@@ -7,7 +7,7 @@
     "agora": "./bin/agora.js"
   },
   "scripts": {
-    "test": "node --test test"
+    "test": "node --test \"test/**/*.test.js\""
   },
   "dependencies": {
     "@agora/core": "0.1.0",

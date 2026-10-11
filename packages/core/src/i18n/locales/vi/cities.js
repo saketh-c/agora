@@ -1,0 +1,21 @@
+export default {
+  title: 'Thành phố',
+  lead: 'Cách phát biểu ở từng hội đồng trong {n} hội đồng thành phố mà Agora theo dõi.',
+  searchLabel: 'Tìm thành phố',
+  searchPlaceholder: 'Tìm thành phố hoặc quận',
+  clearSearch: 'Xóa tìm kiếm',
+  countyLabel: 'Quận',
+  count: {
+    one: '{n} thành phố',
+    other: '{n} thành phố',
+  },
+  sort: 'Sắp xếp',
+  sortNear: 'Gần nhất',
+  sortAz: 'Từ A đến Z',
+  sortSoon: 'Phát biểu sớm nhất',
+  nextSpeak: 'Được phát biểu {when}',
+  calendarNotPosted: 'Chưa có lịch năm {year}',
+  noSpeak: 'Không có phần ý kiến công chúng trong 90 ngày tới',
+  emptyTitle: 'Không có thành phố nào khớp',
+  emptyBody: 'Agora theo dõi {n} thành phố ở Dallas-Fort Worth. Hãy thử tên hoặc quận khác.',
+};

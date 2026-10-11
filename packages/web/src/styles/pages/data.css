@@ -1,0 +1,68 @@
+/* The data ( /insights ).
+   Charts follow charts.css: HTML text at 12/14px, Ink for what is yours, grays for the rest,
+   values printed, a table under each chart. This file lays the page out and draws the two
+   pieces only this page has: the start-time grid and the figure header and captions. */
+
+.dt-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: var(--s3); margin-top: var(--s5); }
+/* phones: the three numbers share one card, one per line */
+@media (max-width: 599px) {
+  .dt-stats { grid-template-columns: max-content minmax(0, 1fr); gap: 0; background: var(--card); border-radius: var(--r-group); }
+  .dt .stat { grid-column: 1 / -1; display: grid; grid-template-columns: max-content minmax(0, 1fr); align-items: baseline; gap: var(--s4); background: none; border-radius: 0; padding: var(--s3) var(--s4); }
+  @supports (grid-template-columns: subgrid) { .dt .stat { grid-template-columns: subgrid; } }
+  .dt .stat + .stat { border-top: 1px solid var(--hairline); }
+  .dt .stat__n { font-size: 24px; line-height: 28px; white-space: nowrap; }
+  .dt .stat__l { margin-top: 0; }
+}
+@media (min-width: 1024px) { .dt-stats { gap: var(--s4); margin-top: var(--s6); } .dt .stat { padding: var(--s5); } }
+
+.dt-grid { display: grid; gap: var(--s3); margin-top: var(--s3); }
+@media (min-width: 900px) {
+  .dt-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s4); margin-top: var(--s4);
+    grid-template-areas: "school heat" "limits heat" "topics topics";
+  }
+  .dt-fig--school { grid-area: school; }
+  .dt-fig--heat { grid-area: heat; }
+  .dt-fig--limits { grid-area: limits; }
+  .dt-fig--topics { grid-area: topics; }
+  .dt-fig--school, .dt-fig--limits { align-self: start; }
+  /* the topics list is long: two columns of bars side by side */
+  .dt-fig--topics .barlist { display: block; columns: 2; column-gap: var(--s7); }
+  .dt-fig--topics .barlist__row { break-inside: avoid; margin-bottom: var(--s2); }
+}
+@media (min-width: 900px) and (max-width: 1100px) { .dt-fig--topics .barlist { column-gap: var(--s5); } }
+
+/* figure text on this page (the shared parts are in charts.css) */
+.dt .figure__t { overflow-wrap: anywhere; }
+:lang(vi) .dt .figure__t { line-height: 1.5; }
+.dt .figure__cap { font-size: 14px; line-height: 20px; color: var(--slate); }
+.dt-cap-line { display: block; }
+.dt-cap-line + .dt-cap-line { margin-top: var(--s1); }
+.dt .chart-table th[scope="row"] { font-weight: 600; color: var(--ink); }
+.dt .chart-table td:last-child:not(.n) { color: var(--slate); }
+
+/* bar list: let long labels wrap instead of cutting them */
+.dt .barlist__row { grid-template-columns: minmax(104px, 38%) minmax(0, 1fr) minmax(24px, auto); }
+.dt .barlist__lbl { white-space: normal; overflow: visible; overflow-wrap: anywhere; }
+.dt .barlist__row.is-hi .barlist__lbl { color: var(--ink); }
+.dt .barlist__row:not(.is-hi) .barlist__lbl { color: var(--slate); font-weight: 500; }
+
+/* start time by weekday: rows are hours, columns weekdays; every count printed */
+.heat { display: grid; grid-template-columns: 64px repeat(var(--heat-cols), minmax(0, 1fr)); gap: 4px; max-width: 520px; font-size: 12px; line-height: 16px; font-weight: 600; }
+.heat__row { display: contents; }
+.heat__corner, .heat__col { color: var(--slate); padding-bottom: 2px; }
+.heat__col { text-align: center; }
+.heat__lbl { display: flex; align-items: center; color: var(--slate); white-space: nowrap; }
+.heat__cell { display: grid; place-items: center; height: 32px; border-radius: 6px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.heat__cell--0 { background: var(--floor); }
+.heat__cell--1 { background: var(--ink-tint); color: var(--ink); }
+.heat__cell--2 { background: #B9BECC; color: var(--ink); }
+.heat__cell--3 { background: #5D6378; color: var(--card); }
+.heat__cell--4 { background: var(--ink); color: var(--card); }
+@media (min-width: 900px) { .heat__cell { height: 36px; } }
+@media (min-width: 1200px) { .heat__cell { height: 40px; } }
+@media (forced-colors: active) { .heat__cell { border: 1px solid CanvasText; } }
+
+.dt-source { margin-top: var(--s6); }
+.dt-source .link { white-space: nowrap; }
+.dt .chart-table th.n, .dt .chart-table td.n { padding-left: var(--s4); }

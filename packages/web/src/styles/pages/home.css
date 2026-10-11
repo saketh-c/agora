@@ -1,0 +1,163 @@
+/* Home ( / ): first visit and returning, plus the setup sheet ("Your city, topics and times").
+   Ported from DESIGN/podium/styles.css ('Home: greeting + grids', 'Home first visit: hero', the
+   Round 1 fixes) and matched to the podium shots. Shared parts (.next, .prog, .post, .row,
+   .group, .lrow, .chip, .sheet) live in components.css; rules here are scoped to Home. */
+
+/* ---------- First visit: the hero (the one brand moment) ---------- */
+.home-page .hero { background: var(--go); color: var(--ink); position: relative; overflow: hidden; }
+.home-page .hero__in { position: relative; z-index: 1; padding-top: var(--s5); padding-bottom: 112px; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s5); }
+.home-page .hero h1:focus { outline: none; }
+.home-page .hero__lead { font-size: 18px; line-height: 28px; font-weight: 500; max-width: 34ch; margin-top: var(--s4); }
+.home-page .hero__art { position: absolute; left: 0; right: 0; bottom: 0; height: 96px; z-index: 0; color: var(--ink); pointer-events: none; }
+.home-page .hero__art svg { display: block; width: 100%; height: 100%; }
+.home-page .hero__mic { fill: var(--go); }
+
+/* the question card */
+.home-page .ask { background: var(--card); border-radius: var(--r-field); padding: var(--s4) var(--s4) var(--s3); box-shadow: 0 1px 0 rgb(21 24 43 / .06); min-width: 0; }
+.home-page .ask__q { display: block; margin-bottom: var(--s3); }
+.home-page .ask__do { margin-top: var(--s3); gap: var(--s2) var(--s3); }
+.home-page .ask__do .btn--primary { flex: 1 1 100%; }
+.home-page .ask__do .btn--quiet { padding: 0 var(--s4); }
+.home-page .ask__alt { margin-top: var(--s2); font-size: 14px; line-height: 20px; color: var(--slate); max-width: none; }
+.place__switch { border: 0; background: none; padding: 0; font: inherit; font-size: 14px; line-height: 20px; color: var(--ink); font-weight: 600; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 3px; cursor: pointer; display: inline-flex; align-items: center; min-height: 44px; vertical-align: middle; }
+.place__switch:hover { text-decoration-thickness: 2.5px; }
+
+/* the live line under the field: a spinner while looking, a red line when something failed */
+.place__msg { font-size: 14px; line-height: 20px; color: var(--slate); max-width: none; display: flex; gap: var(--s2); align-items: flex-start; }
+.place__msg:empty { display: none; }
+.place__msg:not(:empty) { margin-top: var(--s2); }
+.place__msg .spinner { width: 16px; height: 16px; border-width: 2px; margin-top: 2px; flex: none; }
+.place__msg .icon { width: 18px; height: 18px; margin-top: 1px; flex: none; }
+.place__msg.err { color: var(--stop-ink); }
+.search input[aria-invalid="true"] { border-color: var(--stop-ink); box-shadow: 0 0 0 1px var(--stop-ink); }
+
+/* ---------- First visit: below the hero ---------- */
+.home-page .first-grid { display: grid; gap: var(--s7); padding-top: var(--s6); }
+.home-page .first-topics__lead { color: var(--slate); margin: calc(-1 * var(--s1)) 0 var(--s3); }
+.home-page .topics__less .icon:last-child { transform: rotate(180deg); }
+.home-page .statline { margin-top: var(--s5); padding: var(--s4); border-radius: var(--r-group); background: var(--card); display: flex; flex-wrap: wrap; gap: var(--s1) var(--s4); align-items: center; }
+.home-page .statline p { flex: 1 1 18ch; }
+.home-page .statline__n { font-family: var(--font-display); font-stretch: 125%; font-weight: 800; font-size: 28px; line-height: 32px; letter-spacing: -0.02em; white-space: nowrap; }
+.home-page .statline p { font-size: 14px; line-height: 20px; color: var(--slate); }
+.home-page .langs { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; margin-top: var(--s5); }
+.home-page .langs button { display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--s4); border: 0; border-radius: var(--r-pill); background: var(--card); color: var(--ink); font: 600 16px/24px var(--font-text); cursor: pointer; transition: background-color var(--d1) var(--ease); }
+@media (hover: hover) { .home-page .langs button:hover { background: var(--row-hover); } }
+.home-page .langs button:active { background: var(--row-press); }
+
+/* ---------- Returning: greeting and grids ---------- */
+.home-page .greet { padding: var(--s5) 0 var(--s4); display: flex; align-items: baseline; justify-content: space-between; gap: var(--s2) var(--s4); flex-wrap: wrap; }
+.home-page .greet h1 { max-width: 22ch; }
+.home-page .greet h1:focus { outline: none; }
+.home-page .greet__date { color: var(--slate); font-weight: 600; font-size: 14px; line-height: 20px; white-space: nowrap; }
+.home-page .home-top { display: grid; gap: var(--s7); }
+.home-page .home-more { display: grid; gap: var(--s7); margin-top: var(--s7); }
+.home-page .home-more > section, .home-page .home-top > section { min-width: 0; }
+
+/* "Your next meeting", laid out as in the podium shots: when and who on the left, the two
+   deciding facts beside them, then a rule, the prep progress and the actions across the card. */
+.home-page .next { padding: var(--s5) var(--s5) var(--s5); }
+.home-page .next__top, .home-page .next__info { padding-inline: 0; }
+.home-page .next__count { margin-top: var(--s3); }
+.home-page .next__word { font-family: var(--font-display); font-stretch: 125%; font-weight: 800; font-size: 48px; line-height: 52px; letter-spacing: -0.02em; }
+.home-page .next__who { max-width: 40ch; }
+.home-page .next__facts { flex-direction: column; align-items: flex-start; }
+.home-page .next__facts .badge { white-space: normal; text-align: left; }
+.home-page .next__do { margin-top: var(--s5); padding: var(--s5) 0 0; background: none; border-radius: 0; border-top: 1px solid rgb(21 24 43 / .14); }
+.home-page .next .prog__step { font-size: 14px; line-height: 20px; font-weight: 500; }
+.home-page .next .prog__lbl { align-items: flex-start; }
+.home-page .next .prog__lbl .icon { margin-top: 3px; flex: none; }
+.home-page .next__actions { margin-top: var(--s5); }
+.home-page .next__actions .btn--secondary { --btn-bd: var(--ink); }
+.home-page .next--none { background: var(--card); }
+.home-page .next__none { margin-top: var(--s3); }
+.home-page .next__nonebody { color: var(--slate); margin-top: var(--s1); }
+.home-page .next--none .next__actions .btn--primary { flex: 0 0 auto; }
+
+/* ---------- Returning: seats, news, community ---------- */
+.home-page .home-quiet { display: grid; grid-template-columns: auto 1fr; gap: var(--s3); align-items: start; padding: var(--s4); border-radius: var(--r-group); background: var(--card); color: var(--slate); font-size: 14px; line-height: 20px; }
+.home-page .home-quiet > .icon { width: 20px; height: 20px; color: var(--slate); }
+.home-page .home-quiet .link { font-size: 14px; display: inline-flex; min-height: 44px; align-items: center; border: 0; background: none; padding: 0; cursor: pointer; }
+.home-page .home-quiet p { max-width: none; }
+.home-page .home-note { margin-top: var(--s2); font-size: 14px; line-height: 20px; color: var(--slate); }
+.home-page .skel--line { display: block; height: 76px; position: relative; }
+.home-page .skel--line::before, .home-page .skel--line::after { content: ""; position: absolute; left: var(--s4); height: 12px; border-radius: var(--r-pill); background: var(--well); animation: pulse 1.6s var(--ease) infinite; }
+.home-page .skel--line::before { top: 20px; right: 64px; }
+.home-page .skel--line::after { top: 44px; width: 40%; }
+.home-page .home-post { display: block; }
+.home-page .skel--post { min-height: 220px; }
+.home-page .home-post .post__t, .home-page .home-post .post__b, .home-page .home-post .post__kind { display: block; }
+.home-page .home-post .post__kind { display: inline-flex; }
+.home-page .home-post .post__b { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.home-page .post__who { display: inline-flex; align-items: center; gap: var(--s2); color: var(--ink); font-weight: 600; min-width: 0; }
+.home-page .post__who .avatar { width: 28px; height: 28px; font-size: 13px; background: var(--well); color: var(--ink); }
+@media (hover: hover) { .home-page a.home-post:hover { background: var(--row-hover); } }
+.home-page a.home-post:focus-visible { outline-offset: 2px; }
+
+/* ---------- Setup sheet ---------- */
+.setup { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s6); }
+.setup__group { display: grid; gap: var(--s2); }
+.setup__group > legend { margin-bottom: var(--s2); }
+.setup__err { margin-top: var(--s1); }
+.place { display: grid; gap: 6px; }
+.place .place__msg:not(:empty) { margin-top: var(--s1); }
+.place__alt { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 var(--s3); margin: 2px calc(-1 * var(--s3)) 0; }
+.place__alt .btn--quiet { padding: 0 var(--s3); }
+.place__alt .place__switch { margin-inline: var(--s3); }
+.place__zip { display: flex; gap: var(--s2); align-items: center; }
+.place__zip .search { flex: 1 1 auto; min-width: 0; }
+.place__zip .btn { flex: none; }
+.check-row__t { display: block; font-weight: 600; }
+.check-row .help { display: block; margin-top: 2px; }
+.setup .seg { width: 100%; }
+.setup .seg button { padding: 0 var(--s2); }
+
+/* ---------- Narrow phones (320 to 359px): a little more room inside the card ---------- */
+@media (max-width: 359px) {
+  /* The headline steps down with the screen, so a long word ("ayuntamiento.") still fits. */
+  .home-page .hero .t-hero { font-size: clamp(30px, 10.5vw, 40px); line-height: 1.12; }
+  :lang(vi) .home-page .hero .t-hero { line-height: 1.32; }
+  .home-page .next { padding: var(--s5) var(--s4) var(--s4); }
+  .home-page .next .prog__step { font-size: 12px; line-height: 16px; }
+}
+
+/* ---------- Wider screens ---------- */
+@media (min-width: 600px) {
+  .home-page .ask__do .btn--primary { flex: 1 1 auto; }
+  /* The next-meeting card: when and who beside the two facts; actions side by side when they fit. */
+  .home-page .next__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s5); align-items: end; }
+  .home-page .next__facts { margin-top: 0; padding-bottom: 2px; }
+  .home-page .next__actions .btn--primary { flex: 1 1 auto; }
+  .home-page .next__actions .btn--secondary { flex: none; }
+}
+/* In the 7/12 column of a small laptop the facts need the full width. */
+@media (min-width: 1024px) and (max-width: 1199.98px) {
+  .home-page .next__grid { display: block; }
+  .home-page .next__facts { margin-top: var(--s4); padding-bottom: 0; }
+}
+@media (min-width: 1024px) {
+  .home-page .hero__in { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--s7); align-items: start; padding-top: var(--s8); padding-bottom: 200px; }
+  .home-page .hero__lead { font-size: 20px; line-height: 30px; }
+  .home-page .hero__art { height: 168px; }
+  .home-page .ask { margin-top: var(--s2); padding: var(--s5); }
+  /* The headline may run a little into the column gap (never to the card), so the English
+     "speak at city hall." keeps to one line as in the mock. */
+  .home-page .hero__text h1 { margin-right: calc(-1 * var(--s4)); }
+  .home-page .first-grid { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--s6); padding-top: var(--s7); align-items: start; }
+
+  .home-page .greet { padding: var(--s7) 0 var(--s5); }
+  .home-page .home-top { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--s6); align-items: start; }
+  .home-page .home-more { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s6); margin-top: var(--s8); align-items: start; }
+
+  .home-page .next { padding: var(--s6); }
+  .home-page .next__word { font-size: 72px; line-height: 76px; }
+  .home-page .next .prog__step { font-size: 12px; line-height: 16px; font-weight: 600; }
+}
+
+/* Stacked Vietnamese tone marks need room in the big type. */
+:lang(vi) .home-page .next__word, :lang(vi) .home-page .statline__n { line-height: 1.3; }
+
+@media (forced-colors: active) {
+  .home-page .ask, .home-page .statline, .home-page .home-quiet { border: 1px solid CanvasText; }
+  .home-page .hero__art { display: none; }
+  .home-page .langs button { border: 1px solid ButtonText; }
+}

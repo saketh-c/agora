@@ -1,5 +1,6 @@
 /** Build an .ics file for one meeting and hand it to the browser as a download. */
-import { BRAND } from '@agora/core';
+import { BRAND, t } from '@agora/core';
+import { downloadBlob } from './download.js';
 
 function stamp(date) {
   return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
@@ -17,7 +18,15 @@ export function buildIcs(meeting, city) {
   const start = new Date(meeting.startISO);
   const end = new Date(start.getTime() + (meeting.durationMinutes || 120) * 60000);
   const url = city && city.agendaPortal && city.agendaPortal.url ? city.agendaPortal.url : city ? city.website : '';
-  const description = [`${meeting.cityName} ${meeting.label}.`, city && city.publicComment ? `How to speak: ${city.publicComment.summary}` : '', url ? `Agenda: ${url}` : '', `Added from ${BRAND.name}.`].filter(Boolean).join('\n');
+  // Every fixed phrase comes from the dictionaries, so an es or vi event is not half English.
+  const description = [
+    `${meeting.cityName} ${meeting.label}.`,
+    city && city.publicComment && city.publicComment.summary ? t('ui.ics.howToSpeak', { text: city.publicComment.summary }) : '',
+    url ? t('ui.ics.agenda', { url }) : '',
+    t('ui.ics.addedFrom', { app: BRAND.name }),
+  ]
+    .filter(Boolean)
+    .join('\n');
   return [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -36,7 +45,7 @@ export function buildIcs(meeting, city) {
     'BEGIN:VALARM',
     'TRIGGER:-P1D',
     'ACTION:DISPLAY',
-    `DESCRIPTION:${escapeText(`Council meeting tomorrow: ${meeting.cityName}`)}`,
+    `DESCRIPTION:${escapeText(t('ui.ics.reminder', { city: meeting.cityName }))}`,
     'END:VALARM',
     'END:VEVENT',
     'END:VCALENDAR',
@@ -47,14 +56,7 @@ export function buildIcs(meeting, city) {
 
 export function downloadIcs(meeting, city) {
   const blob = new Blob([buildIcs(meeting, city)], { type: 'text/calendar;charset=utf-8' });
-  const href = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = href;
-  a.download = `${meeting.cityId}-council-${meeting.date}.ics`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(href), 1000);
+  downloadBlob(`${meeting.cityId}-council-${meeting.date}.ics`, blob);
 }
 
 export function directionsUrl(meeting) {

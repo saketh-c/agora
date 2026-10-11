@@ -1,289 +1,669 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { expandCityMeetings, addDays, weekdayOf, describeRecurrence, cityPoint, formatDate, formatTime, t, tn } from '@agora/core';
-import { today as todayFn } from '../lib/data.js';
+import { Fragment, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import {
+  agendaFor,
+  calendarThrough,
+  describeRecurrence,
+  expandCityMeetings,
+  formatDate,
+  getTopic,
+  hasEnded,
+  inferTopics,
+  lowerFirst,
+  nextMeetingFor,
+  relativeDays,
+  t,
+  tn,
+  windowEnd,
+} from '@agora/core';
+import { nowIso, rawCity, today as todayFn } from '../lib/data.js';
+import { parseDeadlineRule } from '../lib/deadline.js';
 import { useCities } from '../lib/DataProvider.jsx';
 import { useStore } from '../lib/store.jsx';
-import MeetingCard from '../components/MeetingCard.jsx';
-import MeetingDrawer, { AgendaItem } from '../components/MeetingDrawer.jsx';
-import { ScheduleRibbon, MeetingClock } from '../components/viz.jsx';
-import CityEmblem, { emblemLabel } from '../components/CityEmblem.jsx';
-import { ExternalIcon, MicIcon, PinIcon } from '../components/icons.jsx';
+import { api } from '../lib/api.js';
+import { downloadIcs, directionsUrl } from '../lib/ics.js';
+import { usePageTitle } from '../components/shell/PageMeta.jsx';
+import {
+  asSentence,
+  Badge,
+  DateTile,
+  deadlineText,
+  Disclosure,
+  EmptyState,
+  Icon,
+  Linkified,
+  meetingDeadline,
+  MeetingDetail,
+  MeetingDetailBadge,
+  MeetingStatus,
+  meetingTitle,
+  monthDay,
+  NewsList,
+  Notice,
+  PageHeader,
+  remoteState,
+  Section,
+  Sheet,
+  speakMinutes,
+  tidyTimes,
+  timeText,
+  whenText,
+} from '../components/ui/index.js';
+import '../styles/pages/city.css';
 
 const HORIZON = 90;
+const PER_RULE = 6;
 
-/** Hostname for a source link, or null when the string is not a valid URL. */
-function hostnameOf(s) {
+const hostOf = (url) => {
   try {
-    return new URL(s).hostname;
+    return new URL(url).hostname.replace(/^www\./, '');
   } catch {
-    return null;
+    return '';
   }
+};
+
+/** The first sentence of a longer data paragraph. */
+function firstSentence(text) {
+  const s = String(text || '').trim();
+  const cut = s.search(/[.!?](\s+)(?=[A-ZÁÉÍÓÚÑĐ0-9"(])/u);
+  return cut > 0 ? s.slice(0, cut + 1) : s;
 }
 
-/** The weekday a rule lands on, so the clock can shade school hours correctly. */
-function ruleWeekday(recurrence) {
-  if (typeof recurrence.weekday === 'number') return recurrence.weekday;
-  const first = (recurrence.dates || [])[0];
-  return first ? weekdayOf(first) : 1;
+/** One agenda item with "Explain this": AI when the server has it, a topic guide otherwise. */
+function AgendaItem({ item, index, city }) {
+  const [state, setState] = useState({ status: 'idle', text: '' });
+  const id = useId();
+  const busy = state.status === 'loading';
+  const open = state.status === 'open';
+
+  const toggle = async () => {
+    if (busy) return; // a second click while waiting must not send a second request
+    if (open) return setState((s) => ({ ...s, status: 'closed' }));
+    if (state.text) return setState((s) => ({ ...s, status: 'open' }));
+    setState({ status: 'loading', text: '' });
+    try {
+      // The English title and the item's position let the server find it in any language.
+      const r = await api.explain({ title: item.titleSource || item.title, summary: item.summary, cityId: city.cityId, itemIndex: index >= 0 ? index : undefined });
+      setState({ status: 'open', text: r.text });
+    } catch {
+      const topics = item.topics && item.topics.length ? item.topics : inferTopics(item.titleSource || item.title);
+      const topic = getTopic(topics[0]);
+      const lead = topic.id === 'other' ? t('drawer.itemOnAgenda', { city: city.name }) : t('drawer.itemAbout', { topic: topic.short, city: city.name });
+      const why = topic.id === 'other' ? '' : ` ${t('drawer.whyMatters', { angle: topic.youthAngle })}`;
+      setState({ status: 'open', text: `${lead} ${item.summary || ''}${why}`.replace(/\s+/g, ' ').trim() });
+    }
+  };
+
+  return (
+    <li className="agenda__item">
+      <p className="agenda__t">
+        {item.url ? (
+          <a href={item.url} target="_blank" rel="noopener noreferrer">
+            {item.title}
+            <span className="vh"> {t('ui.opensNewTab')}</span>
+          </a>
+        ) : (
+          item.title
+        )}
+      </p>
+      {item.summary && <p className="agenda__s">{item.summary}</p>}
+      <button type="button" className="btn btn--quiet btn--sm agenda__btn" onClick={toggle} aria-expanded={open} aria-controls={id} aria-busy={busy || undefined}>
+        {busy ? <span className="spinner" aria-hidden="true" /> : <Icon name="bulb" />}
+        {open ? t('drawer.hide') : t('drawer.explainThis')}
+      </button>
+      <div id={id} role="status" aria-live="polite">
+        {busy && <span className="vh">{t('drawer.explaining')}</span>}
+        {open && (
+          <Notice icon="bulb" className="agenda__x">
+            <p>{state.text}</p>
+          </Notice>
+        )}
+      </div>
+    </li>
+  );
+}
+
+/** The schedule rows for one meeting rule: date, time and whether you can speak. Each opens the meeting. */
+function SchedList({ items, onOpen }) {
+  const [all, setAll] = useState(false);
+  const shown = all ? items : items.slice(0, PER_RULE);
+  return (
+    <>
+      <ul className="sched">
+        {shown.map((o) => {
+          const cancelled = o.status === 'cancelled';
+          const tone = cancelled ? 'stop' : o.openToPublicComment ? 'go' : 'watch';
+          const icon = cancelled ? 'xc' : o.openToPublicComment ? 'mic' : 'eye';
+          const label = cancelled ? t('ui.cancelled') : o.openToPublicComment ? t('ui.canSpeak') : t('ui.watchOnly');
+          return (
+            <li key={o.id}>
+              <button type="button" className={`sched__row${cancelled ? ' is-cancelled' : ''}`} onClick={() => onOpen(o)} aria-haspopup="dialog">
+                <span className="sched__when num">
+                  <strong>{formatDate(o.date)}</strong>, {timeText(o.time)}
+                  {o.movedFrom && <span className="sched__note">{t('ui.movedFrom', { date: formatDate(o.movedFrom) })}</span>}
+                </span>
+                <span className={`st st--${tone}`}>
+                  <Icon name={icon} />
+                  {label}
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      {items.length > PER_RULE && (
+        <button type="button" className="btn btn--quiet btn--sm sched__all" onClick={() => setAll((v) => !v)} aria-expanded={all}>
+          {all ? t('common.showFewer') : t('common.showAll', { n: items.length })}
+        </button>
+      )}
+    </>
+  );
 }
 
 export default function CityPage() {
   const { id } = useParams();
-  const [params] = useSearchParams();
-  const { prefs, setPrefs } = useStore();
-  const { cityById } = useCities();
+  const key = String(id || '').toLowerCase();
+  // A new city is a new page: no state (open sheet, expanded lists) carries over.
+  return <CityView key={key} id={key} />;
+}
+
+function CityView({ id }) {
+  const { cityById, cities } = useCities();
+  const { prefs, setHomeCity, lang } = useStore();
+  const city = cityById(id);
+  usePageTitle(city ? city.name : t('city.notFound'));
+  const [params, setParams] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [now] = useState(nowIso);
   const today = todayFn();
-  const city = cityById(String(id).toLowerCase());
-  const [open, setOpen] = useState(null);
-  const [showAll, setShowAll] = useState(false);
 
-  const upcoming = useMemo(() => (city ? expandCityMeetings(city, today, addDays(today, HORIZON)) : []), [city, today]);
+  const upcoming = useMemo(() => (city ? expandCityMeetings(city, today, windowEnd(today, HORIZON)).filter((o) => !hasEnded(o, now)) : []), [city, today, now]);
+  const next = useMemo(() => (city ? nextMeetingFor(city, today, { publicCommentOnly: true, horizonDays: HORIZON, now }) : null), [city, today, now]);
+  const through = city ? calendarThrough(city) : null;
+  const agenda = useMemo(() => (city ? agendaFor(city, today) : { upcoming: [], recent: [] }), [city, today]);
 
-  useEffect(() => {
-    const date = params.get('date');
-    if (date && upcoming.length) {
-      const m = upcoming.find((x) => x.date === date);
-      if (m) setOpen(m);
+  // ---------- one meeting in a sheet (?meeting=<id>, or the older ?date=YYYY-MM-DD) ----------
+  const meetingParam = params.get('meeting');
+  const dateParam = params.get('date');
+  const occ = useMemo(() => {
+    if (meetingParam) return upcoming.find((o) => o.id === meetingParam) || null;
+    if (dateParam) {
+      const same = upcoming.filter((o) => o.date === dateParam);
+      return same.find((o) => o.openToPublicComment && o.status !== 'cancelled') || same[0] || null;
     }
-  }, [params, upcoming]);
+    return null;
+  }, [meetingParam, dateParam, upcoming]);
+  const occNext = useMemo(() => (occ && city && !occ.openToPublicComment && occ.status !== 'cancelled' ? nextMeetingFor(city, occ.date, { publicCommentOnly: true, now }) : null), [occ, city, now]);
 
+  const dropMeetingParams = () =>
+    setParams(
+      (prev) => {
+        const n = new URLSearchParams(prev);
+        n.delete('meeting');
+        n.delete('date');
+        return n;
+      },
+      { replace: true },
+    );
+  // A link to a date with no meeting: drop it, so nothing reopens later.
   useEffect(() => {
-    if (location.hash === '#speak') {
-      const el = document.getElementById('speak');
-      if (el) setTimeout(() => el.scrollIntoView({ block: 'start' }), 50);
-    }
-  }, [city]);
+    if ((meetingParam || dateParam) && !occ) dropMeetingParams();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [meetingParam, dateParam, occ]);
+
+  const openOcc = (o) => {
+    const already = Boolean(meetingParam || dateParam);
+    setParams(
+      (prev) => {
+        const n = new URLSearchParams(prev);
+        n.delete('date');
+        n.set('meeting', o.id);
+        return n;
+      },
+      already ? { replace: true, state: location.state } : { state: { meetingOpen: true } },
+    );
+  };
+  // Closing removes the parameter, so a reload or Back never reopens the sheet.
+  const closeOcc = () => {
+    if (location.state && location.state.meetingOpen) navigate(-1);
+    else dropMeetingParams();
+  };
+
+  // ---------- "Set as my city" ----------
+  const isHome = Boolean(city && prefs.homeCityId === city.cityId);
+  const mineRef = useRef(null);
+  const justSet = useRef(false);
+  const [said, setSaid] = useState('');
+  useEffect(() => {
+    if (isHome && justSet.current && mineRef.current) mineRef.current.focus();
+    justSet.current = false;
+  }, [isHome]);
+
+  // ---------- news for this city ----------
+  const [news, setNews] = useState({ status: 'loading', items: [] });
+  const cityName = city ? city.name : '';
+  useEffect(() => {
+    if (!cityName) return undefined;
+    const ac = new AbortController();
+    setNews({ status: 'loading', items: [] });
+    api
+      .news({ city: cityName, limit: 3 }, { signal: ac.signal })
+      .then((r) => setNews({ status: 'ok', items: (r && r.items) || [] }))
+      .catch((err) => {
+        if (err && err.code === 'aborted') return;
+        setNews({ status: 'error', items: [] });
+      });
+    return () => ac.abort();
+  }, [cityName, lang]);
 
   if (!city) {
     return (
-      <div className="container">
-        <h1>{t('city.notFound')}</h1>
-        <p>
-          <Link to="/cities">{t('city.seeAllCities')}</Link>
-        </p>
+      <div className="wrap city">
+        <PageHeader title={t('city.notFound')} crumbs={[{ to: '/meetings', label: t('nav.meetings') }, { to: '/cities', label: t('cities.title') }, { label: t('city.notFound') }]} />
+        <EmptyState
+          icon="map"
+          className="city__missing"
+          actions={
+            <Link className="btn btn--primary" to="/cities">
+              {t('city.seeAllCities')}
+            </Link>
+          }
+          title={t('city.missingTitle')}
+        >
+          {t('city.notFoundBody', { n: cities.length })}
+        </EmptyState>
       </div>
     );
   }
 
   const pc = city.publicComment || {};
-  const isHome = prefs.homeCityId === city.cityId;
-  const live = upcoming.filter((m) => m.status !== 'cancelled');
-  const cancelled = upcoming.filter((m) => m.status === 'cancelled');
-  const shown = showAll ? live : live.slice(0, 6);
-  const sources = (city.sources || []).filter(hostnameOf).slice(0, 3);
+  const council = city.council || {};
+  const hall = city.cityHall || {};
+  const hallName = String(hall.name || '')
+    .replace(/\s*\([^)]*\)/g, '')
+    .split(',')[0]
+    .trim();
+  const street = String(hall.address || '').split(',')[0].trim();
+  const place = [hallName, street].filter(Boolean).join(', ');
+  const members = Number(council.size) > 1 ? Number(council.size) - 1 : null;
+  const lead = council.mayorName && members ? t('city.lead', { mayor: t('city.mayor', { name: council.mayorName }), n: members, place }) : t('city.meetsAt', { place });
+
+  const deadline = next ? meetingDeadline(next, now) : null;
+  const before = next ? upcoming.find((o) => o.date === next.date && o.time < next.time && !o.openToPublicComment && o.status !== 'cancelled') : null;
+  const minutes = speakMinutes(city);
+  const remote = remoteState(city);
+  // Step 1 in the app's own words when the city's deadline is one the app understands
+  // (Plano, Dallas, Fort Worth); the city's wording then moves into "Full rules".
+  const rule = parseDeadlineRule(((rawCity(city.cityId) || {}).publicComment || {}).deadline);
+  const signupRule = !rule
+    ? ''
+    : rule.kind === 'sameDay'
+      ? t('city.signupRule.sameDay', { time: timeText(rule.time) })
+      : rule.kind === 'hoursBefore'
+        ? rule.minutes % 60 === 0
+          ? tn('city.signupRule.hoursBefore', rule.minutes / 60)
+          : tn('city.signupRule.minutesBefore', rule.minutes)
+        : t('city.signupRule.businessDay', { time: timeText(rule.time) });
+  const fullRules = [signupRule && pc.deadline ? t('city.deadline', { deadline: pc.deadline }) : '', pc.summary, pc.howToRegister, pc.notes].filter(Boolean);
+  const throughYear = through ? Number(through.slice(0, 4)) + 1 : null;
+
+  // Schedule: one disclosure per meeting rule, plus special and moved meetings that belong to none.
+  const used = new Set();
+  const groups = (city.meetings || []).map((rule, i) => {
+    const items = upcoming.filter((o) => o.label === rule.label && o.status !== 'special');
+    items.forEach((o) => used.add(o.id));
+    const title = meetingTitle({ label: rule.label, cityName: city.name });
+    const rec = describeRecurrence(rule.recurrence);
+    const time = rule.recurrence && rule.recurrence.time;
+    return { key: `rule-${i}`, title, time, summary: rule.openToPublicComment === false ? t('city.ruleWatch', { rule: rec }) : rec, items };
+  });
+  // Two rules with the same name ("Work session" at 9 AM and at 2 PM) read as a duplicate: name the time.
+  const shared = new Set(groups.filter((g, i) => groups.some((o, j) => j !== i && o.title === g.title)).map((g) => g.title));
+  for (const g of groups) {
+    if (g.time && shared.has(g.title)) g.title = t('city.ruleAt', { title: g.title, time: timeText(g.time) });
+  }
+  const extra = upcoming.filter((o) => !used.has(o.id));
+  if (extra.length) groups.push({ key: 'extra', title: t('city.special'), summary: tn('city.upcomingCount', extra.length), items: extra });
+  const firstOpen = Math.max(
+    0,
+    groups.findIndex((g) => g.items.some((o) => o.openToPublicComment)),
+  );
+
+  // Recent agenda items, newest meeting first, grouped by date.
+  const recentByDate = [];
+  for (const item of agenda.recent) {
+    const last = recentByDate[recentByDate.length - 1];
+    if (last && last.date === item.meetingDate) last.items.push(item);
+    else recentByDate.push({ date: item.meetingDate, items: [item] });
+  }
+  const recentSummary = recentByDate.length === 1 ? tn('city.recentFrom', agenda.recent.length, { date: monthDay(recentByDate[0].date) }) : recentByDate.length ? tn('city.recentSince', agenda.recent.length, { date: monthDay(recentByDate[recentByDate.length - 1].date) }) : '';
+  const indexOf = (item) => (city.agendaItems || []).indexOf(item);
+
+  // Official links, each with the site it goes to; sources with one link per site.
+  const links = [];
+  const seenUrls = new Set();
+  const addLink = (url, title, sub) => {
+    if (!url || seenUrls.has(url)) return;
+    seenUrls.add(url);
+    links.push({ url, title, sub: sub || hostOf(url) });
+  };
+  addLink(city.website, t('city.website'));
+  // A platform is worth showing only when it is a real name ("Legistar"), not "other".
+  const platform = city.agendaPortal && city.agendaPortal.platform;
+  if (city.agendaPortal) addLink(city.agendaPortal.url, t('city.agendas'), platform && !/^(other|unknown|none|n\/a)$/i.test(platform) ? platform : undefined);
+  if (city.liveStream) addLink(city.liveStream.url, t('ui.watchLive'));
+  addLink(council.findMyDistrictUrl || council.districtMapUrl, t('city.districtMap'));
+  const sourceHosts = new Map();
+  for (const s of city.sources || []) {
+    const host = hostOf(s);
+    if (host && !sourceHosts.has(host)) sourceHosts.set(host, s);
+  }
+
+  const youth = city.youthPrograms || [];
 
   return (
-    <div className="container">
-      <div className="row between" style={{ alignItems: 'start' }}>
-        <div className="city-head">
-          <CityEmblem city={city} size={92} label={emblemLabel(city)} />
-          <div style={{ minWidth: 0 }}>
-            <h1 style={{ marginBottom: 4 }}>{t('city.councilTitle', { city: city.name })}</h1>
-            <p className="muted" style={{ marginBottom: 4 }}>
-              <PinIcon /> {city.cityHall.name ? `${city.cityHall.name}, ` : ''}
-              {city.cityHall.address}
-            </p>
-            {city.council && city.council.structure && (
-              <p className="muted">
-                {city.council.size ? `${t('city.members', { n: city.council.size })}, ` : ''}
-                {city.council.structure}
-                {city.council.mayorName ? t('city.mayor', { name: city.council.mayorName }) : ''}
-              </p>
-            )}
-          </div>
-        </div>
-        {isHome ? (
-          <span className="tag brand">{t('common.yourCity')}</span>
-        ) : (
-          <button
-            type="button"
-            className="btn small"
-            onClick={() =>
-              setPrefs((p) => ({
-                ...p,
-                homeCityId: city.cityId,
-                location: p.location || cityPoint(city),
-                locationLabel: p.locationLabel || t('common.cityHallOf', { city: city.name }),
-              }))
-            }
-          >
-            {t('common.setAsMyCity')}
-          </button>
-        )}
-      </div>
-      <div className="links" style={{ margin: '6px 0 18px' }}>
-        <a href={city.website} target="_blank" rel="noreferrer">
-          {t('common.cityWebsite')} <ExternalIcon />
-        </a>
-        {city.agendaPortal && city.agendaPortal.url && (
-          <a href={city.agendaPortal.url} target="_blank" rel="noreferrer">
-            {t('common.agendas')} <ExternalIcon />
-          </a>
-        )}
-        {city.liveStream && city.liveStream.url && (
-          <a href={city.liveStream.url} target="_blank" rel="noreferrer">
-            {t('common.watchLive')} <ExternalIcon />
-          </a>
-        )}
-        {city.council && (city.council.findMyDistrictUrl || city.council.districtMapUrl) && (
-          <a href={city.council.findMyDistrictUrl || city.council.districtMapUrl} target="_blank" rel="noreferrer">
-            {t('common.findMyDistrict')} <ExternalIcon />
-          </a>
-        )}
-      </div>
-
-      {/* Not compact: this sits in the full width container, and the narrow viewBox would
-          scale the labels up to nearly three times their intended size. */}
-      {live.length > 0 && <ScheduleRibbon meetings={live} from={today} days={HORIZON} title={t('viz.cityRibbonTitle', { n: HORIZON })} />}
-
-      <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(330px, 1fr))', alignItems: 'start' }}>
-        <div className="stack">
-          <section aria-labelledby="h-when">
-            <div className="section-head">
-              <h2 id="h-when">{t('city.whenTheyMeet')}</h2>
-            </div>
-            <ul className="rows">
-              {city.meetings.map((m, i) => (
-                <li key={i} style={{ padding: '11px 0 14px' }}>
-                  <p style={{ fontWeight: 700, marginBottom: 2 }}>{m.label}</p>
-                  <p style={{ marginBottom: 3 }}>{describeRecurrence(m.recurrence)}</p>
-                  {/* A start time only means something once you can see it against a school day. */}
-                  <MeetingClock
-                    time={m.recurrence.time}
-                    weekday={ruleWeekday(m.recurrence)}
-                    label={t('viz.clockAria', { time: formatTime(m.recurrence.time) })}
-                  />
-                  <p className="hint" style={{ margin: 0 }}>
-                    {m.location || city.cityHall.address}
-                    {m.openToPublicComment === false ? t('city.noPublicCommentType') : ''}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          <section aria-labelledby="h-next">
-            <div className="section-head">
-              <h2 id="h-next">{t('city.next90')}</h2>
-              {live.length > 6 && (
-                <button type="button" className="btn quiet" onClick={() => setShowAll((v) => !v)}>
-                  {showAll ? t('common.showFewer') : t('common.showAll', { n: live.length })}
-                </button>
-              )}
-            </div>
-            <ul className="rows">
-              {shown.map((m) => (
-                <li key={m.id}>
-                  <MeetingCard meeting={m} today={today} onSelect={setOpen} selected={Boolean(open && open.id === m.id)} showCity={false} compact />
-                </li>
-              ))}
-            </ul>
-            {cancelled.length > 0 && (
-              <p className="hint" style={{ marginTop: 10 }}>
-                {t('city.cancelledOrMoved', { list: cancelled.map((m) => `${formatDate(m.date)}${m.note ? ` (${m.note})` : ''}`).join('; ') })}
-              </p>
-            )}
-          </section>
-        </div>
-
-        <div className="stack">
-          <section id="speak" className="card" aria-labelledby="h-speak" tabIndex={-1}>
-            <h2 id="h-speak">
-              <MicIcon /> {t('city.howToSpeakHere')}
-            </h2>
-            <p>{pc.summary}</p>
-            <h3>{t('city.steps')}</h3>
-            <p style={{ whiteSpace: 'pre-line' }}>{pc.howToRegister}</p>
-            <dl className="facts">
-              {pc.deadline && (
-                <>
-                  <dt>{t('city.deadline')}</dt>
-                  <dd>{pc.deadline}</dd>
-                </>
-              )}
-              {pc.timeLimitMinutes && (
-                <>
-                  <dt>{t('city.timeLimit')}</dt>
-                  <dd>{tn('common.minutes', pc.timeLimitMinutes)}</dd>
-                </>
-              )}
-              <dt>{t('city.remote')}</dt>
-              <dd>{pc.virtualAllowed === true ? t('city.remoteYes') : pc.virtualAllowed === false ? t('city.remoteNo') : t('city.remoteUnknown')}</dd>
-              {pc.writtenCommentMethod && (
-                <>
-                  <dt>{t('city.written')}</dt>
-                  <dd>{pc.writtenCommentMethod}</dd>
-                </>
-              )}
-            </dl>
-            {pc.notes && <p className="hint">{pc.notes}</p>}
-            {pc.registrationUrl && (
-              <a className="btn primary" href={pc.registrationUrl} target="_blank" rel="noreferrer">
-                {t('city.signUpToSpeak')} <ExternalIcon />
-              </a>
-            )}
-          </section>
-
-          {(city.youthPrograms || []).length > 0 && (
-            <section aria-labelledby="h-youth">
-              <div className="section-head">
-                <h2 id="h-youth">{t('city.youthIn', { city: city.name })}</h2>
-              </div>
-              <ul className="rows">
-                {city.youthPrograms.map((p, i) => (
-                  <li key={i} style={{ padding: '11px 0 12px' }}>
-                    <p style={{ fontWeight: 600, marginBottom: 2 }}>
-                      {p.url ? (
-                        <a href={p.url} target="_blank" rel="noreferrer">
-                          {p.name}
-                        </a>
-                      ) : (
-                        p.name
-                      )}
-                    </p>
-                    {p.ages && <p className="hint" style={{ marginBottom: 2 }}>{p.ages}</p>}
-                    {p.description && <p className="muted" style={{ marginBottom: 4 }}>{p.description}</p>}
-                    {p.applyWindow && <p className="hint" style={{ margin: 0 }}>{t('city.apply', { window: p.applyWindow })}</p>}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          {(city.agendaItems || []).length > 0 && (
-            <section aria-labelledby="h-agenda">
-              <div className="section-head">
-                <h2 id="h-agenda">{t('city.onTheAgenda')}</h2>
-              </div>
-              <ul className="rows">
-                {city.agendaItems.map((item, i) => (
-                  <AgendaItem key={i} item={item} city={city} />
-                ))}
-              </ul>
-            </section>
-          )}
-        </div>
-      </div>
-
-      <p className="hint section">
-        {t('city.verifiedLine', { date: city.lastVerified ? formatDate(city.lastVerified) : '' })}
-        {sources.length > 0 && (
-          <>
-            {' '}
-            {sources.map((s, i) => (
-              <span key={s}>
-                {i > 0 ? ', ' : ''}
-                <a href={s} target="_blank" rel="noreferrer">
-                  {hostnameOf(s)}
-                </a>
-              </span>
-            ))}
-          </>
-        )}
+    <div className="wrap city">
+      <PageHeader
+        className="city-head"
+        title={t('city.councilTitle', { city: city.name })}
+        lead={lead}
+        crumbs={[{ to: '/meetings', label: t('nav.meetings') }, { to: '/cities', label: t('cities.title') }, { label: city.name }]}
+        actions={
+          isHome ? (
+            <span ref={mineRef} tabIndex={-1} className="city-head__mine">
+              <Badge tone="ink" icon="check">
+                {t('ui.yourCity')}
+              </Badge>
+            </span>
+          ) : (
+            <button
+              type="button"
+              className="btn btn--secondary btn--sm city-head__set"
+              onClick={() => {
+                justSet.current = true;
+                setHomeCity(city);
+                setSaid(t('city.nowYourCity', { city: city.name }));
+              }}
+            >
+              <Icon name="pin" />
+              {t('common.setAsMyCity')}
+            </button>
+          )
+        }
+      />
+      <p className="vh" role="status" aria-live="polite">
+        {said}
       </p>
 
-      {open && <MeetingDrawer meeting={open} city={city} today={today} onClose={() => setOpen(null)} hideCityLink />}
+      <div className="city-grid">
+        <div className="city-main">
+          <section aria-labelledby="nm-h">
+            <div className="sec-head">
+              <h2 className="t-heading" id="nm-h">
+                {t('city.nextSpeak')}
+              </h2>
+            </div>
+            {next ? (
+              <div className="meetcard">
+                <div className="meetcard__top">
+                  <DateTile date={next.date} size="lg" />
+                  <div>
+                    <p className="meetcard__t">{meetingTitle(next)}</p>
+                    <p className="meetcard__w num">
+                      <strong>{whenText(next.date, next.time)}</strong> <span>{lowerFirst(relativeDays(next.date, today))}</span>
+                    </p>
+                  </div>
+                </div>
+                <MeetingStatus variant="badges" meeting={next} city={city} showRemote />
+                {deadline && (
+                  <p className={`deadline st st--${deadline.passed ? 'stop' : 'amber'}`}>
+                    <Icon name="clock" />
+                    {deadline.passed ? t('ui.signupClosed') : `${asSentence(deadlineText(deadline, 'closes'))} ${t('ui.noDoorSignup')}`}
+                  </p>
+                )}
+                <div className="btn-row">
+                  <Link className="btn btn--primary" to={`/prepare?meeting=${encodeURIComponent(next.id)}`}>
+                    {t('ui.prepareToSpeak')}
+                  </Link>
+                  <span className="btn-row btn-row--tight">
+                    <button type="button" className="btn btn--secondary" onClick={() => downloadIcs(next, city)}>
+                      <Icon name="cal-plus" />
+                      {t('ui.addToCalendar')}
+                    </button>
+                    <a className="btn btn--quiet" href={directionsUrl(next)} target="_blank" rel="noopener noreferrer">
+                      <Icon name="nav" />
+                      {t('ui.directions')}
+                      <span className="vh"> {t('ui.opensNewTab')}</span>
+                    </a>
+                  </span>
+                </div>
+                {before && (
+                  <p className="meetcard__also">
+                    <Icon name="eye" />
+                    <span>{t('city.alsoBefore', { time: timeText(before.time), title: lowerFirst(meetingTitle(before)) })}</span>
+                  </p>
+                )}
+              </div>
+            ) : (
+              <EmptyState
+                icon="cal"
+                title={throughYear ? t('cities.calendarNotPosted', { year: throughYear }) : t('city.noSpeakTitle')}
+                actions={
+                  city.agendaPortal && city.agendaPortal.url ? (
+                    <a className="btn btn--secondary" href={city.agendaPortal.url} target="_blank" rel="noopener noreferrer">
+                      <Icon name="ext" />
+                      {t('city.openCalendar')}
+                      <span className="vh"> {t('ui.opensNewTab')}</span>
+                    </a>
+                  ) : null
+                }
+              >
+                {throughYear ? t('city.calendarThrough', { city: city.name, date: monthDay(through) }) : t('city.noSpeakBody')}
+              </EmptyState>
+            )}
+          </section>
+
+          <section id="speak" className="city-sec" aria-labelledby="ht-h">
+            <div className="sec-head">
+              <h2 className="t-heading" id="ht-h">
+                {t('city.howToSpeak')}
+              </h2>
+            </div>
+            <div className="howto">
+              <ol>
+                <li>
+                  <div>
+                    {signupRule ? (
+                      <>
+                        <strong>{signupRule}</strong> {t('ui.noDoorSignup')}
+                      </>
+                    ) : (
+                      <>
+                        <strong>{t('city.stepSignup')}</strong>
+                        {pc.deadline && (
+                          <>
+                            {' '}
+                            <Linkified text={t('city.deadline', { deadline: pc.deadline })} />
+                          </>
+                        )}
+                      </>
+                    )}
+                    {pc.registrationUrl && (
+                      <>
+                        <br />
+                        <a className="btn btn--secondary btn--sm" href={pc.registrationUrl} target="_blank" rel="noopener noreferrer">
+                          <Icon name="ext" />
+                          {t('city.openForm')}
+                          <span className="vh"> {t('ui.opensNewTab')}</span>
+                        </a>
+                      </>
+                    )}
+                  </div>
+                </li>
+                <li>
+                  <div>
+                    <strong>{minutes ? tn('city.stepSpeak', minutes) : t('city.stepSpeakNoLimit')}</strong> {t(`ui.remoteLong.${remote}`)}
+                  </div>
+                </li>
+                {pc.writtenCommentMethod && (
+                  <li>
+                    <div>
+                      <strong>{t('city.stepWritten')}</strong> <Linkified text={pc.writtenCommentMethod} />
+                    </div>
+                  </li>
+                )}
+              </ol>
+            </div>
+            {fullRules.length > 0 && (
+              <Disclosure className="city-rules" title={t('city.fullRules')} summary={t('city.fullRulesSub')}>
+                {fullRules.map((text, i) => (
+                  <p key={i} className="slate">
+                    <Linkified text={text} />
+                  </p>
+                ))}
+                {pc.source && (
+                  <p>
+                    <a className="link" href={pc.source} target="_blank" rel="noopener noreferrer">
+                      {`${t('city.source')}: ${hostOf(pc.source)}`}
+                      <span className="vh"> {t('ui.opensNewTab')}</span>
+                    </a>
+                  </p>
+                )}
+              </Disclosure>
+            )}
+          </section>
+
+          <section id="schedule" className="city-sec" aria-labelledby="sc-h">
+            <div className="sec-head">
+              <h2 className="t-heading" id="sc-h">
+                {t('city.schedule')}
+              </h2>
+            </div>
+            {groups.map((g, i) => (
+              <Disclosure key={g.key} title={g.title} summary={g.summary} defaultOpen={i === firstOpen}>
+                {g.items.length ? <SchedList items={g.items} onOpen={openOcc} /> : <p className="slate t-small">{t('city.noDates')}</p>}
+                {throughYear && <p className="sched__foot">{t('city.postedThrough', { date: monthDay(through), year: throughYear })}</p>}
+              </Disclosure>
+            ))}
+            {agenda.upcoming.length > 0 && (
+              <Disclosure title={t('city.upcoming')} summary={tn('city.upcomingCount', agenda.upcoming.length)} defaultOpen>
+                <ul className="agenda">
+                  {agenda.upcoming.map((item) => (
+                    <AgendaItem key={`${item.meetingDate}-${indexOf(item)}`} item={item} index={indexOf(item)} city={city} />
+                  ))}
+                </ul>
+              </Disclosure>
+            )}
+            {agenda.recent.length > 0 && (
+              <Disclosure id="agenda" title={t('city.recent')} summary={recentSummary}>
+                {recentByDate.map((day) => (
+                  <Fragment key={day.date}>
+                    <h3 className="agenda__date">{formatDate(day.date)}</h3>
+                    <ul className="agenda">
+                      {day.items.map((item) => (
+                        <AgendaItem key={indexOf(item)} item={item} index={indexOf(item)} city={city} />
+                      ))}
+                    </ul>
+                  </Fragment>
+                ))}
+              </Disclosure>
+            )}
+          </section>
+        </div>
+
+        <aside className="city-side">
+          {youth.length > 0 && (
+            <Section title={t('city.youthIn', { city: city.name })}>
+              <div className="card">
+                <ul className="youth">
+                  {youth.map((p, i) => (
+                    <li key={i}>
+                      <p className="youth__t">
+                        {p.url ? (
+                          <a href={p.url} target="_blank" rel="noopener noreferrer">
+                            {String(p.name).split(' ').slice(0, -1).join(' ')}{' '}
+                            <span className="youth__last">
+                              {String(p.name).split(' ').slice(-1)[0]}
+                              <Icon name="ext" size={16} />
+                            </span>
+                            <span className="vh"> {t('ui.opensNewTab')}</span>
+                          </a>
+                        ) : (
+                          p.name
+                        )}
+                      </p>
+                      <p className="youth__m">{tidyTimes([p.ages ? String(p.ages).replace(/\.$/, '') : '', firstSentence(p.description)].filter(Boolean).join('. '))}</p>
+                      {p.applyWindow && (
+                        <p className="st st--plain">
+                          <Icon name="cal" />
+                          {t('city.apply', { window: tidyTimes(String(p.applyWindow).split(/;\s*/)[0]) })}
+                        </p>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </Section>
+          )}
+
+          <Section title={t('city.links')}>
+            <ul className="group links">
+              {links.map((l) => (
+                <li key={l.url}>
+                  <a className="lrow" href={l.url} target="_blank" rel="noopener noreferrer">
+                    <span>
+                      <span className="lrow__t">{l.title}</span>
+                      {l.sub && <span className="lrow__m">{l.sub}</span>}
+                    </span>
+                    <Icon name="ext" />
+                    <span className="vh">{t('ui.opensNewTab')}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <p className="verified city__verified">
+              <Icon name="shield" />
+              {t('city.verifiedLine', { date: city.lastVerified ? monthDay(city.lastVerified, { withYear: true }) : '' })}
+            </p>
+            {sourceHosts.size > 0 && (
+              <Disclosure variant="plain" title={t('city.sources')} className="city__sources">
+                <ul>
+                  {[...sourceHosts].map(([host, url]) => (
+                    <li key={host}>
+                      <a className="link" href={url} target="_blank" rel="noopener noreferrer">
+                        {host}
+                        <span className="vh"> {t('ui.opensNewTab')}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </Disclosure>
+            )}
+          </Section>
+
+          <Section title={t('city.newsIn', { city: city.name })} see={{ to: `/news?city=${city.cityId}` }}>
+            {news.status === 'loading' ? (
+              <ul className="group" aria-hidden="true">
+                <li>
+                  <span className="skel skel--line" />
+                </li>
+                <li>
+                  <span className="skel skel--line" />
+                </li>
+              </ul>
+            ) : news.items.length ? (
+              <NewsList items={news.items} limit={3} lang={lang} />
+            ) : (
+              <p className="city__quiet">{news.status === 'error' ? t('city.newsError') : t('city.newsEmpty', { city: city.name })}</p>
+            )}
+          </Section>
+        </aside>
+      </div>
+
+      <Sheet open={Boolean(occ)} onClose={closeOcc} labelledBy="city-md-h" variant="side" barStart={occ ? <MeetingDetailBadge meeting={occ} homeCityId={prefs.homeCityId} /> : null}>
+        {occ && <MeetingDetail key={occ.id} meeting={occ} city={city} today={today} now={now} headingId="city-md-h" nextSpeakable={occNext} onOpenMeeting={openOcc} hideCityLink />}
+      </Sheet>
     </div>
   );
 }

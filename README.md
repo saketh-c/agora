@@ -8,7 +8,7 @@ Agora is a web app, an installable phone app (PWA), and a terminal tool that all
 
 ## Try it
 
-**[Open the live app](https://nathantantexas.github.io/agora/)**, hosted from this repository. Every commit to `main` republishes it. The map, the city guides, the rankings, and the charts all read data bundled into the page, so they work with no server behind them. A tab that was open during a deploy reloads itself once, the first time it needs a page from the newer build.
+**[Open the live app](https://saketh-c.github.io/agora/)**, hosted from this repository. Every commit to `main` republishes it. The map, the city guides, the rankings, and the charts all read data bundled into the page, so they work with no server behind them. A tab that was open during a deploy reloads itself once, the first time it needs a page from the newer build.
 
 Headlines work there too, with one difference worth knowing. A static site cannot run the
 news endpoint, so the deploy gathers the newsroom feeds at build time and ships the result
@@ -80,47 +80,43 @@ ANTHROPIC_API_KEY=sk-ant-... npm run dev
 
 ## What it does
 
-| Feature | Where |
+Four destinations, the same on a phone (a bottom tab bar) and on a laptop (links in the
+header): **Home**, **Meetings**, **Prepare** and **Community**. The header also holds the
+language menu and the profile menu; the footer links to News, The data, About and Profiles.
+
+| Page | What it is for |
 |---|---|
-| Interactive map of each city's published council meetings, pins darken as a meeting gets closer | Map (web), `map` (CLI) |
-| Personalized ranking by topics, schedule, distance, and whether you can speak | For you (web), `match` (CLI) |
-| Step-by-step "how to speak" guide per city: form, deadline, time limit, remote option | City pages (web), `speak` (CLI) |
-| Youth councils and commissions, the appointed seats students can actually hold | For you and city pages, `youth` (CLI) |
-| Agenda items tagged by topic with plain-language explanations | City pages and meeting drawer, `agenda` and `explain` (CLI) |
-| Comment builder that drafts a public comment, times it against the city's limit (usually 3 minutes) | Learn (web), `comment` (CLI) |
-| Local news filtered by topic from 30+ DFW newsroom feeds | News (web), `news` (CLI) |
-| Insights: when councils meet, evening share, school-hours share, speaking limits | Insights (web), `stats` (CLI) |
-| Add to calendar (.ics), directions, offline support | Meeting drawer (web) |
-| Language menu: English, Spanish, Vietnamese, covering the interface, the engine's wording, and the city data | Header (web), `--lang` (CLI) |
-| Profiles: separate saved setups on one device, with export and import to move one | Header and Profiles page (web) |
-| A locator emblem for each of the 39 cities, placed from its real city hall coordinates | City index, city pages, meeting drawer |
-| Community: tips, toolkits, wins, and questions from students, with photos and video | Community (web) |
-| Rehearse: record yourself with camera and mic and get specific coaching on pace, fillers, pauses, script, eye contact, and posture, all analyzed on the device | Rehearse (web) |
+| Home `/` | First visit: one question, "Where do you live or go to school?", and three real meetings you can speak at. After that: "Ana, your turn is Monday.", your next meeting with a countdown, the sign-up deadline and your prep progress, then what is coming up, seats you can apply for, headlines and one post from Community |
+| Meetings `/meetings` | Every upcoming council meeting as a list (and a map beside it on a laptop, or behind the Map toggle on a phone), with search, filters and "Best for you" or "Soonest" order. A meeting opens in a sheet: can I speak, for how long, the sign-up deadline, and "Prepare to speak" |
+| Cities `/cities`, a city `/city/plano` | The directory of all 39 councils, and one page per city: the next meeting you can speak at, how to speak there in three steps, youth programs, official links, the schedule and recent agenda items |
+| Prepare `/prepare` | Getting ready for one meeting, step by step: sign up, write your comment (`/prepare/write`), practice out loud (`/prepare/practice`), on the day, and afterwards |
+| Community `/community` | Guides from the Agora team grounded in each city's rules, and posts students write on their own device |
+| News, The data, About, Profiles | Local reporting on your topics, how the region's councils meet in charts, where the data comes from, and the profiles saved on this device |
+
+"Your city, topics and times" opens from the profile menu over whatever page you are on,
+so changing your city never loses your place. Everything works in English, Spanish and
+Vietnamese, including the city guides and agenda items.
+
+The terminal tool covers the same ground: `map`, `match`, `speak`, `city`, `youth`,
+`agenda`, `explain`, `comment`, `news` and `stats`.
 
 ## Data visualizations
 
-Charts are not confined to a statistics page. Most of them sit inside the screen where
-the question comes up, and each one is built from the same published schedule data the
-rest of the app runs on.
+Charts sit where the question comes up, and each one is built from the same published
+schedule data as the rest of the app.
 
 | Chart | What it answers | Where it appears |
 |---|---|---|
-| Activity strip | Is anything happening soon, and when does the region get busy? One column per day with weekends tinted and month breaks ruled | Above the map list, on every city page, and on Insights |
-| School-day clock | Does this meeting land while I am in class? The start time is drawn to scale from 6 AM to 11 PM with school hours shaded | Meeting drawer, and under each recurrence rule on a city page |
-| Reach plot | Which meetings can I physically get to? Distance on one axis, start time on the other, with your travel limit and free hours shaded in | For you |
-| Speaking ruler | Is my comment short enough? The draft is timed against that city's limit on a ruler marked every fifteen seconds | Comment builder |
-| Cadence strip | Does this council meet weekly or twice a month? Six weeks of its calendar as one small strip, repeated down the index | City index |
-| Density matrix | When do councils meet? Weekday against start hour over ninety days | Insights |
-| Dumbbell plot | How much of a council's calendar happens before the school day ends? Daytime and evening meetings per city, joined by a bar | Insights |
-| Dot plot | What subjects fill upcoming agendas? | Insights |
-| Unit chart | How long do cities let you speak, and how is coverage split by county? One square per city | Insights |
-| City emblem | Where in the region is this council? The whole metroplex as a field of marks, with this city's hall struck through by a crosshair and tinted by county | City index, city pages, meeting drawer |
-| Pace and volume over time | Did I rush the opening and fade at the end? Fifteen second and five second buckets against a target band | Rehearse report |
-| Eye contact strip | When did I look down? One cell per second of the take | Rehearse report |
+| Speaking-time ruler | Is my comment short enough? The draft is timed against that city's limit, with green, amber and red zones like the light at a podium | Write and Practice |
+| School hours bar list | Which councils meet while I am in class? One bar per council, your city highlighted | The data |
+| Weekday by hour heatmap | When do councils meet? Weekday against start hour over ninety days | The data |
+| Speaking limits | How long do cities let you speak? Councils grouped by their limit | The data |
+| Agenda topics | What subjects fill the agendas? | The data |
+| Pace and volume over time | Did I rush the opening and fade at the end? | Practice report |
+| Eye contact strip | When did I look down? One cell per second of the take | Practice report |
 
-Every chart has a keyboard-reachable table view of the same numbers, an SVG description
-for screen readers, and labels drawn from the same dictionaries as the rest of the app,
-so the charts translate along with everything else.
+Chart text is set at a fixed 12 or 14 pixels, one accent hue carries the data, labels sit
+on the marks instead of in legends, and every chart has a table view of the same numbers.
 
 ## Profiles
 
@@ -142,34 +138,32 @@ nobody is sent back through onboarding.
 ## Community
 
 The Community page is where someone who has stood up at a meeting tells the next person
-what worked. Posts are one of four kinds, tip, toolkit, win, or question, and each can
-carry up to four photos, a video file, or a YouTube or Vimeo link.
+what worked. Posts are one of four kinds, tip, guide, win, or question, and each can carry
+up to four photos, a video file, or a YouTube or Vimeo link.
 
-The page is honest about what a static site can do. The shared feed is seeded from
-`data/community.json`, which the team edits directly; every entry there marked
-`sample: true` carries a placeholder name and an illustration that should be swapped for
-the real student and a real photo before the team presents. A post written on the page is
-saved on that device (IndexedDB, so a phone video fits) and shows at the top of that
-person's feed at once, badged as such. Under it, **Send to the team for everyone** opens a
-prefilled issue on this repository carrying the post text; a person reads it and adds it
-to the seed file, which is the moderation step a page used by students needs. Photos and
-video for a submitted post are attached in the issue editor, which hosts them.
+The feed is seeded from `data/community.json` with guides written by the Agora team from
+each city's own file in `data/cities/`. They say nothing that file does not: no invented
+students, schools, outcomes or votes, and every helpful count starts at zero. A post
+written on the page is saved on that device (IndexedDB, so a phone video fits) and shows
+at the top of that person's feed, marked as theirs. **Send to the Agora team** opens a
+prefilled issue on this repository with the post text; a person reads it and, with the
+student's consent, adds it to the seed file, which is the moderation step a page used by
+students needs. Photos and video for a submitted post are attached in the issue editor.
 
 Pasted video links are rewritten to the privacy-preserving `youtube-nocookie.com` and
 `player.vimeo.com` embeds, and any other host is refused, so nobody can slip an arbitrary
 page into an iframe on the feed. Uploaded photos are shrunk to 1600 pixels on the longest
-edge before they are stored. The sample walkthrough video attached to the Plano post is a
-screen recording of this app, so the video renderer is demonstrated with something that is
-ours to ship.
+edge before they are stored.
 
 To seed a post with a video file rather than a link, put the file under
 `packages/web/public/community/` and reference it as
 `{ "type": "video", "src": "community/name.webm", "poster": "community/name.png" }`.
 
-## Rehearse
+## Practice
 
-Showing up is half of it; the other half is the three minutes. Rehearse records you
-giving your comment and tells you, specifically, what to fix.
+Showing up is half of it; the other half is the three minutes. Practice
+(`/prepare/practice`) records you giving your comment and tells you, specifically, what
+to fix.
 
 Pick the council (its speaking limit becomes the clock), optionally bring the draft from
 the comment builder, and record. From the audio it measures pace over time, pauses,
@@ -200,21 +194,25 @@ summaries, and the coach that turns measurements into ranked findings.
 
 ## Design
 
-The palette is taken from the material of a Greek public square: weathered limestone for
-the ground, black-figure ink for text, fired clay for quantity in every chart, and Aegean
-blue for anything you can act on. Headings and large figures are set in Palatino, which
-descends from Renaissance humanist letterforms cut after Roman inscriptional capitals, and
-the wordmark is letterspaced capitals the way a name is cut into stone. A running meander,
-the border that ran along Greek architecture and pottery, appears once as the band the
-masthead sits on, and the key figures are laid out as a colonnade under a single
-architrave. The logo is a stoa, the covered walkway that edged the agora.
+The direction is called "Your turn at the podium". Ink on card on a light gray floor, and
+the only color is the timer light at a council podium: **green means it is your turn and
+you can speak**, amber means time is running out (sign-up deadlines), red means stop
+(cancelled). Every other surface is neutral, and each screen spends its boldness once: the
+green "Your next meeting" card on Home, the "Can I speak? Yes, for 3 minutes" answer on a
+meeting.
 
-Underneath the reference, the structure is plain: hairline rules and typography instead of
-drop shadows and rounded shapes, lists sharing one border with dividers between rows
-instead of stacking separate floating cards, square panels, and color reserved for meaning
-so a filled mark or a colored label always encodes something rather than decorating.
-Charts follow a single set of rules: one hue for magnitude, recessive grids, direct labels
-in place of legends wherever a label fits, and round axis values.
+Headings are set in Mona Sans at its widest, body text in Public Sans, both self-hosted.
+Controls are pills; lists are white groups with hairline dividers; meeting rows lead with
+a date tile that is lit green when you can speak. Copy is sentence case and short, a page
+introduction is two lines at most, longer explanations sit behind a "How this works"
+disclosure, and every list has a designed empty, loading and error state that says what
+to do next. The logo is a stoa, the covered walkway that edged the agora, with a green
+head at the lectern.
+
+The tokens and shared components live in `packages/web/src/styles/` (`tokens.css`,
+`base.css`, `components.css`, `shell.css`, `charts.css`, `map.css`, and one file per page
+in `styles/pages/`) and `packages/web/src/components/ui/`. A gallery of every component in
+every state renders at `/__ui`.
 
 ## How it is built
 
@@ -248,7 +246,14 @@ node scripts/i18n-extract.mjs    # data strings still untranslated per language
 
 ## Accessibility
 
-Keyboard-navigable throughout, with a skip link, visible focus rings, a list alternative to the map, screen-reader labels on icons and pins, reduced-motion support, a forced-colors fallback, and a table view for every chart. Controls are compact with a mouse and grow to 44px targets on touch screens. The app ships one light theme; every color token is defined once in `packages/web/src/styles.css`, all text pairs clear WCAG AA contrast on the light surfaces, and interactive borders clear the 3:1 requirement for non-text contrast.
+Keyboard-navigable throughout, with a skip link, landmarks, one heading per page that
+takes focus after navigation, a polite route announcer, a 2px ink focus ring, a list
+alternative to the map, labels on icons and pins, reduced-motion support, a forced-colors
+fallback, and a table view for every chart. Touch targets are at least 44px (small chips
+and buttons extend their hit area past their outline), nothing scrolls sideways at 320px,
+and inputs use 16px text so phones do not zoom. Text clears WCAG AA contrast and control
+borders clear 3:1. English data shown on a Spanish or Vietnamese page, such as headlines
+and addresses, is marked `lang="en"` so screen readers switch voices.
 
 ## Renaming
 

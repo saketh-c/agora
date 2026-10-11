@@ -61,12 +61,14 @@
     {
       "date": "2026-10-07",
       "status": "rescheduled",
+      "movedFrom": "2026-10-06",
       "note": "First-Tuesday meeting moved from Tuesday October 6 to Wednesday October 7, 2026 because of National Night Out (worksession 5:30 p.m., regular meeting 7:00 p.m.).",
       "source": "https://www.colleyville.com/government/city-council/city-council-meeting-calendar"
     },
     {
       "date": "2026-11-04",
       "status": "rescheduled",
+      "movedFrom": "2026-11-03",
       "note": "First-Tuesday meeting moved from Tuesday November 3 to Wednesday November 4, 2026 because of Election Day (worksession 5:30 p.m., regular meeting 7:00 p.m.).",
       "source": "https://www.colleyville.com/government/city-council/city-council-meeting-calendar"
     }

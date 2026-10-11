@@ -76,12 +76,13 @@
     {
       "date": "2026-10-06",
       "status": "rescheduled",
+      "movedTo": "2026-10-07",
       "note": "Regular meeting moved from Tuesday, Oct. 6 to Wednesday, Oct. 7, 2026 at 6 p.m. because the city's National Night Out event is at City Hall on Tuesday, Oct. 6.",
       "source": "https://www.farmersbranchtx.gov/city-meetings-calendar"
     },
     {
       "date": "2026-10-07",
-      "status": "special",
+      "status": "note",
       "note": "Regular City Council meeting held on a Wednesday at 6 p.m. at City Hall (replaces the Oct. 6 date). The city calendar entry says the meeting was moved to Wednesday because of National Night Out on Tuesday.",
       "source": "https://www.farmersbranchtx.gov/city-meetings-calendar"
     }

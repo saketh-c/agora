@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-10",
+  "generatedAt": "2026-10-10",
   "sources": [
     {
       "id": "kera-news",
       "name": "KERA News",
-      "homepage": "https://www.keranews.org/",
-      "rssUrl": "https://www.keranews.org/news.rss",
+      "homepage": "https://www.kera.org/",
+      "rssUrl": "https://www.kera.org/feed/",
       "rssVerified": true,
       "coverage": [
         "dfw"
@@ -28,7 +28,8 @@
         "governance-elections"
       ],
       "paywall": "none",
-      "notes": "Nonprofit NPR member station for North Texas and the most consistent broadcaster on Dallas and Fort Worth city council business. Tag pages such as /tags/dallas-city-council and /tags/fort-worth-city-council track council votes directly; KERA also owns the Denton Record-Chronicle. Feed verified with the fetch tool (RSS 2.0, current items)."
+      "notes": "Nonprofit NPR member station for North Texas and the most consistent broadcaster on Dallas and Fort Worth city council business; KERA also owns the Denton Record-Chronicle. In 2026 the station moved from keranews.org to kera.org: the old /news.rss feed and every keranews.org tag and section page now redirect to the generic kera.org/news page, which answers automated requests with 403. The site-wide feed at https://www.kera.org/feed/ was verified on 2026-10-10 (RSS 2.0, 10 current items). It mixes in national NPR and PBS stories, so requirePlace keeps only items that name a DFW place. The kera.org tag and category feeds and pages all return 403 to automated requests, so no KERA topic pages are linked.",
+      "requirePlace": true
     },
     {
       "id": "dallas-morning-news",
@@ -92,7 +93,6 @@
       "id": "fort-worth-star-telegram",
       "name": "Fort Worth Star-Telegram",
       "homepage": "https://www.star-telegram.com/",
-      "rssUrl": "https://www.star-telegram.com/news/local/?widgetName=rssfeed&widgetContentId=712015&getXmlFeed=true",
       "rssVerified": false,
       "coverage": [
         "Fort Worth",
@@ -112,7 +112,7 @@
         "governance-elections"
       ],
       "paywall": "metered",
-      "notes": "McClatchy daily for Tarrant County. The host could not be reached from this environment at all (connections never completed over IPv4 or IPv6 and the fetch tool refuses the domain), so the feed URL is McClatchy's standard local-news feed pattern and must be checked before relying on it."
+      "notes": "McClatchy daily for Tarrant County. The feed URL that was configured (McClatchy's standard local-news widget feed) never answered: every fetch hit the 6 second timeout, which stalled news requests, and on 2026-10-10 the host still refused connections from this environment. It was removed rather than replaced, because no working feed URL could be verified. Check the site manually before adding a feed back."
     },
     {
       "id": "dallas-observer",
@@ -164,7 +164,7 @@
       "id": "community-impact-dfw",
       "name": "Community Impact (Dallas-Fort Worth)",
       "homepage": "https://communityimpact.com/dallas-fort-worth/",
-      "rssUrl": "https://communityimpact.com/rss/",
+      "rssUrl": "https://communityimpact.com/rss/dallas-fort-worth/government/",
       "rssVerified": true,
       "coverage": [
         "dfw"
@@ -181,13 +181,50 @@
         "governance-elections"
       ],
       "paywall": "none",
-      "notes": "Free hyperlocal chain with a Government section in every edition that summarizes council and planning-and-zoning meetings. The network feed at /rss/ covers all Texas markets, so filter by DFW cities; per-edition feeds follow /rss/<edition>/ and per-section feeds /rss/<edition>/<section>/. The Lewisville/Flower Mound/Highland Village and Coppell/Valley Ranch/Las Colinas editions no longer exist as separate editions (every slug variant returns 404 and they are absent from the DFW edition list), so use Star Local Media and Cross Timbers Gazette for those cities."
+      "notes": "Free hyperlocal chain with a Government section in every edition that summarizes council and planning-and-zoning meetings. The network feed at /rss/ that was configured covers every Texas market, so most of its items were about Houston, Austin and San Antonio. The Dallas-Fort Worth government feed at /rss/dallas-fort-worth/government/ was verified on 2026-10-10 (RSS, 40 items covering about two and a half weeks of council, county and agency stories from all nine DFW editions). The Lewisville/Flower Mound/Highland Village and Coppell/Valley Ranch/Las Colinas editions no longer exist as separate editions, so use Star Local Media and Cross Timbers Gazette for those cities.",
+      "focus": "government"
+    },
+    {
+      "id": "community-impact-dfw-elections",
+      "name": "Community Impact (DFW elections)",
+      "homepage": "https://communityimpact.com/dallas-fort-worth/",
+      "rssUrl": "https://communityimpact.com/rss/dallas-fort-worth/election/",
+      "rssVerified": true,
+      "focus": "elections",
+      "coverage": [
+        "dfw"
+      ],
+      "topics": [
+        "governance-elections",
+        "budget-taxes",
+        "education-libraries"
+      ],
+      "paywall": "none",
+      "notes": "Election section of the nine DFW editions: candidate Q&As for city, county, school board and appraisal district races, bond and tax rate elections, and polling place changes. Feed verified on 2026-10-10 (RSS, 40 items covering about five weeks)."
+    },
+    {
+      "id": "community-impact-dfw-education",
+      "name": "Community Impact (DFW education)",
+      "homepage": "https://communityimpact.com/dallas-fort-worth/",
+      "rssUrl": "https://communityimpact.com/rss/dallas-fort-worth/education/",
+      "rssVerified": true,
+      "focus": "education",
+      "coverage": [
+        "dfw"
+      ],
+      "topics": [
+        "education-libraries",
+        "budget-taxes",
+        "youth"
+      ],
+      "paywall": "none",
+      "notes": "Education section of the nine DFW editions, mostly ISD board decisions (tax rates, boundaries, superintendent searches, legislative priorities). Feed verified on 2026-10-10 (RSS, 40 items covering about a month)."
     },
     {
       "id": "community-impact-plano",
       "name": "Community Impact (Plano)",
       "homepage": "https://communityimpact.com/plano/",
-      "rssUrl": "https://communityimpact.com/rss/plano/",
+      "rssUrl": "https://communityimpact.com/rss/plano/government/",
       "rssVerified": true,
       "coverage": [
         "Plano"
@@ -204,13 +241,14 @@
         "governance-elections"
       ],
       "paywall": "none",
-      "notes": "Edition feed verified with the fetch tool. Government-only feed also verified at https://communityimpact.com/rss/plano/government/; section pages at /plano/government/, /plano/transportation/, /plano/development/, /plano/education/, /plano/business/."
+      "notes": "Edition feed verified with the fetch tool. Government-only feed also verified at https://communityimpact.com/rss/plano/government/; section pages at /plano/government/, /plano/transportation/, /plano/development/, /plano/education/, /plano/business/. Switched on 2026-10-10 from the edition feed (/rss/plano/, mostly restaurant and business openings) to the edition's government feed, verified the same day (RSS, 40 items going back about three months).",
+      "focus": "government"
     },
     {
       "id": "community-impact-richardson",
       "name": "Community Impact (Richardson)",
       "homepage": "https://communityimpact.com/richardson/",
-      "rssUrl": "https://communityimpact.com/rss/richardson/",
+      "rssUrl": "https://communityimpact.com/rss/richardson/government/",
       "rssVerified": true,
       "coverage": [
         "Richardson"
@@ -227,13 +265,14 @@
         "governance-elections"
       ],
       "paywall": "none",
-      "notes": "Edition feed verified with curl (RSS, 50 items). Government section at /richardson/government/ follows the same pattern as Plano."
+      "notes": "Edition feed verified with curl (RSS, 50 items). Government section at /richardson/government/ follows the same pattern as Plano. Switched on 2026-10-10 from the edition feed (/rss/richardson/, mostly restaurant and business openings) to the edition's government feed, verified the same day (RSS, 40 items going back about three months).",
+      "focus": "government"
     },
     {
       "id": "community-impact-frisco",
       "name": "Community Impact (Frisco)",
       "homepage": "https://communityimpact.com/frisco/",
-      "rssUrl": "https://communityimpact.com/rss/frisco/",
+      "rssUrl": "https://communityimpact.com/rss/frisco/government/",
       "rssVerified": true,
       "coverage": [
         "Frisco"
@@ -250,13 +289,14 @@
         "governance-elections"
       ],
       "paywall": "none",
-      "notes": "Edition feed verified with curl (RSS, 50 items); government-only feed also confirmed at https://communityimpact.com/rss/frisco/government/."
+      "notes": "Edition feed verified with curl (RSS, 50 items); government-only feed also confirmed at https://communityimpact.com/rss/frisco/government/. Switched on 2026-10-10 from the edition feed (/rss/frisco/, mostly restaurant and business openings) to the edition's government feed, verified the same day (RSS, 40 items going back about three months).",
+      "focus": "government"
     },
     {
       "id": "community-impact-mckinney",
       "name": "Community Impact (McKinney)",
       "homepage": "https://communityimpact.com/mckinney/",
-      "rssUrl": "https://communityimpact.com/rss/mckinney/",
+      "rssUrl": "https://communityimpact.com/rss/mckinney/government/",
       "rssVerified": true,
       "coverage": [
         "McKinney"
@@ -273,13 +313,14 @@
         "governance-elections"
       ],
       "paywall": "none",
-      "notes": "Edition feed verified with curl (RSS, 50 items)."
+      "notes": "Edition feed verified with curl (RSS, 50 items). Switched on 2026-10-10 from the edition feed (/rss/mckinney/, mostly restaurant and business openings) to the edition's government feed, verified the same day (RSS, 40 items going back about three months).",
+      "focus": "government"
     },
     {
       "id": "community-impact-allen",
       "name": "Community Impact (Allen)",
       "homepage": "https://communityimpact.com/allen/",
-      "rssUrl": "https://communityimpact.com/rss/allen/",
+      "rssUrl": "https://communityimpact.com/rss/allen/government/",
       "rssVerified": true,
       "coverage": [
         "Allen"
@@ -296,13 +337,14 @@
         "governance-elections"
       ],
       "paywall": "none",
-      "notes": "Edition feed verified with curl (RSS, 50 items)."
+      "notes": "Edition feed verified with curl (RSS, 50 items). Switched on 2026-10-10 from the edition feed (/rss/allen/, mostly restaurant and business openings) to the edition's government feed, verified the same day (RSS, 40 items going back about three months).",
+      "focus": "government"
     },
     {
       "id": "community-impact-grapevine-colleyville-southlake",
       "name": "Community Impact (Grapevine, Colleyville, Southlake)",
       "homepage": "https://communityimpact.com/grapevine-colleyville-southlake/",
-      "rssUrl": "https://communityimpact.com/rss/grapevine-colleyville-southlake/",
+      "rssUrl": "https://communityimpact.com/rss/grapevine-colleyville-southlake/government/",
       "rssVerified": true,
       "coverage": [
         "Grapevine",
@@ -321,13 +363,14 @@
         "governance-elections"
       ],
       "paywall": "none",
-      "notes": "Edition feed verified with curl (RSS, 50 items)."
+      "notes": "Edition feed verified with curl (RSS, 50 items). Switched on 2026-10-10 from the edition feed (/rss/grapevine-colleyville-southlake/, mostly restaurant and business openings) to the edition's government feed, verified the same day (RSS, 40 items going back about three months).",
+      "focus": "government"
     },
     {
       "id": "community-impact-keller-roanoke-northeast-fort-worth",
       "name": "Community Impact (Keller, Roanoke, Northeast Fort Worth)",
       "homepage": "https://communityimpact.com/keller-roanoke-northeast-fort-worth/",
-      "rssUrl": "https://communityimpact.com/rss/keller-roanoke-northeast-fort-worth/",
+      "rssUrl": "https://communityimpact.com/rss/keller-roanoke-northeast-fort-worth/government/",
       "rssVerified": true,
       "coverage": [
         "Keller",
@@ -347,13 +390,14 @@
         "governance-elections"
       ],
       "paywall": "none",
-      "notes": "Edition feed verified with curl (RSS, 50 items). This is the edition that covers Keller, Roanoke and the Northeast Tarrant suburbs including North Richland Hills."
+      "notes": "Edition feed verified with curl (RSS, 50 items). This is the edition that covers Keller, Roanoke and the Northeast Tarrant suburbs including North Richland Hills. Switched on 2026-10-10 from the edition feed (/rss/keller-roanoke-northeast-fort-worth/, mostly restaurant and business openings) to the edition's government feed, verified the same day (RSS, 40 items going back about three months).",
+      "focus": "government"
     },
     {
       "id": "community-impact-denton",
       "name": "Community Impact (Denton)",
       "homepage": "https://communityimpact.com/denton/",
-      "rssUrl": "https://communityimpact.com/rss/denton/",
+      "rssUrl": "https://communityimpact.com/rss/denton/government/",
       "rssVerified": true,
       "coverage": [
         "Denton"
@@ -370,13 +414,14 @@
         "governance-elections"
       ],
       "paywall": "none",
-      "notes": "Not in the requested list but a live DFW edition; feed verified with curl (RSS, 50 items). Pairs well with the Denton Record-Chronicle."
+      "notes": "Not in the requested list but a live DFW edition; feed verified with curl (RSS, 50 items). Pairs well with the Denton Record-Chronicle. Switched on 2026-10-10 from the edition feed (/rss/denton/, mostly restaurant and business openings) to the edition's government feed, verified the same day (RSS, 40 items going back about three months).",
+      "focus": "government"
     },
     {
       "id": "community-impact-prosper-celina",
       "name": "Community Impact (Prosper, Celina)",
       "homepage": "https://communityimpact.com/prosper-celina/",
-      "rssUrl": "https://communityimpact.com/rss/prosper-celina/",
+      "rssUrl": "https://communityimpact.com/rss/prosper-celina/government/",
       "rssVerified": true,
       "coverage": [
         "Prosper",
@@ -392,7 +437,8 @@
         "governance-elections"
       ],
       "paywall": "none",
-      "notes": "Not in the requested list but a live DFW edition for two fast-growing Collin County cities; feed verified with curl (RSS, 50 items)."
+      "notes": "Not in the requested list but a live DFW edition for two fast-growing Collin County cities; feed verified with curl (RSS, 50 items). Switched on 2026-10-10 from the edition feed (/rss/prosper-celina/, mostly restaurant and business openings) to the edition's government feed, verified the same day (RSS, 40 items going back about three months).",
+      "focus": "government"
     },
     {
       "id": "texas-tribune",
@@ -482,7 +528,8 @@
         "governance-elections"
       ],
       "paywall": "metered",
-      "notes": "Daily owned by KERA since 2023. Runs on the BLOX CMS, so the feed is a search endpoint; the fetch tool was rate-limited (429) but curl returned RSS with 25 items. News index at /news/."
+      "notes": "Daily owned by KERA since 2023. Runs on the BLOX CMS, so the feed is a search endpoint; the fetch tool was rate-limited (429) but curl returned RSS with 25 items. News index at /news/. requirePlace is set because the search feed carries syndicated wire copy (NAPSI tips, statewide sports).",
+      "requirePlace": true
     },
     {
       "id": "star-local-media",
@@ -515,14 +562,15 @@
         "governance-elections"
       ],
       "paywall": "metered",
-      "notes": "Chain of suburban weeklies (Plano Star Courier, Frisco Enterprise, McKinney Courier-Gazette, Allen American, Lewisville Leader, Coppell Gazette and others), which makes it the main council-coverage source for Lewisville, Flower Mound and Coppell now that Community Impact has dropped those editions. BLOX search-as-RSS feed verified with the fetch tool; it mixes in syndicated wire content."
+      "notes": "Chain of suburban weeklies (Plano Star Courier, Frisco Enterprise, McKinney Courier-Gazette, Allen American, Lewisville Leader, Coppell Gazette and others), which makes it the main council-coverage source for Lewisville, Flower Mound and Coppell now that Community Impact has dropped those editions. BLOX search-as-RSS feed verified with the fetch tool; it mixes in syndicated wire content. requirePlace is set because the search feed carries syndicated wire copy (Oklahoma sports, NAPSI tips) under the local mastheads.",
+      "requirePlace": true
     },
     {
       "id": "candys-dirt",
       "name": "CandysDirt.com",
       "homepage": "https://candysdirt.com/",
       "rssUrl": "https://candysdirt.com/feed/",
-      "rssVerified": false,
+      "rssVerified": true,
       "coverage": [
         "Dallas",
         "dfw"
@@ -533,7 +581,7 @@
         "governance-elections"
       ],
       "paywall": "none",
-      "notes": "Real estate news site that follows Dallas zoning cases, the City Plan Commission and the ForwardDallas land-use plan closely. Cloudflare returns a 403 challenge to every automated request (fetch tool and curl alike), so the standard WordPress feed path could not be confirmed and the homepage could not be loaded either; check manually before use."
+      "notes": "Real estate news site that follows Dallas zoning cases, the City Plan Commission and the ForwardDallas land-use plan closely. The standard WordPress feed at /feed/ was verified on 2026-10-10 (RSS 2.0, 10 current items); the homepage itself sits behind a Cloudflare challenge for automated requests. Most items are home listings, which the relevance check drops; zoning and council stories come through."
     },
     {
       "id": "fort-worth-weekly",
@@ -656,7 +704,8 @@
         "education-libraries"
       ],
       "paywall": "none",
-      "notes": "Feed verified with the fetch tool but it mixes national CBS stories with local ones; /texas/local-news/ and /texas/tag/dart/ are the useful local pages."
+      "notes": "Feed verified with the fetch tool but it mixes national CBS stories with local ones; /texas/local-news/ and /texas/tag/dart/ are the useful local pages. The feed carries national CBS stories, so requirePlace keeps only items that name a DFW place.",
+      "requirePlace": true
     },
     {
       "id": "arlington-report",
@@ -805,12 +854,6 @@
   "topicLinks": [
     {
       "topic": "housing",
-      "label": "KERA News housing tag",
-      "url": "https://www.keranews.org/tags/housing",
-      "sourceName": "KERA News"
-    },
-    {
-      "topic": "housing",
       "label": "NBC 5 DFW housing tag",
       "url": "https://www.nbcdfw.com/tag/housing/",
       "sourceName": "NBC 5 Dallas-Fort Worth (KXAS)"
@@ -826,12 +869,6 @@
       "label": "Dallas Morning News real estate section",
       "url": "https://www.dallasnews.com/business/real-estate/",
       "sourceName": "The Dallas Morning News"
-    },
-    {
-      "topic": "transit",
-      "label": "KERA News DART tag",
-      "url": "https://www.keranews.org/tags/dart",
-      "sourceName": "KERA News"
     },
     {
       "topic": "transit",
@@ -865,12 +902,6 @@
     },
     {
       "topic": "roads-traffic",
-      "label": "KERA News transportation section",
-      "url": "https://www.keranews.org/transportation",
-      "sourceName": "KERA News"
-    },
-    {
-      "topic": "roads-traffic",
       "label": "Dallas Morning News transportation section",
       "url": "https://www.dallasnews.com/news/transportation/",
       "sourceName": "The Dallas Morning News"
@@ -888,22 +919,10 @@
       "sourceName": "D Magazine"
     },
     {
-      "topic": "parks-recreation",
-      "label": "KERA News parks tag",
-      "url": "https://www.keranews.org/tags/parks",
-      "sourceName": "KERA News"
-    },
-    {
       "topic": "public-safety",
       "label": "FOX 4 crime and public safety section",
       "url": "https://www.fox4news.com/tag/crime-publicsafety",
       "sourceName": "FOX 4 News (KDFW)"
-    },
-    {
-      "topic": "public-safety",
-      "label": "KERA News criminal justice section",
-      "url": "https://www.keranews.org/criminal-justice",
-      "sourceName": "KERA News"
     },
     {
       "topic": "public-safety",
@@ -916,12 +935,6 @@
       "label": "Dallas Morning News public safety section",
       "url": "https://www.dallasnews.com/news/public-safety/",
       "sourceName": "The Dallas Morning News"
-    },
-    {
-      "topic": "environment",
-      "label": "KERA News energy and environment section",
-      "url": "https://www.keranews.org/energy-environment",
-      "sourceName": "KERA News"
     },
     {
       "topic": "environment",
@@ -940,12 +953,6 @@
       "label": "Dallas Morning News environment section",
       "url": "https://www.dallasnews.com/news/environment/",
       "sourceName": "The Dallas Morning News"
-    },
-    {
-      "topic": "budget-taxes",
-      "label": "KERA News Dallas City Council tag (budget votes)",
-      "url": "https://www.keranews.org/tags/dallas-city-council",
-      "sourceName": "KERA News"
     },
     {
       "topic": "budget-taxes",
@@ -979,21 +986,9 @@
     },
     {
       "topic": "zoning-development",
-      "label": "NBC 5 DFW housing tag (Dallas zoning rewrite coverage)",
-      "url": "https://www.nbcdfw.com/tag/housing/",
-      "sourceName": "NBC 5 Dallas-Fort Worth (KXAS)"
-    },
-    {
-      "topic": "zoning-development",
       "label": "D Magazine residential real estate category",
       "url": "https://www.dmagazine.com/category/residential-real-estate/",
       "sourceName": "D Magazine"
-    },
-    {
-      "topic": "education-libraries",
-      "label": "KERA News education section",
-      "url": "https://www.keranews.org/education",
-      "sourceName": "KERA News"
     },
     {
       "topic": "education-libraries",
@@ -1021,27 +1016,9 @@
     },
     {
       "topic": "youth",
-      "label": "KERA News children tag",
-      "url": "https://www.keranews.org/tags/children",
-      "sourceName": "KERA News"
-    },
-    {
-      "topic": "youth",
       "label": "Dallas Free Press student journalists",
       "url": "https://dallasfreepress.com/author/dfp-student-journalists/",
       "sourceName": "Dallas Free Press"
-    },
-    {
-      "topic": "youth",
-      "label": "KERA News Dallas ISD tag",
-      "url": "https://www.keranews.org/tags/dallas-isd",
-      "sourceName": "KERA News"
-    },
-    {
-      "topic": "arts-culture",
-      "label": "KERA News arts and culture section",
-      "url": "https://www.keranews.org/arts-culture",
-      "sourceName": "KERA News"
     },
     {
       "topic": "arts-culture",
@@ -1063,12 +1040,6 @@
     },
     {
       "topic": "health",
-      "label": "KERA News health section",
-      "url": "https://www.keranews.org/health",
-      "sourceName": "KERA News"
-    },
-    {
-      "topic": "health",
       "label": "Fort Worth Report health section",
       "url": "https://fortworthreport.org/health/",
       "sourceName": "Fort Worth Report"
@@ -1084,12 +1055,6 @@
       "label": "Dallas Morning News public health section",
       "url": "https://www.dallasnews.com/news/public-health/",
       "sourceName": "The Dallas Morning News"
-    },
-    {
-      "topic": "economic-development",
-      "label": "KERA News business and economy section",
-      "url": "https://www.keranews.org/business-economy",
-      "sourceName": "KERA News"
     },
     {
       "topic": "economic-development",
@@ -1111,12 +1076,6 @@
     },
     {
       "topic": "utilities-water",
-      "label": "KERA News water tag",
-      "url": "https://www.keranews.org/tags/water",
-      "sourceName": "KERA News"
-    },
-    {
-      "topic": "utilities-water",
       "label": "Fort Worth Report water tag",
       "url": "https://fortworthreport.org/tag/water/",
       "sourceName": "Fort Worth Report"
@@ -1126,12 +1085,6 @@
       "label": "Texas Tribune energy topic (grid and electric rates)",
       "url": "https://www.texastribune.org/topics/energy/",
       "sourceName": "The Texas Tribune"
-    },
-    {
-      "topic": "animal-services",
-      "label": "KERA News Dallas Animal Services tag",
-      "url": "https://www.keranews.org/tags/dallas-animal-services",
-      "sourceName": "KERA News"
     },
     {
       "topic": "animal-services",
@@ -1147,18 +1100,6 @@
     },
     {
       "topic": "technology",
-      "label": "KERA News science and technology section",
-      "url": "https://www.keranews.org/science-technology",
-      "sourceName": "KERA News"
-    },
-    {
-      "topic": "technology",
-      "label": "KERA News data centers tag",
-      "url": "https://www.keranews.org/tags/data-centers",
-      "sourceName": "KERA News"
-    },
-    {
-      "topic": "technology",
       "label": "FOX 4 technology section",
       "url": "https://www.fox4news.com/tag/technology",
       "sourceName": "FOX 4 News (KDFW)"
@@ -1168,12 +1109,6 @@
       "label": "Dallas Innovates",
       "url": "https://dallasinnovates.com/",
       "sourceName": "Dallas Innovates"
-    },
-    {
-      "topic": "governance-elections",
-      "label": "KERA News Dallas City Council tag",
-      "url": "https://www.keranews.org/tags/dallas-city-council",
-      "sourceName": "KERA News"
     },
     {
       "topic": "governance-elections",

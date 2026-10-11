@@ -1,0 +1,16 @@
+/* About ( /about ). A quiet, typographic page: prose sections on the floor, and the app's
+   places as the same link rows the rest of the app uses. */
+
+.ab-grid { display: grid; gap: var(--s7); margin-top: var(--s6); }
+@media (min-width: 1024px) {
+  .ab-grid { grid-template-columns: minmax(0, 1fr) minmax(300px, 380px); gap: var(--s8); align-items: start; margin-top: var(--s7); }
+  .ab-side { position: sticky; top: calc(var(--header-h) + var(--s5)); }
+}
+
+.ab-prose { max-width: 680px; }
+.ab-prose section + section { margin-top: var(--s7); }
+.ab-prose h2 { margin-bottom: var(--s2); }
+.ab-prose p { color: var(--slate); }
+.ab-prose p + p { margin-top: var(--s3); }
+.ab-prose .verified { margin-top: var(--s4); }
+.ab-prose .link { color: var(--ink); }

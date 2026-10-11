@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-25T01:12:53.606Z",
+  "generatedAt": "2026-10-11T01:32:07.703Z",
   "cityCount": 39,
   "cities": [
     {
@@ -298,7 +298,7 @@
       "scheduleExceptions": [
         {
           "date": "2026-09-15",
-          "status": "special",
+          "status": "note",
           "note": "Budget Related Meeting: evening meeting only (no afternoon work session on the calendar). Final readings of the FY2027 operating budget (about $765.8 million), tax levy, water and wastewater rates and other ordinances given first reading on Sept 8 are expected; confirm on the posted agenda.",
           "source": "https://www.arlingtontx.gov/Government/Meetings-Agendas/City-Council-Meeting-Schedule"
         },
@@ -310,7 +310,7 @@
         },
         {
           "date": "2026-12-15",
-          "status": "special",
+          "status": "note",
           "note": "Second December meeting one week after Dec 8 (back-to-back weeks) to close out the year.",
           "source": "https://www.arlingtontx.gov/Government/Meetings-Agendas/City-Council-Meeting-Schedule"
         }
@@ -436,6 +436,7 @@
         {
           "date": "2026-11-10",
           "status": "rescheduled",
+          "movedTo": "2026-11-17",
           "note": "No second-Tuesday meeting in November; the city calendar shows a single November regular meeting on Tuesday Nov. 17, 2026 at 6 p.m. (third Tuesday).",
           "source": "https://bedfordtx.gov/common/modules/iCalendar/iCalendar.aspx?catID=14&feed=calendar"
         },
@@ -580,12 +581,13 @@
         {
           "date": "2026-10-06",
           "status": "rescheduled",
+          "movedTo": "2026-10-13",
           "note": "No council meeting on the first Tuesday of October; the city calendar instead lists City Council Meetings on Tuesday, Oct. 13 and Tuesday, Oct. 20, 2026 at 5:45 p.m. (reason not stated).",
           "source": "https://www.cityofcarrollton.com/about-us/calendar/-curm-10/-cury-2026"
         },
         {
           "date": "2026-10-13",
-          "status": "special",
+          "status": "note",
           "note": "City Council Meeting at 5:45 p.m. on the second Tuesday at City Hall, replacing the usual first-Tuesday date.",
           "source": "https://www.cityofcarrollton.com/Home/Components/Calendar/Event/51241/2498"
         }
@@ -952,12 +954,14 @@
         {
           "date": "2026-10-07",
           "status": "rescheduled",
+          "movedFrom": "2026-10-06",
           "note": "First-Tuesday meeting moved from Tuesday October 6 to Wednesday October 7, 2026 because of National Night Out (worksession 5:30 p.m., regular meeting 7:00 p.m.).",
           "source": "https://www.colleyville.com/government/city-council/city-council-meeting-calendar"
         },
         {
           "date": "2026-11-04",
           "status": "rescheduled",
+          "movedFrom": "2026-11-03",
           "note": "First-Tuesday meeting moved from Tuesday November 3 to Wednesday November 4, 2026 because of Election Day (worksession 5:30 p.m., regular meeting 7:00 p.m.).",
           "source": "https://www.colleyville.com/government/city-council/city-council-meeting-calendar"
         }
@@ -1361,7 +1365,7 @@
       "scheduleExceptions": [
         {
           "date": "2026-09-16",
-          "status": "special",
+          "status": "note",
           "note": "Council Briefing plus Budget Workshop: adopt FY 2026-27 budget on final reading, adopt tax rate, approve other budget items (9 a.m., Council Chambers).",
           "source": "https://dallascityhall.com/government/Calendar1/2026-City-Calendar.pdf"
         },
@@ -1374,6 +1378,7 @@
         {
           "date": "2026-11-10",
           "status": "rescheduled",
+          "movedFrom": "2026-11-11",
           "note": "The second-Wednesday voting agenda meeting is moved to Tuesday, Nov 10 at 9 a.m. because Wednesday, Nov 11 is the Veterans Day city holiday.",
           "source": "https://dallascityhall.com/government/Calendar1/2026-City-Calendar.pdf"
         },
@@ -1638,14 +1643,10 @@
             "time": "14:00",
             "dates": [
               "2026-09-15",
-              "2026-09-22",
-              "2026-10-13",
-              "2026-10-27",
-              "2026-11-17",
               "2026-12-01",
               "2026-12-15"
             ],
-            "notes": "Held the same day as every regular or special session; the city says the 2 p.m. start is typical and can vary, so check the posted agenda."
+            "notes": "Held the same day as every regular or special session; the city says the 2 p.m. start is typical and can vary, so check the posted agenda. On special-called days (Sept. 22, Oct. 13, Oct. 27 and Nov. 17) the session is the Work/Special Session listed separately, so those dates are not repeated here."
           },
           "location": "Council Work Session Room, City Hall, 215 E. McKinney St., Denton, TX 76201",
           "virtualUrl": "https://www.cityofdenton.com/242/Public-Meetings-Agendas",
@@ -2685,12 +2686,13 @@
         {
           "date": "2026-10-06",
           "status": "rescheduled",
+          "movedTo": "2026-10-07",
           "note": "Regular meeting moved from Tuesday, Oct. 6 to Wednesday, Oct. 7, 2026 at 6 p.m. because the city's National Night Out event is at City Hall on Tuesday, Oct. 6.",
           "source": "https://www.farmersbranchtx.gov/city-meetings-calendar"
         },
         {
           "date": "2026-10-07",
-          "status": "special",
+          "status": "note",
           "note": "Regular City Council meeting held on a Wednesday at 6 p.m. at City Hall (replaces the Oct. 6 date). The city calendar entry says the meeting was moved to Wednesday because of National Night Out on Tuesday.",
           "source": "https://www.farmersbranchtx.gov/city-meetings-calendar"
         }
@@ -2972,19 +2974,19 @@
         },
         {
           "date": "2026-10-15",
-          "status": "special",
+          "status": "note",
           "note": "Town Council Work Session, 6 p.m. (third Thursday).",
           "source": "https://flowermoundtx.api.civicclerk.com/v1/Events"
         },
         {
           "date": "2026-11-19",
-          "status": "special",
+          "status": "note",
           "note": "Town Council Work Session, 6 p.m. (third Thursday).",
           "source": "https://flowermoundtx.api.civicclerk.com/v1/Events"
         },
         {
           "date": "2026-12-17",
-          "status": "special",
+          "status": "note",
           "note": "Town Council Work Session, 6 p.m. (third Thursday).",
           "source": "https://flowermoundtx.api.civicclerk.com/v1/Events"
         },
@@ -3174,7 +3176,7 @@
         },
         {
           "date": "2026-11-03",
-          "status": "special",
+          "status": "note",
           "note": "Election Day: only the afternoon work session (2:00 p.m.) and executive session are scheduled; no evening meeting.",
           "source": "https://www.fortworthtexas.gov/departments/citysecretary/events/2026-City-Council-Work-Session-Meetings"
         },
@@ -3434,10 +3436,10 @@
             "time": "16:00",
             "notes": "Held the afternoon of each regular meeting. On the 2026 city calendar, first-Tuesday sessions start at 4 p.m. (Oct. 6, Nov. 3, Dec. 1) and third-Tuesday sessions at 3:30 p.m. (Sept. 15, Oct. 20, Nov. 17, Dec. 15); the Sept. 15 session is posted on OnBase for 3 p.m. Check the agenda for the exact time and room."
           },
-          "location": "George A. Purefoy Municipal Center, 6101 Frisco Square Blvd., Frisco, TX 75034 (Training Room 252, second floor, on third Tuesdays; Conference Room L120, first floor, on first Tuesdays)",
+          "location": "George A. Purefoy Municipal Center, 6101 Frisco Square Blvd., Frisco, TX 75034",
           "virtualUrl": "https://www.friscotexas.gov/943/Watch-FTVN-Live-Council-Meetings-etc",
           "openToPublicComment": false,
-          "notes": "Discussion-only sessions; no Citizen Input period is listed on work session agendas. A Special Called Budget Work Session was held Sept. 2, 2026 (it appears on the city calendar as a 5 p.m. City Council Meeting), and the council sets separate Summer and Winter Work Session dates each year.",
+          "notes": "Held in Training Room 252 (second floor) on third Tuesdays and in Conference Room L120 (first floor) on first Tuesdays. Discussion-only sessions; no Citizen Input period is listed on work session agendas. A Special Called Budget Work Session was held Sept. 2, 2026 (it appears on the city calendar as a 5 p.m. City Council Meeting), and the council sets separate Summer and Winter Work Session dates each year.",
           "source": "https://www.friscotexas.gov/common/modules/iCalendar/iCalendar.aspx?catID=14&feed=calendar"
         }
       ],
@@ -3456,7 +3458,7 @@
         },
         {
           "date": "2026-11-03",
-          "status": "special",
+          "status": "note",
           "note": "Regular meeting remains on the city calendar on Election Day (Nov. 3, 2026) at 5 p.m. in the Council Chambers, with the work session at 4 p.m. in Conference Room L120.",
           "source": "https://www.friscotexas.gov/Calendar.aspx?EID=6847"
         }
@@ -3762,6 +3764,7 @@
         {
           "date": "2026-10-05",
           "status": "rescheduled",
+          "movedFrom": "2026-10-06",
           "note": "First October meeting moved from Tuesday Oct. 6 (National Night Out) to Monday Oct. 5: Work Session 6 p.m., Regular Meeting 7 p.m.",
           "source": "https://www.garlandtx.gov/DocumentCenter/View/23091/2026-Garland-City-Council-Schedule"
         },
@@ -3774,6 +3777,7 @@
         {
           "date": "2026-11-02",
           "status": "rescheduled",
+          "movedFrom": "2026-11-03",
           "note": "First November meeting moved from Tuesday Nov. 3 (Election Day) to Monday Nov. 2: Work Session 6 p.m., Regular Meeting 7 p.m.",
           "source": "https://www.garlandtx.gov/DocumentCenter/View/23091/2026-Garland-City-Council-Schedule"
         },
@@ -3791,7 +3795,7 @@
         },
         {
           "date": "2026-11-30",
-          "status": "special",
+          "status": "note",
           "note": "Work Session held Monday Nov. 30 at 6 p.m. ahead of the Tuesday Dec. 1 Regular Meeting (shown on the adopted calendar; not yet posted on CivicClerk as of Sept. 10).",
           "source": "https://www.garlandtx.gov/DocumentCenter/View/23091/2026-Garland-City-Council-Schedule"
         }
@@ -4063,7 +4067,7 @@
       "scheduleExceptions": [
         {
           "date": "2026-09-15",
-          "status": "special",
+          "status": "note",
           "note": "Regular meeting includes the state-required public hearing on the proposed 2026 property tax rate of $0.660000 per $100 valuation (unchanged from 2025 but above the no-new-revenue rate of $0.635388).",
           "source": "https://www.gptx.org/files/sharedassets/public/v/2/departments/budget/documents/budget-and-tax-matters/2026-notice-of-public-hearing-on-tax-increase.pdf"
         },
@@ -4075,7 +4079,7 @@
         },
         {
           "date": "2026-10-29",
-          "status": "special",
+          "status": "note",
           "note": "District 1 Town Hall with Council Member Jorja Clemson, 6:00 to 8:00 p.m., Council Chambers.",
           "source": "https://www.gptx.org/Community-Calendar/City-Council-Member-Jorja-Clemson-Town-Hall-Meeting-October-2026"
         },
@@ -4209,6 +4213,7 @@
         {
           "date": "2026-10-06",
           "status": "rescheduled",
+          "time": "17:30",
           "note": "Start time of the October 6, 2026 regular City Council meeting moved to 5:30 p.m. so Council can attend neighborhood National Night Out events (approved 6-0 on the September 1, 2026 consent agenda, item 19). As of September 10, 2026 the city calendar entry for October 6 still showed 7:30 p.m., so check the posted agenda for the final time.",
           "source": "https://www.grapevinetexas.gov/ArchiveCenter/ViewFile/Item/5476"
         }
@@ -5381,6 +5386,7 @@
         {
           "date": "2026-09-14",
           "status": "rescheduled",
+          "movedFrom": "2026-09-07",
           "note": "First-Monday meeting moved from Labor Day (Sept. 7) to Sept. 14: workshop 6:15 p.m., regular session 7 p.m. A 5:30 p.m. special-called joint workshop with the Youth Action Council precedes it in the City Hall lower level.",
           "source": "https://cityoflewisville.legistar.com/Calendar.aspx"
         },
@@ -5392,7 +5398,7 @@
         },
         {
           "date": "2026-09-21",
-          "status": "special",
+          "status": "note",
           "note": "Regular 3rd-Monday meeting; Legistar posts a 6:30 p.m. start (workshop) with agenda not yet available as of Sept. 10.",
           "source": "https://cityoflewisville.legistar.com/Calendar.aspx"
         }
@@ -6162,12 +6168,16 @@
           "type": "work-session",
           "label": "Fourth-Tuesday Work Session (as needed)",
           "recurrence": {
-            "kind": "nth-weekday",
+            "kind": "custom",
             "weekday": 2,
             "ordinals": [
               4
             ],
             "time": "15:00",
+            "dates": [
+              "2026-09-22",
+              "2026-10-27"
+            ],
             "notes": "Scheduled as needed. On the 2026 schedule: Sept. 22 (work session only) and Oct. 27 (work session at 3 p.m. plus a 4 p.m. joint meeting with the McKinney Economic Development Corporation). No fourth-Tuesday sessions are listed for November or December 2026."
           },
           "location": "Council Chambers, McKinney City Hall, 401 E. Virginia St., McKinney, TX 75069",
@@ -6180,31 +6190,32 @@
       "scheduleExceptions": [
         {
           "date": "2026-09-22",
-          "status": "special",
+          "status": "note",
           "note": "Work session only at 3 p.m. (no 6 p.m. regular meeting).",
           "source": "https://www.mckinneytexas.org/DocumentCenter/View/38961/2026-Proposed-Council-Meeting-Dates---PDF"
         },
         {
           "date": "2026-10-06",
           "status": "rescheduled",
+          "movedTo": "2026-10-05",
           "note": "The first-Tuesday meeting is moved to Monday, Oct. 5, 2026 (3 p.m. work session, 6 p.m. regular meeting) because National Night Out is Tuesday, Oct. 6.",
           "source": "https://www.mckinneytexas.org/DocumentCenter/View/38961/2026-Proposed-Council-Meeting-Dates---PDF"
         },
         {
           "date": "2026-10-05",
-          "status": "special",
+          "status": "note",
           "note": "Monday meeting date: 3 p.m. work session and 6 p.m. regular meeting held in place of Tuesday, Oct. 6.",
           "source": "https://www.mckinneytexas.org/DocumentCenter/View/38961/2026-Proposed-Council-Meeting-Dates---PDF"
         },
         {
           "date": "2026-10-27",
-          "status": "special",
+          "status": "note",
           "note": "3 p.m. work session followed by a 4 p.m. joint meeting with the McKinney Economic Development Corporation; no regular meeting.",
           "source": "https://www.mckinneytexas.org/DocumentCenter/View/38961/2026-Proposed-Council-Meeting-Dates---PDF"
         },
         {
           "date": "2026-11-03",
-          "status": "special",
+          "status": "note",
           "note": "Regular meeting is still scheduled on Election Day (3 p.m. work session, 6 p.m. regular meeting).",
           "source": "https://www.mckinneytexas.org/DocumentCenter/View/38961/2026-Proposed-Council-Meeting-Dates---PDF"
         }
@@ -7012,10 +7023,10 @@
             "time": "19:00",
             "notes": "Second and fourth Mondays at 7 p.m. per the city council page. Legistar lists Sept 14 and Sept 28, 2026 at 7:00 p.m.; no council meetings after Sept 28 were posted on Legistar when checked on Sept 10, so October to December dates follow the stated rule and are not yet confirmed."
           },
-          "location": "Senator Florence Shapiro Council Chambers, Plano Municipal Center, 1520 K Avenue, Plano, TX 75074 (lower level, elevator access)",
+          "location": "Senator Florence Shapiro Council Chambers, Plano Municipal Center, 1520 K Avenue, Plano, TX 75074",
           "virtualUrl": "https://www.plano.gov/1565/Plano-TV",
           "openToPublicComment": true,
-          "notes": "Preceded by a 5 p.m. executive session (closed) and a Preliminary Open Meeting. Agendas are posted by close of business the Tuesday before the Monday meeting. Speakers must register online in advance; there is no onsite sign-up.",
+          "notes": "The council chambers are on the lower level, with elevator access. Preceded by a 5 p.m. executive session (closed) and a Preliminary Open Meeting. Agendas are posted by close of business the Tuesday before the Monday meeting. Speakers must register online in advance; there is no onsite sign-up.",
           "source": "https://www.plano.gov/city-council-agendas"
         },
         {
@@ -7271,10 +7282,10 @@
             "time": "18:00",
             "notes": "The adopted 2026 calendar lists a council meeting every Monday at 6:00 p.m., with the posted agenda determining whether a given Monday is a work session or a business meeting; the city says business meetings are on the second and fourth Mondays. No meetings on fifth Mondays, city holidays, Mondays of a holiday week, or RISD/PISD spring break."
           },
-          "location": "Council Chambers, Temporary City Hall, 2360 Campbell Creek Blvd, Suite 525, Richardson, TX 75082 (the Sept 14, 2026 agenda lists Multipurpose Room CH 157 in the same building)",
+          "location": "Council Chambers, Temporary City Hall, 2360 Campbell Creek Blvd, Suite 525, Richardson, TX 75082",
           "virtualUrl": "https://www.cor.net/government/city-council/watch-live-council-video",
           "openToPublicComment": true,
-          "notes": "Confirmed 2026 calendar dates from Sept 10 onward: Sept 14, 21, 28; Oct 5, 12, 19, 26; Nov 2, 9, 16; Dec 7, 14. Agendas and packets are posted as they become available, normally by the Friday before, and show the start time for that night. The Sept 14, 2026 meeting starts at 6:00 p.m.",
+          "notes": "Confirmed 2026 calendar dates from Sept 10 onward: Sept 14, 21, 28; Oct 5, 12, 19, 26; Nov 2, 9, 16; Dec 7, 14. Agendas and packets are posted as they become available, normally by the Friday before, and show the start time for that night. The Sept 14, 2026 meeting starts at 6:00 p.m. The Sept 14, 2026 agenda lists Multipurpose Room CH 157 in the same building.",
           "source": "https://www.cor.net/government/city-council/city-council"
         },
         {
@@ -7492,12 +7503,13 @@
         {
           "date": "2026-10-06",
           "status": "rescheduled",
+          "time": "17:00",
           "note": "Regular meeting starts at 5:00 p.m. instead of 7:00 p.m. (Oct. 6 is National Night Out in Texas).",
           "source": "https://www.rowletttx.gov/calendar.aspx?CID=25&Keywords=&startDate=10%2F01%2F2026&endDate=11%2F30%2F2026"
         },
         {
           "date": "2026-11-03",
-          "status": "special",
+          "status": "note",
           "note": "Regular meeting is held as scheduled at 7 p.m. even though it is Election Day (listed on both the city calendar and CivicClerk).",
           "source": "https://rowletttx.portal.civicclerk.com/"
         }
@@ -8128,12 +8140,14 @@
         {
           "date": "2026-10-07",
           "status": "rescheduled",
+          "movedFrom": "2026-10-06",
           "note": "City calendar places the first October council meeting on Wednesday, Oct 7 at 6:30 p.m. instead of the usual first Tuesday (Oct 6, which is National Night Out in Texas). The calendar does not state the reason.",
           "source": "https://www.thecolonytx.gov/calendar.aspx?CID=33&month=10&year=2026"
         },
         {
           "date": "2026-11-04",
           "status": "rescheduled",
+          "movedFrom": "2026-11-03",
           "note": "City calendar places the first November council meeting on Wednesday, Nov 4 at 6:30 p.m. instead of Tuesday, Nov 3 (Election Day). The calendar does not state the reason.",
           "source": "https://www.thecolonytx.gov/calendar.aspx?CID=33&month=11&year=2026"
         }

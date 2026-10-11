@@ -1,0 +1,52 @@
+/* News ( /news ).
+   Composed from .page-head, .search, a .chipbar of Chip (plus a Menu chip for the other
+   topics), day heads over .group/.lrow headline rows, EmptyState and .skel for loading,
+   busy and offline. Layout and the headline row's description line live here. */
+
+.nw-lang { margin-top: var(--s1); }
+
+.nw-grid { display: grid; gap: var(--s7); margin-top: var(--s5); }
+.nw-main { min-width: 0; }
+@media (min-width: 1024px) {
+  .nw-grid { grid-template-columns: minmax(0, 1fr) minmax(300px, 380px); align-items: start; margin-top: var(--s6); }
+  .nw-side { position: sticky; top: calc(var(--header-h) + var(--s5)); }
+}
+
+/* tools: one topic menu chip and the city search, on one line when they fit */
+.nw-tools { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3); }
+.nw-topic { flex: none; max-width: 100%; }
+.nw-topic .chip { height: 48px; max-width: 100%; }
+.nw-topic .menu { width: 300px; max-height: min(480px, calc(100dvh - 240px)); overflow-y: auto; overscroll-behavior: contain; }
+.nw-search { flex: 1 1 160px; max-width: 420px; }
+
+.nw-listbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 var(--s3); min-height: 44px; margin-top: var(--s3); }
+.nw-listbar__count { font-size: 14px; line-height: 20px; font-weight: 600; color: var(--slate); }
+.nw-listbar__when { font-size: 14px; line-height: 20px; color: var(--muted); }
+
+.nw-days .day-head:first-child { padding-top: var(--s2); }
+
+/* a headline: title, two lines of the story, source */
+.nw-row { align-items: start; padding-top: var(--s4); padding-bottom: var(--s4); }
+.nw-row > .icon { margin-top: 2px; }
+.nw-row__main { display: block; min-width: 0; }
+.nw-row__d {
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden;
+  margin-top: var(--s1); font-size: 14px; line-height: 20px; color: var(--slate); overflow-wrap: anywhere;
+}
+:lang(vi) .nw-row__d { line-height: 22px; }
+.nw-row .lrow__m { margin-top: var(--s2); color: var(--muted); }
+
+.nw-more { margin-top: var(--s5); }
+.nw-pending { margin-top: var(--s3); font-size: 14px; line-height: 20px; color: var(--slate); }
+
+/* loading */
+.nw-loading { margin-top: var(--s4); }
+.nw-loading__head { width: 96px; height: 14px; margin: var(--s2) 0 var(--s3); }
+.nw-loading__row { display: grid; gap: 10px; padding: var(--s4); }
+.nw-loading__row .skel { height: 12px; }
+.nw-loading__row .skel:nth-child(1) { width: 85%; height: 14px; }
+.nw-loading__row .skel:nth-child(2) { width: 65%; }
+.nw-loading__row .skel:nth-child(3) { width: 30%; }
+
+/* busy, offline, down */
+.nw-down { margin-top: var(--s4); display: grid; gap: var(--s6); }

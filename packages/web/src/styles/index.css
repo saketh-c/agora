@@ -1,0 +1,9 @@
+/* Shared styles, in cascade order. Imported once from main.jsx.
+   Each page imports its own file from ./pages/ (for example
+   `import '../styles/pages/home.css';` at the top of pages/Home.jsx). */
+@import './tokens.css';
+@import './base.css';
+@import './components.css';
+@import './shell.css';
+@import './charts.css';
+@import './map.css';

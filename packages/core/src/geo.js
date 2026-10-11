@@ -52,15 +52,31 @@ export function cardinal(from, to) {
   return dirs[Math.round(bearing / 45) % 8];
 }
 
-/** Find a city by id, or by a case-insensitive name match ("fort worth", "Fort Worth", "fw"). */
+/** "North Richland Hills" -> "nrh". */
+function initialsOf(name) {
+  return String(name || '')
+    .toLowerCase()
+    .split(/[\s-]+/)
+    .filter(Boolean)
+    .map((w) => w[0])
+    .join('');
+}
+
+/**
+ * Find a city by id, or by a case-insensitive name: exact, then prefix ("dal"), then the
+ * initials of a multi-word name ("fw", "nrh"), then any substring. A blank query finds nothing.
+ */
 export function findCity(cities, query) {
-  if (!query) return null;
-  const q = String(query).trim().toLowerCase();
+  const q = String(query ?? '')
+    .trim()
+    .toLowerCase();
+  if (!q) return null;
   const slugQ = q.replace(/[^a-z0-9]+/g, '-');
   return (
     cities.find((c) => c.cityId === slugQ) ||
     cities.find((c) => c.name.toLowerCase() === q) ||
     cities.find((c) => c.name.toLowerCase().startsWith(q)) ||
+    (/^[a-z]{2,4}$/.test(q) && cities.find((c) => initialsOf(c.name) === q)) ||
     cities.find((c) => c.name.toLowerCase().includes(q)) ||
     null
   );

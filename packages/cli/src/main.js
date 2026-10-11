@@ -1,19 +1,14 @@
-import { spawn } from 'node:child_process';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { readFileSync } from 'node:fs';
 import {
   BRAND,
+  LOCALES,
   topicList,
   getTopic,
+  isTopicId,
   todayStr,
-  upcomingMeetings,
-  expandCityMeetings,
   addDays,
-  nextMeetingFor,
-  buildPlan,
-  matchYouthPrograms,
+  isDateStr,
   computeStats,
-  findCity,
   cityPoint,
   formatDate,
   formatTime,
@@ -27,419 +22,715 @@ import {
   buildComment,
   estimateSpeakingSeconds,
   timeOfDayFor,
+  matchYouthPrograms,
   setLocale,
   isLocale,
-  localizeCities,
   t,
-  tList,
+  tn,
 } from '@agora/core';
-import { loadCities, loadNews, loadTranslations, REPO_ROOT } from '@agora/core/node';
-import { fetchNews } from '@agora/server/news';
-import { geocode } from '@agora/server/geocode';
-import { explainAgendaItem, aiAvailable } from '@agora/server/ai';
-import { c, heading, label, bullet, table, bar, wrapText } from './ui.js';
+import { loadNews } from '@agora/core/node';
+import { parseArgs, UsageError, GLOBAL_FLAGS, textFlag, dateFlag, intFlag, numberFlag, langCode, suggest } from './args.js';
+import { c, heading, labelBlock, bullet, table, bar, wrapText, wrapParagraphs, safe, padVisible, visibleLength, colorEnabled, setColorEnabled, outputWidth } from './ui.js';
 import { loadPrefs, PREFS_PATH } from './prefs.js';
-import { renderAsciiMap } from './asciimap.js';
+import { loadData, engine, splitAgenda, calendarGap, remoteState, matchCity } from './data.js';
+import { renderAsciiMap, mapLegend } from './asciimap.js';
 import { runWizard } from './wizard.js';
+import { renderNews, newsOffline } from './news.js';
+import { serve } from './serve.js';
 
-const here = path.dirname(fileURLToPath(import.meta.url));
+export { parseArgs };
+
 const CMD = BRAND.cliCommand;
+const WIDTH = 76;
 
-/** Flags that never take a value, so `--evening Plano` leaves "Plano" as a positional. */
-const BOOLEAN_FLAGS = new Set(['evening', 'daytime', 'weekends', 'speak', 'json', 'all', 'help', 'version']);
+/**
+ * Every command with its help group, the options it takes besides the global ones, whether
+ * it reads positional words, and the usage hint shown by `agora <command> --help`. Help,
+ * option checks and dispatch all read this list, so they cannot drift apart.
+ */
+const COMMANDS = [
+  { name: 'setup', group: 'start', flags: [] },
+  { name: 'match', group: 'start', flags: ['interests', 'city', 'near', 'evening', 'daytime', 'weekends', 'speak', 'miles', 'days'], hint: '[--interests housing,transit] [--city Plano] [--near "75024"] [--evening] [--daytime] [--weekends] [--speak] [--miles 10] [--days 45]' },
+  { name: 'city', group: 'start', flags: ['city'], positional: true, hint: '<name>' },
+  { name: 'speak', group: 'start', flags: ['city'], positional: true, hint: '<name>' },
+  { name: 'comment', group: 'start', flags: ['name', 'school', 'city', 'topic', 'item', 'position', 'story', 'ask'], hint: '--name "Ana" --school "Plano East" --city Plano --topic parks-recreation [--item "..."] [--position support|oppose|concerned|ask] [--story "..."] --ask "..."' },
+  { name: 'cities', group: 'browse', flags: ['county'], hint: '[--county Collin]' },
+  { name: 'meetings', group: 'browse', flags: ['city', 'days', 'evening', 'speak', 'topic', 'all'], positional: true, hint: '[city] [--days 30] [--evening] [--speak] [--topic housing] [--all]' },
+  { name: 'agenda', group: 'browse', flags: ['city', 'topic', 'recent'], positional: true, hint: '[city] [--topic housing] [--recent]' },
+  { name: 'youth', group: 'browse', flags: ['city'], positional: true, hint: '[city]' },
+  { name: 'news', group: 'browse', flags: ['topic', 'city', 'limit'], hint: '[--topic transit] [--city Dallas] [--limit 15]' },
+  { name: 'map', group: 'browse', flags: ['near'], hint: '[--near "Richardson"]' },
+  { name: 'learn', group: 'learn', flags: [], positional: true, hint: '[glossary|checklist|tips]' },
+  { name: 'topics', group: 'learn', flags: [] },
+  { name: 'explain', group: 'learn', flags: ['title', 'summary', 'city'], positional: true, hint: '"Rezoning case Z-2026-14" [--summary "..."] [--city plano]' },
+  { name: 'stats', group: 'learn', flags: ['days'], hint: '[--days 30]' },
+  { name: 'prefs', group: 'more', flags: [] },
+  { name: 'demo', group: 'more', flags: [] },
+  { name: 'serve', group: 'more', flags: ['port'], hint: '[--port 8787]' },
+  { name: 'help', group: 'more', flags: [], positional: true, hint: '[command]' },
+];
 
-/** Parse `cmd --flag value --bool positional` into {cmd, flags, args}. */
-export function parseArgs(argv) {
-  const flags = {};
-  const args = [];
-  for (let i = 0; i < argv.length; i += 1) {
-    const a = argv[i];
-    if (a.startsWith('--')) {
-      const eq = a.indexOf('=');
-      const k = eq === -1 ? a.slice(2) : a.slice(2, eq);
-      const inline = eq === -1 ? undefined : a.slice(eq + 1);
-      const next = argv[i + 1];
-      if (inline !== undefined) flags[k] = inline;
-      else if (BOOLEAN_FLAGS.has(k)) flags[k] = true;
-      else if (next !== undefined && !next.startsWith('--')) {
-        flags[k] = next;
-        i += 1;
-      } else flags[k] = true;
-    } else args.push(a);
+export const COMMAND_NAMES = COMMANDS.map((x) => x.name);
+const GROUPS = ['start', 'browse', 'learn', 'more'];
+const LEARN_SECTIONS = ['glossary', 'checklist', 'tips'];
+const POSITIONS = ['support', 'oppose', 'concerned', 'ask'];
+const STATUS_KEYS = new Set(['rescheduled', 'special', 'cancelled']);
+
+function readVersion() {
+  try {
+    return JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version;
+  } catch {
+    return '0.0.0';
   }
-  const cmd = args.shift() || 'help';
-  return { cmd, flags, args };
 }
 
-/** Flags used as text: a bare `--name` (no value) becomes undefined instead of `true`. */
-const text = (v) => (typeof v === 'string' ? v : undefined);
-
-const COMMAND_NAMES = ['help', 'setup', 'prefs', 'match', 'meetings', 'cities', 'city', 'speak', 'agenda', 'youth', 'map', 'stats', 'news', 'explain', 'comment', 'learn', 'topics', 'serve', 'demo'];
-
+/**
+ * Run one command. Returns the exit code instead of exiting, so output piped to another
+ * program can finish draining (see bin/agora.js).
+ * @param {string[]} argv arguments after the program name
+ * @param {{log: Function, error: Function}} io where output and errors go
+ */
 export async function run(argv, io = console) {
   const { cmd, flags, args } = parseArgs(argv);
-  const json = flags.json === true || flags.json === 'true';
-  const today = flags.today && /^\d{4}-\d{2}-\d{2}$/.test(flags.today) ? flags.today : todayStr();
+  const colorsBefore = colorEnabled();
+  if (flags['no-color']) setColorEnabled(false);
+  try {
+    return await main(cmd, flags, args, io);
+  } catch (e) {
+    if (e instanceof UsageError) {
+      io.error(c.red(e.message));
+      return e.exitCode;
+    }
+    throw e;
+  } finally {
+    setColorEnabled(colorsBefore);
+  }
+}
+
+async function main(cmd, flags, args, io) {
   const out = (s) => io.log(s);
-
   const saved = loadPrefs();
-  const lang = [text(flags.lang), process.env.AGORA_LANG, saved.prefs.lang].find(isLocale) || 'en';
-  setLocale(lang);
+  const lang = pickLanguage(flags, saved.prefs, io);
 
-  if (cmd === 'help' || flags.help) {
-    out(help());
+  if (flags.version) {
+    out(`${CMD} ${readVersion()}`);
     return 0;
   }
-  if (cmd === 'serve') return serve(flags);
+  if (cmd === 'help') {
+    out(flags.json === true ? JSON.stringify(helpData(), null, 2) : help(args[0]));
+    return 0;
+  }
+  const command = COMMANDS.find((x) => x.name === cmd);
+  if (!command) return unknownCommand(cmd, lang, io);
+  if (flags.help) {
+    out(help(cmd));
+    return 0;
+  }
+  warnAboutInput(command, flags, args, io);
 
-  let cities;
+  const pretend = dateFlag(flags, 'today');
+  const today = pretend || todayStr();
+  // With a real date, meetings that already ended today drop out; a pretend date has no time.
+  const now = pretend ? undefined : new Date().toISOString();
+  if (cmd === 'serve') return serve(flags, io);
+
+  let data;
   try {
-    cities = localizeCities(loadCities(), loadTranslations(lang));
+    data = loadData(lang);
   } catch (e) {
     io.error(c.red(e.message));
     return 1;
   }
+  const ctx = { ...engine(data, { now }), today, lang, json: flags.json === true, flags, args, io, out, saved };
+  return RUNNERS[cmd](ctx);
+}
 
-  const emit = (data, render) => {
-    if (json) out(JSON.stringify(data, null, 2));
-    else out(render());
-  };
-
-  switch (cmd) {
-    case 'topics': {
-      const topics = topicList();
-      emit({ topics }, () => [heading(t('cli.topicsHeading')), table(topics.map((x) => ({ id: c.cyan(x.id), label: x.label, why: x.youthAngle })), [{ key: 'id', title: t('cli.colId') }, { key: 'label', title: t('cli.colTopic') }, { key: 'why', title: t('cli.colWhy'), width: 60 }])].join('\n'));
-      return 0;
-    }
-
-    case 'cities': {
-      let list = cities;
-      if (text(flags.county)) list = list.filter((x) => x.county.toLowerCase() === flags.county.toLowerCase());
-      const rows = list.map((city) => {
-        const next = nextMeetingFor(city, today);
-        return {
-          name: c.bold(city.name),
-          county: city.county,
-          when: next ? `${formatDate(next.date)} ${formatTime(next.time)}` : c.dim(t('cli.noneFound')),
-          rel: next ? relativeDays(next.date, today) : '',
-          speak: city.publicComment && city.publicComment.virtualAllowed ? t('cli.inPersonOrRemote') : t('cli.inPerson'),
-          youth: (city.youthPrograms || []).length ? c.green(t('cli.yes')) : c.dim(t('cli.no')),
-          id: c.gray(city.cityId),
-        };
-      });
-      emit({ cities: list.map((x) => ({ cityId: x.cityId, name: x.name, county: x.county, nextMeeting: nextMeetingFor(x, today) })) }, () =>
-        [
-          heading(t('cli.citiesHeading', { app: BRAND.name, n: list.length, region: BRAND.region })),
-          table(rows, [{ key: 'name', title: t('cli.colCity') }, { key: 'county', title: t('cli.colCounty') }, { key: 'when', title: t('cli.colNext') }, { key: 'rel', title: '' }, { key: 'speak', title: t('cli.colPublicComment') }, { key: 'youth', title: t('cli.colYouth') }, { key: 'id', title: t('cli.colId') }]),
-          '',
-          c.dim(t('cli.tip', { cmd: CMD })),
-        ].join('\n'),
-      );
-      return 0;
-    }
-
-    case 'city': {
-      const city = requireCity(cities, args.join(' ') || text(flags.city), io);
-      if (!city) return 1;
-      const upcoming = expandCityMeetings(city, today, addDays(today, 60));
-      emit({ city, upcoming }, () => renderCity(city, upcoming, today));
-      return 0;
-    }
-
-    case 'speak': {
-      const city = requireCity(cities, args.join(' ') || text(flags.city), io);
-      if (!city) return 1;
-      const next = nextMeetingFor(city, today, { publicCommentOnly: true });
-      emit({ cityId: city.cityId, publicComment: city.publicComment, nextSpeakableMeeting: next }, () => renderSpeak(city, next, today));
-      return 0;
-    }
-
-    case 'meetings': {
-      const days = Number(flags.days) || 30;
-      let list = upcomingMeetings(cities, { from: today, days, includeCancelled: !!flags.all });
-      if (text(flags.city)) {
-        const city = requireCity(cities, flags.city, io);
-        if (!city) return 1;
-        list = list.filter((m) => m.cityId === city.cityId);
-      }
-      if (flags.evening) list = list.filter((m) => m.isEvening);
-      if (flags.speak) list = list.filter((m) => m.openToPublicComment);
-      if (text(flags.topic)) list = list.filter((m) => m.agendaItems.some((a) => a.topics.includes(flags.topic)));
-      emit({ from: today, days, meetings: list }, () => [heading(t('cli.meetingsHeading', { days, n: list.length })), meetingsTable(list, today)].join('\n'));
-      return 0;
-    }
-
-    case 'agenda': {
-      let items = [];
-      for (const city of cities) for (const a of city.agendaItems || []) items.push({ ...a, cityId: city.cityId, cityName: city.name });
-      if (text(flags.city)) {
-        const city = requireCity(cities, flags.city, io);
-        if (!city) return 1;
-        items = items.filter((a) => a.cityId === city.cityId);
-      }
-      if (text(flags.topic)) items = items.filter((a) => a.topics.includes(flags.topic));
-      items = items.filter((a) => !a.meetingDate || a.meetingDate >= today).sort((a, b) => String(a.meetingDate || '9').localeCompare(String(b.meetingDate || '9')));
-      emit({ items }, () =>
-        [heading(t('cli.agendaHeading', { n: items.length })), ...items.slice(0, 40).map((a) => `${c.bold(a.cityName)} ${c.gray(a.meetingDate ? formatDate(a.meetingDate) : t('cli.dateTbd'))}  ${a.topics.map((id) => c.cyan(getTopic(id).short)).join(', ')}\n${wrapText(a.title, 78, 2)}${a.summary ? `\n${c.dim(wrapText(a.summary, 78, 2))}` : ''}${a.url ? `\n  ${c.gray(a.url)}` : ''}\n`)].join('\n'),
-      );
-      return 0;
-    }
-
-    case 'youth': {
-      let programs = matchYouthPrograms(cities, saved.prefs);
-      if (text(flags.city)) {
-        const city = requireCity(cities, flags.city, io);
-        if (!city) return 1;
-        programs = programs.filter((p) => p.cityId === city.cityId);
-      }
-      emit({ programs }, () =>
-        [heading(t('cli.youthHeading', { n: programs.length })), ...programs.map((p) => `${c.bold(p.cityName)}: ${p.name}${p.ages ? c.gray(` (${p.ages})`) : ''}${p.description ? `\n${wrapText(p.description, 78, 2)}` : ''}${p.applyWindow ? `\n  ${c.yellow(t('cli.applyLabel'))} ${p.applyWindow}` : ''}${p.url ? `\n  ${c.gray(p.url)}` : ''}\n`)].join('\n'),
-      );
-      return 0;
-    }
-
-    case 'prefs': {
-      emit({ prefs: saved.prefs, saved: saved.saved, path: PREFS_PATH }, () => [heading(t('cli.prefsHeading')), saved.saved ? c.dim(PREFS_PATH) : c.yellow(t('cli.nothingSaved', { cmd: CMD })), renderPrefs(saved.prefs, cities)].join('\n'));
-      return 0;
-    }
-
-    case 'setup': {
-      await runWizard(cities, saved.prefs, lang);
-      return 0;
-    }
-
-    case 'match': {
-      const prefs = await prefsFromFlags(flags, cities, saved.prefs, io);
-      if (!prefs) return 1;
-      const plan = buildPlan(cities, prefs, { today, days: Number(flags.days) || 45 });
-      emit(plan, () => renderPlan(plan, today));
-      return 0;
-    }
-
-    case 'map': {
-      let you = null;
-      if (text(flags.near)) you = await resolveLocation(flags.near, cities, io);
-      else you = saved.prefs.location;
-      emit({ note: t('cli.mapUseWithoutJson') }, () => [heading(t('cli.mapHeading', { region: BRAND.region })), renderAsciiMap(cities, { today, you })].join('\n'));
-      return 0;
-    }
-
-    case 'stats': {
-      const s = computeStats(cities, { today, days: Number(flags.days) || 30 });
-      emit(s, () => renderStats(s));
-      return 0;
-    }
-
-    case 'news': {
-      const news = loadNews();
-      let result;
-      try {
-        result = await fetchNews(news, { topic: text(flags.topic), city: text(flags.city), limit: Number(flags.limit) || 15 });
-      } catch (e) {
-        io.error(c.red(t('cli.couldNotFetchNews', { error: e.message })));
-        return 1;
-      }
-      emit(result, () =>
-        [
-          heading(t('cli.newsHeading', { topic: text(flags.topic) ? t('cli.newsOn', { topic: getTopic(flags.topic).short }) : '', city: text(flags.city) ? t('cli.newsMentioning', { city: flags.city }) : '' })),
-          c.dim(t('cli.feedsResponded', { n: result.fetchedFeeds, total: result.totalFeeds })),
-          ...result.items.map((i) => `${c.bold(i.title)}\n  ${c.gray(`${i.sourceName}${i.publishedAt ? ` (${i.publishedAt.slice(0, 10)})` : ''}`)}  ${i.topics.map((id) => c.cyan(getTopic(id).short)).join(', ')}\n  ${c.gray(i.link)}\n`),
-          result.items.length ? '' : c.yellow(t('cli.noStories')),
-          result.topicLinks.length ? heading(t('cli.whereToRead')) : '',
-          ...result.topicLinks.slice(0, 12).map((l) => bullet(`${l.label} ${c.gray(`(${l.sourceName})`)}\n    ${c.gray(l.url)}`)),
-        ].join('\n'),
-      );
-      return 0;
-    }
-
-    case 'explain': {
-      const title = args.join(' ') || text(flags.title);
-      if (!title) {
-        io.error(c.red(t('cli.explainUsage', { cmd: CMD })));
-        return 1;
-      }
-      const city = text(flags.city) ? findCity(cities, flags.city) : null;
-      let result;
-      try {
-        result = await explainAgendaItem({ title, summary: text(flags.summary), city });
-      } catch (e) {
-        io.error(c.red(t('cli.couldNotExplain', { error: e.message })));
-        return 1;
-      }
-      emit(result, () => [heading(title), c.dim(result.source === 'claude' ? t('cli.explainedBy', { model: result.model }) : t('cli.templateExplanation', { reason: result.fallbackReason ? t('cli.aiUnavailable', { reason: result.fallbackReason }) : t('cli.setKeyHint') })), '', wrapText(result.text.replace(/\n\n/g, '\n \n'), 78)].join('\n'));
-      return 0;
-    }
-
-    case 'comment': {
-      const city = text(flags.city) ? findCity(cities, flags.city) : null;
-      const firstTime = city && city.meetings && city.meetings[0] ? city.meetings[0].recurrence.time : '18:00';
-      const input = { name: text(flags.name), school: text(flags.school), cityName: city ? city.name : text(flags.city), topicId: text(flags.topic), itemTitle: text(flags.item), position: text(flags.position), story: text(flags.story), ask: text(flags.ask), timeOfDay: timeOfDayFor(firstTime) };
-      const draft = buildComment(input);
-      const seconds = estimateSpeakingSeconds(draft);
-      emit({ draft, seconds }, () => [heading(t('cli.draftHeading')), draft, '', c.dim(t('cli.spokenSeconds', { n: seconds })), city && city.publicComment ? c.dim(t('cli.howToSignUp', { city: city.name, how: city.publicComment.howToRegister })) : ''].join('\n'));
-      return 0;
-    }
-
-    case 'learn': {
-      const which = args[0] || 'all';
-      const parts = [];
-      if (which === 'all' || which === 'glossary') parts.push(heading(t('cli.glossaryHeading')), ...glossary().map((g) => `${c.bold(g.term)}\n${wrapText(g.definition, 78, 2)}`));
-      if (which === 'all' || which === 'checklist') parts.push(heading(t('cli.checklistHeading')), ...checklist().map((s, i) => `${c.cyan(String(i + 1).padStart(2))}. ${s}`));
-      if (which === 'all' || which === 'tips') parts.push(heading(t('cli.tipsHeading')), ...speakingTips().map((s) => bullet(s)));
-      emit({ glossary: glossary(), checklist: checklist(), tips: speakingTips() }, () => parts.join('\n'));
-      return 0;
-    }
-
-    case 'demo': {
-      await demo(cities, today, lang, out);
-      return 0;
-    }
-
-    default:
-      io.error(c.red(t('cli.unknownCommand', { cmd })));
-      out(help());
-      return 1;
+/**
+ * --lang, then AGORA_LANG, then the saved language, then English. Codes are matched
+ * without case ("ES" works). An unsupported --lang is reported instead of silently
+ * switching to English.
+ */
+function pickLanguage(flags, prefs, io) {
+  const fallback = langCode(process.env.AGORA_LANG) || (isLocale(prefs.lang) ? prefs.lang : 'en');
+  setLocale(fallback);
+  if (flags.lang === undefined || flags.lang === false) return fallback;
+  const list = LOCALES.map((l) => l.code).join(', ');
+  if (flags.lang === true) {
+    io.error(c.yellow(t('cli.errors.badLang', { lang: '', list })));
+    return fallback;
   }
+  const code = langCode(flags.lang);
+  if (code) {
+    setLocale(code);
+    return code;
+  }
+  io.error(c.yellow(t('cli.errors.badLang', { lang: String(flags.lang), list })));
+  return fallback;
 }
 
-function help() {
-  const lines = [heading(`${BRAND.name}: ${BRAND.tagline}`), wrapText(BRAND.shortDescription, 78), '', c.bold(t('cli.usage')), `  ${CMD} <command> [options]`, '', c.bold(t('cli.commandsHeading'))];
-  for (const name of COMMAND_NAMES) lines.push(`  ${c.cyan(name.padEnd(9))} ${t(`cli.commands.${name}`, { cmd: CMD })}`);
-  lines.push('', c.bold(t('cli.globalOptions')), `  ${c.cyan('--json')}       ${t('cli.jsonOpt')}`, `  ${c.cyan('--today')}      ${t('cli.todayOpt')}`, `  ${c.cyan('--lang')}       ${t('cli.langOpt')}`, `  ${c.cyan('--no-color')}   ${t('cli.noColorOpt')}`, '', c.dim(BRAND.nonpartisanNote));
-  return lines.join('\n');
+/** Options a command does not use, and words it does not read, are reported instead of silently ignored. */
+function warnAboutInput(command, flags, args, io) {
+  const known = [...GLOBAL_FLAGS, ...command.flags];
+  for (const k of Object.keys(flags)) {
+    if (known.includes(k)) continue;
+    const near = suggest(k, known);
+    const params = { flag: `--${k}`, near: `--${near}`, cmd: `${CMD} ${command.name}`, help: `${CMD} ${command.name} --help` };
+    io.error(c.yellow(near ? t('cli.errors.unknownFlagNear', params) : t('cli.errors.unknownFlag', params)));
+  }
+  if (!command.positional && args.length) io.error(c.yellow(t('cli.errors.extraWords', { words: args.join(' '), cmd: `${CMD} ${command.name}`, help: `${CMD} ${command.name} --help` })));
 }
 
-function requireCity(cities, query, io) {
+function unknownCommand(cmd, lang, io) {
+  let near = suggest(cmd, COMMAND_NAMES);
+  if (!near) {
+    try {
+      const { city } = matchCity(loadData(lang).cities, cmd);
+      if (city) near = `city ${quoteArg(city.name)}`;
+    } catch {
+      // No city data: plain message below.
+    }
+  }
+  io.error(c.red(t('cli.unknownCommand', { cmd })));
+  if (near) io.error(t('cli.didYouMean', { suggestion: `${CMD} ${near}` }));
+  io.error(t('cli.seeHelp', { cmd: CMD }));
+  return 1;
+}
+
+/**
+ * What to print when a command fails in a way nobody planned for: one line and a hint, or
+ * the full stack when `debug` is set (AGORA_DEBUG or DEBUG in the environment). Expected
+ * problems such as bad input never get here; they come back from run() as exit codes.
+ * @returns {string[]} lines for stderr
+ */
+export function crashReport(err, { debug = false } = {}) {
+  if (debug && err && err.stack) return [String(err.stack)];
+  return [`${CMD}: ${err && err.message ? err.message : String(err)}`, t('cli.errors.debugHint')];
+}
+
+function emit(ctx, data, render) {
+  ctx.out(ctx.json ? JSON.stringify(data, null, 2) : render());
+}
+
+/** Quote a word for a shell when it needs it, so commands shown on screen can be pasted. */
+function quoteArg(a) {
+  const s = String(a);
+  return /^[\w@%+=:,./-]+$/.test(s) ? s : `"${s.replace(/(["\\$`])/g, '\\$1')}"`;
+}
+
+function requireCity(ctx, query) {
   if (!query) {
-    io.error(c.red(t('cli.whichCity', { cmd: CMD })));
+    ctx.io.error(c.red(t('cli.whichCity', { cmd: CMD })));
     return null;
   }
-  const city = findCity(cities, query);
-  if (!city) io.error(c.red(t('cli.noCity', { query, cmd: CMD })));
-  return city;
+  const { city, candidates } = matchCity(ctx.cities, query);
+  if (city) return city;
+  if (candidates.length > 1) ctx.io.error(c.red(t('cli.cityWhich', { query, list: candidates.map((x) => x.name).join(', ') })));
+  else if (candidates.length === 1) ctx.io.error(c.red(t('cli.cityDidYouMean', { query, name: candidates[0].name })));
+  else ctx.io.error(c.red(t('cli.noCity', { query, cmd: CMD })));
+  return null;
 }
 
-async function resolveLocation(query, cities, io) {
-  const city = findCity(cities, query);
-  if (city && city.name.toLowerCase() === String(query).toLowerCase()) return cityPoint(city);
-  try {
-    const g = await geocode(query, cities);
-    if (g) return { lat: g.lat, lng: g.lng, label: g.label };
-    io.error(c.yellow(t('cli.couldNotPlace', { query })));
-  } catch (e) {
-    io.error(c.yellow(t('cli.geocoderUnreachable', { error: e.message })));
-  }
-  return city ? cityPoint(city) : null;
+/** A city named by --city or by the words after the command ("agora meetings Fort Worth"). */
+function cityFromInput(ctx) {
+  return textFlag(ctx.flags, 'city') || ctx.args.join(' ').trim() || undefined;
 }
 
-async function prefsFromFlags(flags, cities, savedPrefs, io) {
-  const p = { ...savedPrefs };
-  if (text(flags.interests)) p.interests = flags.interests.split(',').map((s) => s.trim()).filter(Boolean);
-  if (text(flags.city)) {
-    const city = requireCity(cities, flags.city, io);
-    if (!city) return null;
-    p.homeCityId = city.cityId;
-    if (!text(flags.near) && !savedPrefs.location) p.location = cityPoint(city);
+/** Topic ids, validated: a typo is an error with a suggestion, not a filter that matches nothing. */
+function topicIds(list) {
+  const ids = String(list)
+    .split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+  for (const id of ids) {
+    if (isTopicId(id)) continue;
+    const near = suggest(id, topicList().map((x) => x.id));
+    throw new UsageError(near ? t('cli.errors.unknownTopicNear', { topic: id, near, cmd: CMD }) : t('cli.errors.unknownTopic', { topic: id, cmd: CMD }));
   }
-  if (text(flags.near)) {
-    const loc = await resolveLocation(flags.near, cities, io);
-    if (loc) {
-      p.location = { lat: loc.lat, lng: loc.lng };
-      p.locationLabel = loc.label || flags.near;
-    }
-  }
-  if (flags.evening || flags.daytime || flags.weekends) p.availability = { evenings: !!flags.evening, daytime: !!flags.daytime, weekends: !!flags.weekends };
-  if (flags.speak) p.canSpeakOnly = true;
-  if (flags.miles) p.maxMiles = Number(flags.miles);
-  return p;
+  return [...new Set(ids)];
 }
 
-function meetingsTable(list, today) {
-  return table(
-    list.map((m) => ({
-      when: `${formatDate(m.date)} ${formatTime(m.time)}`,
-      rel: c.gray(relativeDays(m.date, today)),
-      city: c.bold(m.cityName),
-      what: m.label,
-      flags: [m.isEvening ? c.green(t('cli.evening')) : c.dim(t('cli.daytime')), m.openToPublicComment ? t('cli.speak') : c.dim(t('cli.watchOnly')), m.status !== 'scheduled' ? c.yellow(m.status) : '', m.agendaItems.length ? c.cyan(t('cli.itemsTag', { n: m.agendaItems.length })) : ''].filter(Boolean).join(' '),
-    })),
-    [{ key: 'when', title: t('cli.colWhen') }, { key: 'rel', title: '' }, { key: 'city', title: t('cli.colCity') }, { key: 'what', title: t('cli.colMeeting'), width: 34 }, { key: 'flags', title: t('cli.colNotes') }],
-  );
+function topicFlag(flags) {
+  const v = textFlag(flags, 'topic');
+  if (v === undefined) return undefined;
+  const ids = topicIds(v);
+  if (ids.length !== 1) throw new UsageError(t('cli.errors.oneTopic', { cmd: CMD }));
+  return ids[0];
 }
 
-function renderCity(city, upcoming, today) {
-  const lines = [heading(t('cli.cityHeading', { city: city.name })), label(t('cli.county'), city.county), label(t('cli.cityHall'), `${city.cityHall.name ? `${city.cityHall.name}, ` : ''}${city.cityHall.address}`), label(t('cli.website'), c.gray(city.website))];
-  if (city.council && (city.council.structure || city.council.size)) lines.push(label(t('cli.council'), `${city.council.size ? t('cli.membersCount', { n: city.council.size }) : ''}${city.council.structure || ''}${city.council.mayorName ? t('cli.mayor', { name: city.council.mayorName }) : ''}`));
-  if (city.council && city.council.findMyDistrictUrl) lines.push(label(t('cli.yourDistrict'), c.gray(city.council.findMyDistrictUrl)));
-  lines.push('', c.bold(t('cli.schedule')));
-  for (const m of city.meetings) lines.push(bullet(`${m.label}: ${describeRecurrence(m.recurrence)}${m.openToPublicComment === false ? c.dim(t('cli.noPublicComment')) : ''}${m.location ? `\n    ${c.gray(m.location)}` : ''}`));
-  if (city.agendaPortal && city.agendaPortal.url) lines.push(label(t('cli.agendasLabel'), c.gray(city.agendaPortal.url)));
-  if (city.liveStream && city.liveStream.url) lines.push(label(t('cli.watchLive'), c.gray(city.liveStream.url)));
-  lines.push('', c.bold(t('cli.next60')), meetingsTable(upcoming.filter((m) => m.status !== 'cancelled'), today));
-  const cancelled = upcoming.filter((m) => m.status === 'cancelled');
-  if (cancelled.length) lines.push(c.dim(t('cli.cancelledList', { list: cancelled.map((m) => `${formatDate(m.date)}${m.note ? ` (${m.note})` : ''}`).join(', ') })));
-  lines.push('', c.bold(t('cli.speakingUp')), wrapText(city.publicComment.summary, 78, 2));
-  if ((city.youthPrograms || []).length) {
-    lines.push('', c.bold(t('cli.youthProgramsHeading')));
-    for (const p of city.youthPrograms) lines.push(bullet(`${p.name}${p.ages ? c.gray(` (${p.ages})`) : ''}${p.url ? `\n    ${c.gray(p.url)}` : ''}`));
+/** Topic tags as one bracketed label list, so they never read as part of a title. */
+function topicTags(ids) {
+  const labels = (ids || []).filter((id) => id !== 'other').map((id) => getTopic(id).label);
+  return labels.length ? c.cyan(`[${labels.join(', ')}]`) : '';
+}
+
+function statusText(status) {
+  return STATUS_KEYS.has(status) ? t(`cli.status.${status}`) : status;
+}
+
+/**
+ * What to say when a city has no meeting in a window of `days` days: that its published
+ * calendar ends first (so the next one is simply not posted yet), or, for the 90-day
+ * lookahead, that there is none; for other windows, the table's plain empty message.
+ */
+function noMeetingText(city, today, days = 90) {
+  const end = calendarGap(city, today, days);
+  if (end) return t('cli.calendarEnds', { date: formatDate(end) });
+  return days === 90 ? t('cli.noneIn90') : undefined;
+}
+
+/** A gray detail line under a bullet (an address), wrapped and indented to sit under the bullet text. */
+function detail(text, indent = 4) {
+  return c.gray(wrapText(text, WIDTH - indent, indent));
+}
+
+/** Whether you can speak, any schedule change, and how many agenda items: "you can speak, moved". */
+function meetingNotes(m) {
+  return [
+    m.openToPublicComment ? c.green(t('cli.canSpeak')) : c.dim(t('cli.watchOnly')),
+    m.status !== 'scheduled' ? c.yellow(statusText(m.status)) : '',
+    (m.agendaItems || []).length ? c.cyan(tn('common.agendaItems', m.agendaItems.length)) : '',
+  ]
+    .filter(Boolean)
+    .join(', ');
+}
+
+/**
+ * Meetings as a table, or, when the table is wider than the terminal, as two lines per
+ * meeting (when and where, then what). In Spanish and Vietnamese a one-line row cannot fit
+ * 80 columns without cutting every meeting name down to a word, so the list keeps the names
+ * whole. Output sent to a pipe or file always gets the table.
+ */
+function meetingsTable(list, today, { showCity = true, empty } = {}) {
+  const rows = list.map((m) => ({
+    when: `${formatDate(m.date)} ${formatTime(m.time)}`,
+    rel: c.gray(relativeDays(m.date, today)),
+    city: c.bold(m.cityName),
+    what: m.label,
+    notes: meetingNotes(m),
+  }));
+  const columns = [
+    { key: 'when', title: t('cli.colWhen') },
+    { key: 'rel', title: '', optional: true },
+    showCity && { key: 'city', title: t('cli.colCity') },
+    { key: 'what', title: t('cli.colMeeting'), width: 34, flex: true },
+    { key: 'notes', title: t('cli.colNotes'), flex: true },
+  ].filter(Boolean);
+  const room = outputWidth();
+  const widest = (text) => Math.max(...text.split('\n').map(visibleLength));
+  // The table is used when it fits with whole cells, after dropping the optional columns.
+  if (!list.length || widest(table(rows, columns.filter((col) => !col.optional), { maxWidth: Infinity })) <= room) return table(rows, columns, { empty, maxWidth: room });
+  const lines = [];
+  for (const m of list) {
+    lines.push(`  ${c.bold(`${formatDate(m.date)} ${formatTime(m.time)}`)} ${c.gray(`(${relativeDays(m.date, today).toLowerCase()})`)}${showCity ? `  ${c.bold(m.cityName)}` : ''}`);
+    lines.push(wrapText(`${m.label} (${meetingNotes(m)})`, Math.min(WIDTH, room) - 4, 4));
   }
-  if ((city.agendaItems || []).length) {
-    lines.push('', c.bold(t('cli.onTheAgenda', { n: city.agendaItems.length })));
-    for (const a of city.agendaItems.slice(0, 8)) lines.push(bullet(`${a.title} ${a.topics.map((id) => c.cyan(getTopic(id).short)).join(', ')}${a.meetingDate ? c.gray(` (${formatDate(a.meetingDate)})`) : ''}`));
-  }
-  lines.push('', c.dim(t('cli.dataConfidence', { level: city.confidence, verified: city.lastVerified ? t('cli.verifiedOn', { date: city.lastVerified }) : '' })));
   return lines.join('\n');
 }
 
-function renderSpeak(city, next, today) {
+/* ----------------------------------------------------------------------------------------
+ * Commands. Each takes the run context and returns an exit code.
+ * -------------------------------------------------------------------------------------- */
+
+function cmdTopics(ctx) {
+  const topics = topicList();
+  emit(ctx, { topics }, () => {
+    const idWidth = Math.max(...topics.map((x) => x.id.length));
+    return [
+      heading(t('cli.topicsHeading')),
+      ...topics.map((x) => `  ${c.cyan(x.id.padEnd(idWidth))}  ${c.bold(x.label)}\n${c.dim(wrapText(x.youthAngle, WIDTH - idWidth - 4, idWidth + 4))}`),
+      '',
+      c.dim(wrapText(t('cli.topicsTip'), WIDTH)),
+    ].join('\n');
+  });
+  return 0;
+}
+
+function cmdCities(ctx) {
+  let list = ctx.cities;
+  const county = textFlag(ctx.flags, 'county');
+  if (county) {
+    const counties = [...new Set(ctx.cities.map((x) => x.county))].sort();
+    const wanted = county.toLowerCase().replace(/\s+county$/, '');
+    const hit = counties.find((x) => x.toLowerCase() === wanted);
+    if (!hit) throw new UsageError(t('cli.errors.badCounty', { county, list: counties.join(', ') }));
+    list = list.filter((x) => x.county === hit);
+  }
+  // The column points at the next meeting where the public can speak: for 19 cities the very
+  // next meeting is a work session or briefing where students can only watch.
+  const entries = list.map((city) => {
+    const next = ctx.next(city, ctx.today);
+    const speakable = next && next.openToPublicComment ? next : ctx.next(city, ctx.today, { publicCommentOnly: true });
+    return { city, next, speakable, gap: speakable ? null : calendarGap(city, ctx.today), remote: remoteState(city) };
+  });
+  emit(
+    ctx,
+    {
+      cities: entries.map((e) => ({
+        cityId: e.city.cityId,
+        name: e.city.name,
+        county: e.city.county,
+        nextMeeting: e.next,
+        nextSpeakableMeeting: e.speakable,
+        remoteComment: e.remote,
+        calendarThrough: e.gap,
+      })),
+    },
+    () => {
+      const remote = { yes: c.green(t('cli.remoteShort.yes')), no: t('cli.remoteShort.no'), unknown: c.dim(t('cli.remoteShort.unknown')) };
+      const rows = entries.map((e) => ({
+        name: c.bold(e.city.name),
+        county: e.city.county,
+        when: e.speakable ? `${formatDate(e.speakable.date)} ${formatTime(e.speakable.time)}` : c.dim(noMeetingText(e.city, ctx.today)),
+        rel: e.speakable ? c.gray(relativeDays(e.speakable.date, ctx.today)) : '',
+        remote: remote[e.remote],
+        youth: (e.city.youthPrograms || []).length ? c.green(t('cli.yes')) : c.dim(t('cli.no')),
+      }));
+      return [
+        heading(t('cli.citiesHeading', { app: BRAND.name, n: list.length, region: BRAND.region })),
+        table(rows, [
+          { key: 'name', title: t('cli.colCity') },
+          { key: 'county', title: t('cli.colCounty') },
+          { key: 'when', title: t('cli.colNextSpeak'), flex: true },
+          { key: 'rel', title: '', optional: true },
+          { key: 'remote', title: t('cli.colRemote'), flex: true },
+          { key: 'youth', title: t('cli.colYouth'), flex: true },
+        ]),
+        '',
+        c.dim(wrapText(t('cli.remoteLegend', { yes: t('cli.remoteShort.yes'), unknown: t('cli.remoteShort.unknown') }), WIDTH)),
+        c.dim(t('cli.tip', { cmd: CMD })),
+      ].join('\n');
+    },
+  );
+  return 0;
+}
+
+function cmdCity(ctx) {
+  const city = requireCity(ctx, cityFromInput(ctx));
+  if (!city) return 1;
+  const upcoming = ctx.expand(city, ctx.today, addDays(ctx.today, 60));
+  const agenda = splitAgenda(city, ctx.today);
+  emit(ctx, { city, upcoming, agenda }, () => renderCity(ctx, city, upcoming, agenda));
+  return 0;
+}
+
+function agendaLine(a, today, { past = false } = {}) {
+  const when = a.meetingDate ? (past ? `${formatDate(a.meetingDate)}, ${relativeDays(a.meetingDate, today).toLowerCase()}` : formatDate(a.meetingDate)) : t('cli.dateTbd');
+  return `${a.title} ${c.gray(`(${when})`)}${a.topics && a.topics.length ? ` ${topicTags(a.topics)}` : ''}`.trim();
+}
+
+function renderCity(ctx, city, upcoming, agenda) {
+  const { today } = ctx;
+  const council = city.council || {};
+  const councilText = [council.size ? t('cli.membersCount', { n: council.size }) : '', council.structure || '', council.mayorName ? t('cli.mayor', { name: council.mayorName }) : ''].filter(Boolean).join(', ');
+  const lines = [
+    heading(t('cli.cityHeading', { city: city.name })),
+    labelBlock([
+      [t('cli.county'), city.county],
+      [t('cli.cityHall'), `${city.cityHall.name ? `${city.cityHall.name}, ` : ''}${city.cityHall.address}`],
+      city.website && [t('cli.website'), c.gray(city.website)],
+      councilText && [t('cli.council'), councilText],
+      council.findMyDistrictUrl && [t('cli.yourDistrict'), c.gray(council.findMyDistrictUrl)],
+      city.agendaPortal && city.agendaPortal.url && [t('cli.agendasLabel'), c.gray(city.agendaPortal.url)],
+      city.liveStream && city.liveStream.url && [t('cli.watchLive'), c.gray(city.liveStream.url)],
+    ]),
+  ];
+
+  lines.push('', c.bold(t('cli.schedule')));
+  for (const m of city.meetings || []) {
+    const rule = `${m.label}: ${describeRecurrence(m.recurrence)}${m.openToPublicComment === false ? c.dim(` (${t('cli.noPublicComment')})`) : ''}`;
+    lines.push(bullet(`${wrapText(rule, WIDTH - 4, 4).trimStart()}${m.location ? `\n${detail(m.location)}` : ''}`));
+  }
+
+  const live = upcoming.filter((m) => m.status !== 'cancelled');
+  lines.push('', c.bold(t('cli.next60')), meetingsTable(live, today, { showCity: false, empty: noMeetingText(city, today, 60) }));
+
+  // Cancelled, moved and special meetings, once per date and note (two meetings cancelled on
+  // the same night used to print the same date twice).
+  const seen = new Set();
+  const changes = upcoming.filter((m) => m.status !== 'scheduled' && m.note && !seen.has(`${m.date}|${m.status}|${m.note}`) && seen.add(`${m.date}|${m.status}|${m.note}`));
+  if (changes.length) {
+    lines.push('', c.bold(t('cli.scheduleChanges')));
+    for (const m of changes) lines.push(bullet(wrapText(`${formatDate(m.date)}, ${statusText(m.status)}: ${m.note}`, WIDTH - 4, 4).trimStart()));
+  }
+
+  lines.push('', c.bold(t('cli.speakingUp')), wrapText((city.publicComment || {}).summary || '', WIDTH, 2), c.dim(`  ${t('cli.speakHint', { cmd: `${CMD} speak ${quoteArg(city.name)}` })}`));
+
+  if ((city.youthPrograms || []).length) {
+    lines.push('', c.bold(t('cli.youthProgramsHeading')));
+    for (const p of city.youthPrograms) lines.push(bullet(`${wrapText(`${p.name}${p.ages ? ` (${p.ages})` : ''}`, WIDTH - 4, 4).trimStart()}${p.url ? `\n    ${c.gray(p.url)}` : ''}`));
+  }
+
+  lines.push('', c.bold(t('cli.upcomingAgenda', { n: agenda.upcoming.length })));
+  if (agenda.upcoming.length) {
+    for (const a of agenda.upcoming.slice(0, 8)) lines.push(bullet(wrapText(agendaLine(a, today), WIDTH - 4, 4).trimStart()));
+    if (agenda.upcoming.length > 8) lines.push(c.dim(`  ${t('cli.andMore', { n: agenda.upcoming.length - 8, cmd: `${CMD} agenda ${quoteArg(city.name)}` })}`));
+  } else {
+    const where = (city.agendaPortal && city.agendaPortal.url) || city.website;
+    lines.push(c.dim(wrapText(t('cli.noUpcomingAgenda', { url: where }), WIDTH, 2)));
+  }
+  if (agenda.recent.length) {
+    lines.push('', c.bold(t('cli.recentAgenda', { n: agenda.recent.length })));
+    for (const a of agenda.recent.slice(0, 5)) lines.push(bullet(wrapText(agendaLine(a, today, { past: true }), WIDTH - 4, 4).trimStart()));
+    if (agenda.recent.length > 5) lines.push(c.dim(`  ${t('cli.andMore', { n: agenda.recent.length - 5, cmd: `${CMD} agenda ${quoteArg(city.name)} --recent` })}`));
+  }
+
+  const level = ['high', 'medium', 'low'].includes(city.confidence) ? t(`cli.confidence.${city.confidence}`) : city.confidence || t('cli.confidence.medium');
+  const confidence = isDateStr(city.lastVerified) ? t('cli.dataConfidenceVerified', { level, date: formatDate(city.lastVerified, { withYear: true }) }) : t('cli.dataConfidence', { level });
+  lines.push('', c.dim(wrapText(confidence, WIDTH)));
+  return lines.join('\n');
+}
+
+function cmdSpeak(ctx) {
+  const city = requireCity(ctx, cityFromInput(ctx));
+  if (!city) return 1;
+  const next = ctx.next(city, ctx.today, { publicCommentOnly: true });
+  const calendarThrough = next ? null : calendarGap(city, ctx.today);
+  emit(ctx, { cityId: city.cityId, publicComment: city.publicComment, nextSpeakableMeeting: next, remoteComment: remoteState(city), calendarThrough }, () => renderSpeak(ctx, city, next));
+  return 0;
+}
+
+function renderSpeak(ctx, city, next) {
   const pc = city.publicComment || {};
-  const lines = [heading(t('cli.speakHeading', { city: city.name })), wrapText(pc.summary || '', 78), '', c.bold(t('cli.steps')), wrapText(pc.howToRegister || '', 78, 2)];
-  if (pc.registrationUrl) lines.push(label(t('cli.signUp'), c.gray(pc.registrationUrl)));
-  if (pc.deadline) lines.push(label(t('cli.deadline'), pc.deadline));
-  if (pc.timeLimitMinutes) lines.push(label(t('cli.timeLimit'), `${pc.timeLimitMinutes} min`));
-  lines.push(label(t('cli.remote'), pc.virtualAllowed === true ? c.green(t('cli.remoteYes')) : pc.virtualAllowed === false ? t('cli.remoteNo') : c.dim(t('cli.remoteUnknown'))));
-  if (pc.writtenCommentMethod) lines.push(label(t('cli.written'), pc.writtenCommentMethod));
-  if (pc.notes) lines.push('', c.dim(wrapText(pc.notes, 78)));
+  const remote = { yes: c.green(t('cli.remoteYes')), no: t('cli.remoteNo'), unknown: c.dim(t('cli.remoteUnknown')) }[remoteState(city)];
+  const lines = [heading(t('cli.speakHeading', { city: city.name })), wrapText(pc.summary || '', WIDTH), '', c.bold(t('cli.steps')), wrapText(pc.howToRegister || '', WIDTH, 2), ''];
+  lines.push(
+    labelBlock(
+      [
+        pc.registrationUrl && [t('cli.signUp'), c.gray(pc.registrationUrl)],
+        pc.deadline && [t('cli.deadline'), pc.deadline],
+        pc.timeLimitMinutes && [t('cli.timeLimit'), t('cli.minutesValue', { n: pc.timeLimitMinutes })],
+        [t('cli.remote'), remote],
+        pc.writtenCommentMethod && [t('cli.written'), pc.writtenCommentMethod],
+      ],
+      { indent: 2 },
+    ),
+  );
+  if (pc.notes) lines.push('', c.dim(wrapText(pc.notes, WIDTH)));
   lines.push('', c.bold(t('cli.nextChance')));
-  lines.push(next ? bullet(`${formatDate(next.date, { withYear: true })}, ${formatTime(next.time)} (${relativeDays(next.date, today).toLowerCase()}): ${next.label}\n    ${c.gray(next.location)}`) : c.dim(t('cli.noSpeakMeeting')));
-  lines.push('', c.bold(t('cli.beforeYouGo')), ...speakingTips().slice(0, 3).map((tip) => bullet(tip)));
+  if (next) lines.push(bullet(`${wrapText(`${formatDate(next.date, { withYear: true })}, ${formatTime(next.time)} (${relativeDays(next.date, ctx.today).toLowerCase()}): ${next.label}`, WIDTH - 4, 4).trimStart()}\n${detail(next.location)}`));
+  else {
+    const end = calendarGap(city, ctx.today);
+    lines.push(c.dim(wrapText(end ? t('cli.noSpeakMeetingAfter', { date: formatDate(end, { withYear: true }) }) : t('cli.noSpeakMeeting'), WIDTH, 2)));
+  }
+  lines.push('', c.bold(t('cli.beforeYouGo')), ...speakingTips().slice(0, 3).map((tip) => bullet(wrapText(tip, WIDTH - 4, 4).trimStart())));
   lines.push('', c.dim(t('cli.draftHint', { cmd: CMD, city: city.name })));
   return lines.join('\n');
 }
 
-function renderPrefs(prefs, cities) {
-  const city = prefs.homeCityId ? findCity(cities, prefs.homeCityId) : null;
-  return [
-    label(t('cli.interests'), prefs.interests.length ? prefs.interests.map((id) => getTopic(id).label).join(', ') : c.dim(t('cli.noneYet'))),
-    label(t('cli.available'), Object.entries(prefs.availability).filter(([, v]) => v).map(([k]) => k).join(', ') || c.dim(t('cli.notSet'))),
-    label(t('cli.homeCity'), city ? city.name : c.dim(t('cli.notSet'))),
-    label(t('cli.location'), prefs.location ? `${prefs.locationLabel || ''} (${prefs.location.lat.toFixed(3)}, ${prefs.location.lng.toFixed(3)})` : c.dim(t('cli.notSet'))),
-    label(t('cli.maxDistance'), t('cli.milesValue', { n: prefs.maxMiles })),
-    label(t('cli.speakOnly'), prefs.canSpeakOnly ? t('cli.yes') : t('cli.no')),
-  ].join('\n');
+function cmdMeetings(ctx) {
+  const { flags, today } = ctx;
+  const days = intFlag(flags, 'days', { min: 1, max: 365, fallback: 30 });
+  const topic = topicFlag(flags);
+  const query = cityFromInput(ctx);
+  const city = query ? requireCity(ctx, query) : null;
+  if (query && !city) return 1;
+  let list = ctx.upcoming({ from: today, days, includeCancelled: !!flags.all });
+  if (city) list = list.filter((m) => m.cityId === city.cityId);
+  if (flags.evening) list = list.filter((m) => m.isEvening);
+  if (flags.speak) list = list.filter((m) => m.openToPublicComment);
+  if (topic) list = list.filter((m) => (m.agendaItems || []).some((a) => (a.topics || []).includes(topic)));
+  const empty = topic ? t('cli.noTopicMeetings', { topic: getTopic(topic).label }) : city ? noMeetingText(city, today, days) : undefined;
+  emit(ctx, { from: today, days, meetings: list }, () => [heading(tn('cli.meetingsHeading', days, { days, n: list.length })), meetingsTable(list, today, { showCity: !city, empty })].join('\n'));
+  return 0;
 }
 
-function renderPlan(plan, today) {
-  const lines = [heading(t('cli.matchesHeading')), wrapText(plan.summary, 78), ''];
-  if (!plan.prefs.interests.length) lines.push(c.yellow(t('cli.matchTip', { cmd: CMD })), '');
+function cmdAgenda(ctx) {
+  const { flags, today } = ctx;
+  const topic = topicFlag(flags);
+  const query = cityFromInput(ctx);
+  const city = query ? requireCity(ctx, query) : null;
+  if (query && !city) return 1;
+  const recent = flags.recent === true;
+  const pool = { upcoming: [], recent: [] };
+  for (const x of city ? [city] : ctx.cities) {
+    const split = splitAgenda(x, today);
+    for (const key of ['upcoming', 'recent']) for (const a of split[key]) pool[key].push({ ...a, cityId: x.cityId, cityName: x.name });
+  }
+  const keep = (a) => !topic || (a.topics || []).includes(topic);
+  const byDate = (a, b) => String(a.meetingDate || '9').localeCompare(String(b.meetingDate || '9')) || a.cityName.localeCompare(b.cityName);
+  const items = (recent ? pool.recent : pool.upcoming).filter(keep).sort(recent ? (a, b) => byDate(b, a) : byDate);
+  const otherCount = (recent ? pool.upcoming : pool.recent).filter(keep).length;
+  const SHOW = 40;
+  emit(ctx, { items, window: recent ? 'recent' : 'upcoming' }, () => {
+    const lines = [heading(t(recent ? 'cli.recentAgendaHeading' : 'cli.agendaHeading', { n: items.length }))];
+    for (const a of items.slice(0, SHOW)) {
+      const when = a.meetingDate ? (recent ? `${formatDate(a.meetingDate)}, ${relativeDays(a.meetingDate, today).toLowerCase()}` : formatDate(a.meetingDate)) : t('cli.dateTbd');
+      lines.push(wrapText(`${c.bold(a.cityName)} ${c.gray(when)}  ${topicTags(a.topics)}`.trimEnd(), WIDTH));
+      lines.push(wrapText(a.title, WIDTH, 2));
+      if (a.summary) lines.push(c.dim(wrapText(a.summary, WIDTH, 2)));
+      if (a.url) lines.push(`  ${c.gray(a.url)}`);
+      lines.push('');
+    }
+    if (items.length > SHOW) lines.push(c.dim(wrapText(t('cli.showingOf', { shown: SHOW, n: items.length }), WIDTH)));
+    if (!items.length && !recent) {
+      lines.push(c.dim(wrapText(t('cli.noUpcomingAgendaAll'), WIDTH)));
+      if (otherCount) lines.push(c.dim(wrapText(t('cli.recentHint', { n: otherCount, cmd: `${CMD} agenda${city ? ` ${quoteArg(city.name)}` : ''}${topic ? ` --topic ${topic}` : ''} --recent` }), WIDTH)));
+    } else if (!items.length) lines.push(c.dim(`  ${t('cli.nothingToShow')}`));
+    return lines.join('\n').trimEnd();
+  });
+  return 0;
+}
+
+function cmdYouth(ctx) {
+  const query = cityFromInput(ctx);
+  const city = query ? requireCity(ctx, query) : null;
+  if (query && !city) return 1;
+  let programs = matchYouthPrograms(ctx.cities, ctx.saved.prefs);
+  if (city) programs = programs.filter((p) => p.cityId === city.cityId);
+  emit(ctx, { programs }, () => {
+    const lines = [heading(t('cli.youthHeading', { n: programs.length }))];
+    for (const p of programs) {
+      lines.push(c.bold(wrapText(`${p.cityName}: ${p.name}`, WIDTH)));
+      if (p.ages) lines.push(c.gray(wrapText(p.ages, WIDTH, 2)));
+      if (p.description) lines.push(wrapText(p.description, WIDTH, 2));
+      if (p.applyWindow) lines.push(wrapText(`${c.yellow(t('cli.applyLabel'))} ${p.applyWindow}`, WIDTH, 2));
+      if (p.url) lines.push(`  ${c.gray(p.url)}`);
+      lines.push('');
+    }
+    if (!city && programs.length) lines.push(c.dim(t('cli.youthTip', { cmd: CMD })));
+    return lines.join('\n').trimEnd();
+  });
+  return 0;
+}
+
+function cmdPrefs(ctx) {
+  const { saved } = ctx;
+  emit(ctx, { prefs: saved.prefs, saved: saved.saved, path: PREFS_PATH, error: saved.error }, () => {
+    const lines = [heading(t('cli.prefsHeading'))];
+    if (saved.error) lines.push(c.yellow(wrapText(t('cli.prefsUnreadable', { path: PREFS_PATH, error: saved.error, cmd: CMD }), WIDTH)));
+    else if (saved.saved) lines.push(c.dim(PREFS_PATH));
+    else lines.push(c.yellow(t('cli.nothingSaved', { cmd: CMD })), c.dim(t('cli.defaultsBelow')));
+    lines.push(renderPrefs(ctx, saved.prefs));
+    return lines.join('\n');
+  });
+  return 0;
+}
+
+function renderPrefs(ctx, prefs) {
+  const city = prefs.homeCityId ? ctx.cityById.get(prefs.homeCityId) : null;
+  const yn = (v) => (v ? t('cli.yes') : t('cli.no'));
+  const available = ['evenings', 'daytime', 'weekends'].filter((k) => prefs.availability[k]).map((k) => t(`cli.availability.${k}`));
+  const language = LOCALES.find((l) => l.code === prefs.lang);
+  // A city-hall location is labeled in the language being shown, not the one it was saved in.
+  const hall = city ? cityPoint(city) : null;
+  const atHall = Boolean(hall && prefs.location && hall.lat === prefs.location.lat && hall.lng === prefs.location.lng);
+  const place = atHall ? t('common.cityHallOf', { city: city.name }) : safe(prefs.locationLabel || '');
+  const where = prefs.location ? [place, `(${prefs.location.lat.toFixed(3)}, ${prefs.location.lng.toFixed(3)})`].filter(Boolean).join(' ') : c.dim(t('cli.notSet'));
+  return labelBlock([
+    [t('cli.languageLabel'), language ? language.nativeName : c.dim(t('cli.notSet'))],
+    [t('cli.interests'), prefs.interests.length ? prefs.interests.map((id) => getTopic(id).label).join(', ') : c.dim(t('cli.noneYet'))],
+    [t('cli.available'), available.length ? available.join(', ') : c.dim(t('cli.notSet'))],
+    [t('cli.student'), yn(prefs.student)],
+    [t('cli.homeCity'), city ? city.name : c.dim(t('cli.notSet'))],
+    [t('cli.location'), where],
+    [t('cli.maxDistance'), t('cli.milesValue', { n: prefs.maxMiles })],
+    [t('cli.speakOnly'), yn(prefs.canSpeakOnly)],
+    [t('cli.remoteOk'), yn(prefs.virtualOk)],
+  ]);
+}
+
+async function cmdSetup(ctx) {
+  if (ctx.saved.error) ctx.io.error(c.yellow(wrapText(t('cli.prefsWillReplace', { path: PREFS_PATH, error: ctx.saved.error }), WIDTH)));
+  const result = await runWizard(ctx.cities, ctx.saved.prefs, ctx.lang);
+  return result.code;
+}
+
+async function resolveLocation(ctx, query) {
+  const { city } = matchCity(ctx.cities, query);
+  const hall = city ? { ...cityPoint(city), label: t('common.cityHallOf', { city: city.name }) } : null;
+  if (city && city.name.toLowerCase() === query.trim().toLowerCase()) return hall;
+  try {
+    const { geocode } = await import('@agora/server/geocode');
+    const g = await geocode(query, ctx.cities);
+    if (g) return { lat: g.lat, lng: g.lng, label: safe(g.label) };
+    ctx.io.error(c.yellow(t('cli.couldNotPlace', { query })));
+  } catch (e) {
+    ctx.io.error(c.yellow(t('cli.geocoderUnreachable', { error: safe(e.message) })));
+  }
+  return hall;
+}
+
+/**
+ * Preferences for one `match` run: saved ones overridden by flags. --city sets the home
+ * city but not a location: the home-city bonus already covers it, and using city hall as
+ * "your location" invented an "under 1 mile away" reason and counted the city twice.
+ */
+async function prefsFromFlags(ctx) {
+  const { flags } = ctx;
+  const p = { ...ctx.saved.prefs };
+  const interests = textFlag(flags, 'interests');
+  if (interests) p.interests = topicIds(interests);
+  const query = textFlag(flags, 'city');
+  if (query) {
+    const city = requireCity(ctx, query);
+    if (!city) return null;
+    p.homeCityId = city.cityId;
+  }
+  const near = textFlag(flags, 'near');
+  if (near) {
+    const loc = await resolveLocation(ctx, near);
+    if (loc) {
+      p.location = { lat: loc.lat, lng: loc.lng };
+      p.locationLabel = loc.label || near;
+    }
+  }
+  if (flags.evening || flags.daytime || flags.weekends) p.availability = { evenings: !!flags.evening, daytime: !!flags.daytime, weekends: !!flags.weekends };
+  if (flags.speak) p.canSpeakOnly = true;
+  p.maxMiles = numberFlag(flags, 'miles', { max: 200, fallback: p.maxMiles });
+  return p;
+}
+
+async function cmdMatch(ctx) {
+  const days = intFlag(ctx.flags, 'days', { min: 1, max: 365, fallback: 45 });
+  const prefs = await prefsFromFlags(ctx);
+  if (!prefs) return 1;
+  const plan = ctx.plan(prefs, { today: ctx.today, days });
+  emit(ctx, plan, () => renderPlan(ctx, plan));
+  return 0;
+}
+
+/** Wrap a run of reasons as plain text, then color each line, so color codes never split. */
+function reasonLines(texts, color) {
+  if (!texts.length) return [];
+  return wrapText(texts.join(' | '), WIDTH - 4, 4)
+    .split('\n')
+    .map((l) => `    ${color(l.trimStart())}`);
+}
+
+function renderPlan(ctx, plan) {
+  const { today } = ctx;
+  const lines = [heading(t('cli.matchesHeading')), wrapText(plan.summary, WIDTH), ''];
+  if (!plan.prefs.interests.length) lines.push(c.yellow(wrapText(t('cli.matchTip', { cmd: CMD }), WIDTH)), '');
   plan.meetings.forEach((m, i) => {
-    const pos = m.reasons.filter((r) => r.points > 0).map((r) => c.green(r.text));
-    const neg = m.reasons.filter((r) => r.points < 0).map((r) => c.yellow(r.text));
     lines.push(`${c.bold(String(i + 1).padStart(2))}. ${c.bold(m.cityName)}: ${m.label}`);
-    lines.push(`    ${formatDate(m.date, { withYear: true })}, ${formatTime(m.time)} ${c.gray(`(${relativeDays(m.date, today).toLowerCase()})`)}${m.distanceMiles != null ? c.gray(`, ${milesText(m.distanceMiles)}`) : ''}`);
-    lines.push(`    ${c.gray(m.location)}`);
-    if (pos.length) lines.push(`    ${pos.join(c.gray(' | '))}`);
-    if (neg.length) lines.push(`    ${neg.join(c.gray(' | '))}`);
-    for (const a of m.matchedItems.slice(0, 3)) lines.push(`    ${c.cyan('>')} ${a.title}`);
+    lines.push(`    ${formatDate(m.date, { withYear: true })}, ${formatTime(m.time)} ${c.gray(`(${relativeDays(m.date, today).toLowerCase()})`)}`);
+    lines.push(detail(m.location));
+    // The strongest few reasons read better than every one (--json keeps them all); the
+    // ones counting against a meeting always show.
+    const strongest = m.reasons.filter((r) => r.points > 0).sort((a, b) => b.points - a.points);
+    lines.push(...reasonLines(strongest.slice(0, 3).map((r) => r.text), c.green));
+    lines.push(...reasonLines(m.reasons.filter((r) => r.points < 0).map((r) => r.text), c.yellow));
+    for (const a of m.matchedItems.slice(0, 3)) lines.push(`    ${c.cyan('>')} ${wrapText(a.title, WIDTH - 6, 6).trimStart()}`);
     lines.push('');
   });
   if (plan.agendaItems.length) {
     lines.push(c.bold(t('cli.agendaItemsOnTopics')));
-    for (const a of plan.agendaItems.slice(0, 8)) lines.push(bullet(`${c.bold(a.cityName)}${a.meetingDate ? c.gray(` (${formatDate(a.meetingDate)})`) : ''}: ${a.title} ${a.matchedTopics.map((id) => c.cyan(getTopic(id).short)).join(', ')}`));
+    for (const a of plan.agendaItems.slice(0, 8)) lines.push(bullet(wrapText(`${c.bold(a.cityName)}${a.meetingDate ? c.gray(` (${formatDate(a.meetingDate)})`) : ''}: ${a.title} ${topicTags(a.matchedTopics)}`.trim(), WIDTH - 4, 4).trimStart()));
     lines.push('');
+  } else if (plan.prefs.interests.length) {
+    lines.push(c.dim(wrapText(t('cli.noAgendaOnTopics'), WIDTH)), '');
+    // Older engines do not return recentAgendaItems; then this section is simply skipped.
+    const recent = Array.isArray(plan.recentAgendaItems) ? plan.recentAgendaItems : [];
+    if (recent.length) {
+      lines.push(c.bold(t('cli.recentOnTopics')));
+      for (const a of recent.slice(0, 5)) lines.push(bullet(wrapText(`${c.bold(a.cityName)}: ${agendaLine(a, today, { past: true })}`, WIDTH - 4, 4).trimStart()));
+      lines.push('');
+    }
   }
   if (plan.youthPrograms.length) {
-    lines.push(c.bold(t('cli.youthNearYou')));
+    // "Near you" only when there is a location to be near; otherwise the list is home city first, then A to Z.
+    const title = plan.prefs.location ? t('cli.youthNearYou') : plan.prefs.homeCityId ? t('cli.youthHomeFirst') : t('cli.youthPlain');
+    lines.push(c.bold(title));
     for (const p of plan.youthPrograms.slice(0, 5)) lines.push(bullet(`${c.bold(p.cityName)}: ${p.name}${p.distanceMiles != null ? c.gray(` (${milesText(p.distanceMiles)})`) : ''}`));
     lines.push('');
   }
@@ -447,14 +738,71 @@ function renderPlan(plan, today) {
   return lines.join('\n');
 }
 
-function renderStats(s) {
-  const lines = [heading(t('cli.statsHeading', { region: BRAND.region, days: s.windowDays }))];
-  lines.push(label(t('cli.cities'), String(s.totals.cities)), label(t('cli.meetings'), String(s.totals.meetings)), label(t('cli.after5'), `${Math.round(s.totals.eveningShare * 100)}%`), label(t('cli.openToSpeak'), `${Math.round(s.totals.speakableShare * 100)}%`), label(t('cli.youthProgramsLabel'), t('cli.citiesCount', { n: s.totals.citiesWithYouthPrograms })), label(t('cli.remoteComment'), t('cli.citiesCount', { n: s.totals.citiesWithVirtualComment })));
+async function cmdMap(ctx) {
+  const near = textFlag(ctx.flags, 'near');
+  const you = near ? await resolveLocation(ctx, near) : ctx.saved.prefs.location;
+  const legend = mapLegend(ctx.cities, { today: ctx.today, next: (city) => ctx.next(city, ctx.today, { publicCommentOnly: true }), gap: (city) => calendarGap(city, ctx.today) });
+  emit(ctx, { note: t('cli.mapUseWithoutJson'), today: ctx.today, you: you ? { lat: you.lat, lng: you.lng } : null, legend }, () =>
+    [heading(t('cli.mapHeading', { region: BRAND.region })), renderAsciiMap(ctx.cities, { today: ctx.today, you, legend })].join('\n'),
+  );
+  return 0;
+}
+
+/**
+ * Topic counts for the agenda chart. The engine's stats count every agenda item ever
+ * loaded, which labeled September items as "upcoming" in October. These count upcoming
+ * items, or, when none are posted yet, the most recent ones under a heading that says so.
+ */
+function agendaTopicCounts(cities, today) {
+  const upcoming = [];
+  const recent = [];
+  for (const city of cities) {
+    const split = splitAgenda(city, today);
+    upcoming.push(...split.upcoming);
+    recent.push(...split.recent);
+  }
+  const items = upcoming.length ? upcoming : recent;
+  const counts = new Map();
+  for (const item of items) for (const id of item.topics || []) counts.set(id, (counts.get(id) || 0) + 1);
+  const dates = items
+    .map((a) => a.meetingDate)
+    .filter(isDateStr)
+    .sort();
+  return {
+    window: upcoming.length ? 'upcoming' : 'recent',
+    from: dates[0] || null,
+    to: dates[dates.length - 1] || null,
+    items: items.length,
+    counts: [...counts].map(([topicId, count]) => ({ topicId, count })).sort((a, b) => b.count - a.count || a.topicId.localeCompare(b.topicId)),
+  };
+}
+
+function cmdStats(ctx) {
+  const days = intFlag(ctx.flags, 'days', { min: 1, max: 365, fallback: 30 });
+  const s = computeStats(ctx.cities, { today: ctx.today, days, now: ctx.now });
+  const agendaTopics = agendaTopicCounts(ctx.cities, ctx.today);
+  emit(ctx, { ...s, agendaTopics }, () => renderStats(s, agendaTopics));
+  return 0;
+}
+
+function renderStats(s, agendaTopics) {
+  const lines = [heading(tn('cli.statsHeading', s.windowDays, { region: BRAND.region, days: s.windowDays }))];
+  lines.push(
+    labelBlock([
+      [t('cli.cities'), String(s.totals.cities)],
+      [t('cli.meetings'), String(s.totals.meetings)],
+      [t('cli.after5'), `${Math.round(s.totals.eveningShare * 100)}%`],
+      [t('cli.openToSpeak'), `${Math.round(s.totals.speakableShare * 100)}%`],
+      [t('cli.youthProgramsLabel'), t('cli.citiesCount', { n: s.totals.citiesWithYouthPrograms })],
+      [t('cli.remoteComment'), t('cli.citiesCount', { n: s.totals.citiesWithVirtualComment })],
+    ]),
+  );
   lines.push('', c.bold(t('cli.byWeekday')));
   const days = weekdayShortNames();
+  const dayWidth = Math.max(...days.map(visibleLength));
   const byDay = s.byWeekdayHour.map((row) => row.reduce((a, b) => a + b, 0));
   const max = Math.max(...byDay, 1);
-  byDay.forEach((n, i) => lines.push(`  ${days[i].padEnd(4)} ${bar(n, max)} ${n}`));
+  byDay.forEach((n, i) => lines.push(`  ${padVisible(days[i], dayWidth)} ${bar(n, max)} ${n}`));
   lines.push('', c.bold(t('cli.startTimes')));
   const byHour = Array(24).fill(0);
   s.byWeekdayHour.forEach((row) => row.forEach((n, h) => (byHour[h] += n)));
@@ -463,38 +811,217 @@ function renderStats(s) {
     if (n) lines.push(`  ${formatTime(`${String(h).padStart(2, '0')}:00`).padStart(8)}  ${bar(n, hmax)} ${n}`);
   });
   lines.push('', c.bold(t('cli.studentFriendly')));
-  for (const city of s.perCity.slice(0, 10)) lines.push(`  ${city.name.padEnd(22)} ${bar(city.evening, Math.max(...s.perCity.map((x) => x.evening), 1), 16)} ${city.evening}${city.virtualComment ? c.green(t('cli.remoteTag')) : ''}${city.youthPrograms ? c.cyan(t('cli.youthTag')) : ''}`);
-  if (s.topicCounts.length) {
-    lines.push('', c.bold(t('cli.topicsOnAgendas')));
-    const tmax = s.topicCounts[0].count;
-    for (const x of s.topicCounts.slice(0, 10)) lines.push(`  ${getTopic(x.topicId).label.padEnd(30)} ${bar(x.count, tmax, 16)} ${x.count}`);
+  const top = s.perCity.slice(0, 10);
+  const nameWidth = Math.max(...top.map((x) => visibleLength(x.name)));
+  const emax = Math.max(...s.perCity.map((x) => x.evening), 1);
+  for (const city of top) {
+    const tags = [city.virtualComment ? c.green(t('cli.remoteTag')) : '', city.youthPrograms ? c.cyan(t('cli.youthTag')) : ''].filter(Boolean).join(', ');
+    lines.push(`  ${padVisible(city.name, nameWidth)} ${bar(city.evening, emax, 16)} ${city.evening}${tags ? `  ${tags}` : ''}`);
+  }
+  if (agendaTopics.counts.length) {
+    const title =
+      agendaTopics.window === 'upcoming' ? t('cli.topicsOnAgendas') : t('cli.topicsOnRecentAgendas', { from: agendaTopics.from ? formatDate(agendaTopics.from) : '?', to: agendaTopics.to ? formatDate(agendaTopics.to) : '?' });
+    lines.push('', c.bold(wrapText(title, WIDTH)));
+    const shown = agendaTopics.counts.slice(0, 10);
+    const labelWidth = Math.max(...shown.map((x) => visibleLength(getTopic(x.topicId).label)));
+    const tmax = shown[0].count;
+    for (const x of shown) lines.push(`  ${padVisible(getTopic(x.topicId).label, labelWidth)} ${bar(x.count, tmax, 16)} ${x.count}`);
   }
   return lines.join('\n');
 }
 
-async function demo(cities, today, lang, out) {
+async function cmdNews(ctx) {
+  const { flags } = ctx;
+  const topic = topicFlag(flags);
+  const city = textFlag(flags, 'city');
+  const limit = intFlag(flags, 'limit', { min: 1, max: 200, fallback: 15 });
+  const { fetchNews } = await import('@agora/server/news');
+  let result;
+  try {
+    result = await fetchNews(loadNews(), { topic, city, limit, cities: ctx.cities });
+  } catch (e) {
+    ctx.io.error(c.red(t('cli.couldNotFetchNews', { error: safe(e.message) })));
+    return 1;
+  }
+  // fetchNews never throws: a feed that fails just returns nothing. When every feed failed,
+  // say so, instead of "no stories matched" as if the filters had found nothing.
+  const offline = newsOffline(result);
+  if (offline) ctx.io.error(c.yellow(t('cli.newsOffline')));
+  emit(ctx, result, () => renderNews(result, { topic, city }));
+  return offline ? 1 : 0;
+}
+
+async function cmdExplain(ctx) {
+  const title = safe(ctx.args.join(' ').trim() || textFlag(ctx.flags, 'title') || '');
+  if (!title) throw new UsageError(t('cli.explainUsage', { cmd: CMD }));
+  const query = textFlag(ctx.flags, 'city');
+  const city = query ? requireCity(ctx, query) : null;
+  if (query && !city) return 1;
+  // Loaded here, not at startup: the AI SDK is heavy and only this command needs it.
+  const ai = await import('@agora/server/ai');
+  if (ai.aiAvailable()) ctx.io.error(c.dim(t('cli.askingAi')));
+  let result;
+  try {
+    // The explanation (from the AI or the template) comes back in the user's language.
+    result = await ai.explainAgendaItem({ title, summary: textFlag(ctx.flags, 'summary'), city, locale: ctx.lang });
+  } catch (e) {
+    ctx.io.error(c.red(t('cli.couldNotExplain', { error: safe(e.message) })));
+    return 1;
+  }
+  const text = safe(result.text, { multiline: true });
+  emit(ctx, { ...result, text }, () => {
+    const source =
+      result.source === 'claude'
+        ? t('cli.explainedBy', { model: safe(result.model) })
+        : result.fallbackReason
+          ? t('cli.templateAfterError', { reason: safe(result.fallbackReason) })
+          : t('cli.templateExplanation');
+    return [heading(title), c.dim(wrapText(source, WIDTH)), '', wrapParagraphs(text, WIDTH)].join('\n');
+  });
+  return 0;
+}
+
+function cmdComment(ctx) {
+  const { flags } = ctx;
+  const query = textFlag(flags, 'city');
+  const city = query ? requireCity(ctx, query) : null;
+  if (query && !city) return 1;
+  const topicId = topicFlag(flags);
+  const position = textFlag(flags, 'position');
+  if (position && !POSITIONS.includes(position.toLowerCase())) throw new UsageError(t('cli.errors.badPosition', { value: position, list: POSITIONS.join(', ') }));
+  // Greet for the time of the next meeting where the student could actually read this.
+  const next = city ? ctx.next(city, ctx.today, { publicCommentOnly: true }) : null;
+  const firstRule = city && (city.meetings || [])[0];
+  const time = next ? next.time : firstRule && firstRule.recurrence ? firstRule.recurrence.time : '18:00';
+  const draft = buildComment({
+    name: textFlag(flags, 'name'),
+    school: textFlag(flags, 'school'),
+    cityName: city ? city.name : undefined,
+    topicId,
+    itemTitle: textFlag(flags, 'item'),
+    position: position ? position.toLowerCase() : undefined,
+    story: textFlag(flags, 'story'),
+    ask: textFlag(flags, 'ask'),
+    timeOfDay: timeOfDayFor(time),
+  });
+  const seconds = estimateSpeakingSeconds(draft);
+  emit(ctx, { draft, seconds }, () =>
+    [
+      heading(t('cli.draftHeading')),
+      wrapParagraphs(draft, WIDTH),
+      '',
+      c.dim(wrapText(t('cli.spokenSeconds', { n: seconds }), WIDTH)),
+      city && city.publicComment ? c.dim(wrapText(t('cli.howToSignUp', { city: city.name, how: city.publicComment.howToRegister }), WIDTH)) : '',
+    ]
+      .join('\n')
+      .trimEnd(),
+  );
+  return 0;
+}
+
+function cmdLearn(ctx) {
+  const which = String(ctx.args[0] || 'all').toLowerCase();
+  if (which !== 'all' && !LEARN_SECTIONS.includes(which)) throw new UsageError(t('cli.errors.badLearn', { value: ctx.args[0], list: LEARN_SECTIONS.join(', '), cmd: CMD }));
+  const want = (s) => which === 'all' || which === s;
+  const data = {};
+  if (want('glossary')) data.glossary = glossary();
+  if (want('checklist')) data.checklist = checklist();
+  if (want('tips')) data.tips = speakingTips();
+  emit(ctx, data, () => {
+    const parts = [];
+    if (data.glossary) parts.push(heading(t('cli.glossaryHeading')), ...data.glossary.map((g) => `${c.bold(g.term)}\n${wrapText(g.definition, WIDTH, 2)}`));
+    if (data.checklist) parts.push(heading(t('cli.checklistHeading')), ...data.checklist.map((s, i) => `${c.cyan(String(i + 1).padStart(2))}. ${wrapText(s, WIDTH - 4, 4).trimStart()}`));
+    if (data.tips) parts.push(heading(t('cli.tipsHeading')), ...data.tips.map((s) => bullet(wrapText(s, WIDTH - 4, 4).trimStart())));
+    return parts.join('\n');
+  });
+  return 0;
+}
+
+async function cmdDemo(ctx) {
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const pause = Number(process.env.AGORA_DEMO_PAUSE_MS ?? 250);
+  // Each step runs with the data already loaded and the same output, today and language.
   const step = async (title, argv) => {
-    out(`\n${c.bgBlue(c.bold(` ${title} `))} ${c.gray(`$ ${CMD} ${argv.join(' ')}`)}`);
-    await sleep(250);
-    await run([...argv, '--today', today, '--lang', lang]);
+    ctx.out(`\n${c.bgBlue(c.bold(` ${title} `))} ${c.gray(`$ ${CMD} ${argv.map(quoteArg).join(' ')}`)}`);
+    if (pause > 0) await sleep(pause);
+    const parsed = parseArgs(argv);
+    await RUNNERS[parsed.cmd]({ ...ctx, json: false, flags: parsed.flags, args: parsed.args });
   };
-  out(heading(t('cli.demoHeading', { app: BRAND.name })));
-  out(wrapText(`${BRAND.shortDescription} ${BRAND.nonpartisanNote}`, 78));
+  ctx.out(heading(t('cli.demoHeading', { app: BRAND.name })));
+  ctx.out(wrapText(`${BRAND.shortDescription} ${BRAND.nonpartisanNote}`, WIDTH));
+  const plano = ctx.cityById.get('plano') || ctx.cities[0];
   await step(t('cli.demo1'), ['cities']);
-  const plano = findCity(cities, 'plano') || cities[0];
   await step(t('cli.demo2'), ['match', '--interests', 'housing,transit,parks-recreation', '--city', plano.name, '--evening', '--weekends']);
   await step(t('cli.demo3'), ['speak', plano.name]);
   await step(t('cli.demo4'), ['map', '--near', plano.name]);
   await step(t('cli.demo5'), ['comment', '--name', 'Jordan', '--school', t('cli.demoSchool', { city: plano.name }), '--city', plano.name, '--topic', 'parks-recreation', '--ask', t('cli.demoAsk')]);
-  out(`\n${c.green(t('cli.demoDone'))} ${t('cli.demoSetup', { cmd: c.cyan(`${CMD} setup`) })}`);
+  ctx.out(`\n${c.green(t('cli.demoDone'))} ${t('cli.demoSetup', { cmd: c.cyan(`${CMD} setup`) })}`);
+  return 0;
 }
 
-function serve(flags) {
-  const env = { ...process.env };
-  if (flags.port) env.PORT = String(flags.port);
-  const child = spawn(process.execPath, [path.join(REPO_ROOT, 'packages', 'server', 'src', 'index.js')], { stdio: 'inherit', env });
-  return new Promise((resolve) => child.on('exit', (code) => resolve(code || 0)));
+const RUNNERS = {
+  topics: cmdTopics,
+  cities: cmdCities,
+  city: cmdCity,
+  speak: cmdSpeak,
+  meetings: cmdMeetings,
+  agenda: cmdAgenda,
+  youth: cmdYouth,
+  prefs: cmdPrefs,
+  setup: cmdSetup,
+  match: cmdMatch,
+  map: cmdMap,
+  stats: cmdStats,
+  news: cmdNews,
+  explain: cmdExplain,
+  comment: cmdComment,
+  learn: cmdLearn,
+  demo: cmdDemo,
+};
+
+function globalOptionLines() {
+  const rows = [
+    ['--json', t('cli.jsonOpt')],
+    ['--today', t('cli.todayOpt')],
+    ['--lang', t('cli.langOpt')],
+    ['--no-color', t('cli.noColorOpt')],
+    ['-h, --help', t('cli.helpOpt', { cmd: CMD })],
+    ['--version', t('cli.versionOpt')],
+  ];
+  const width = Math.max(...rows.map(([k]) => k.length)) + 2;
+  return rows.map(([k, v]) => `  ${c.cyan(k.padEnd(width))}${wrapText(v, WIDTH - width - 2, width + 2).trimStart()}`);
 }
 
-export { COMMAND_NAMES, here, aiAvailable, tList };
+/** The command list as data, for `agora help --json`. */
+function helpData() {
+  return {
+    version: readVersion(),
+    commands: COMMANDS.map((x) => ({ name: x.name, group: x.group, description: t(`cli.commands.${x.name}`), usage: `${CMD} ${x.name}${x.hint ? ` ${x.hint}` : ''}`, options: x.flags })),
+    globalOptions: GLOBAL_FLAGS,
+  };
+}
+
+/** The full help screen, or one command's usage when `name` is a command. */
+function help(name) {
+  const command = COMMANDS.find((x) => x.name === name && x.name !== 'help');
+  if (command) {
+    return [
+      heading(`${CMD} ${command.name}`),
+      wrapText(t(`cli.commands.${command.name}`), WIDTH),
+      '',
+      c.bold(t('cli.usage')),
+      wrapText(`${CMD} ${command.name}${command.hint ? ` ${command.hint}` : ''}`, WIDTH - 2, 2),
+      '',
+      c.bold(t('cli.globalOptions')),
+      ...globalOptionLines(),
+    ].join('\n');
+  }
+  const width = Math.max(...COMMAND_NAMES.map((n) => n.length)) + 2;
+  const lines = [heading(`${BRAND.name}: ${BRAND.tagline}`), wrapText(BRAND.shortDescription, WIDTH), '', c.bold(t('cli.usage')), `  ${t('cli.usageLine', { cmd: CMD })}`];
+  for (const group of GROUPS) {
+    lines.push('', c.bold(t(`cli.groups.${group}`)));
+    for (const x of COMMANDS.filter((y) => y.group === group)) lines.push(`  ${c.cyan(x.name.padEnd(width))}${wrapText(t(`cli.commands.${x.name}`), WIDTH - width - 2, width + 2).trimStart()}`);
+  }
+  lines.push('', c.bold(t('cli.globalOptions')), ...globalOptionLines(), '', c.dim(wrapText(t('cli.prefsFileNote', { path: PREFS_PATH }), WIDTH)), '', c.dim(wrapText(BRAND.nonpartisanNote, WIDTH)));
+  return lines.join('\n');
+}

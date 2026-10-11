@@ -1,61 +1,46 @@
-import { Component, lazy, Suspense, useEffect } from 'react';
-import { NavLink, Route, Routes, useLocation } from 'react-router-dom';
-import { BRAND, t } from '@agora/core';
+import { Component, lazy, Suspense } from 'react';
+import { Link, Navigate, Route, Routes, useLocation, useSearchParams } from 'react-router-dom';
+import { t } from '@agora/core';
 import { useStore } from './lib/store.jsx';
 import { DataProvider } from './lib/DataProvider.jsx';
 import { isChunkLoadError, isReloadPending, reloadOnce } from './lib/recover.js';
-import { Logo, MapIcon, StarIcon, BuildingIcon, BookIcon, NewsIcon, MoreIcon } from './components/icons.jsx';
-import LanguageSwitcher from './components/LanguageSwitcher.jsx';
-import ProfileSwitcher from './components/ProfileSwitcher.jsx';
+import AppHeader from './components/shell/AppHeader.jsx';
+import TabBar from './components/shell/TabBar.jsx';
+import AppFooter from './components/shell/AppFooter.jsx';
+import SetupHost from './components/shell/SetupHost.jsx';
+import { PageMetaProvider, RouteEffects, useShellChrome } from './components/shell/PageMeta.jsx';
+import EmptyState from './components/ui/EmptyState.jsx';
 import Home from './pages/Home.jsx';
 
-// The map is no longer the landing page, so Leaflet can load on demand instead of
-// shipping with the first screen.
-const MapPage = lazy(() => import('./pages/MapPage.jsx'));
-const Onboarding = lazy(() => import('./pages/Onboarding.jsx'));
-const ForYou = lazy(() => import('./pages/ForYou.jsx'));
+// Pages load on demand; Home ships with the first screen because it is the landing page.
+// Routes that still point at a page from before the redesign are marked "interim": the page
+// agents replace them with the rebuilt pages.
+const Meetings = lazy(() => import('./pages/Meetings.jsx'));
+const Prepare = lazy(() => import('./pages/Prepare.jsx'));
+const Write = lazy(() => import('./pages/Write.jsx'));
+const Practice = lazy(() => import('./pages/Practice.jsx'));
 const Cities = lazy(() => import('./pages/Cities.jsx'));
 const CityPage = lazy(() => import('./pages/CityPage.jsx'));
 const Insights = lazy(() => import('./pages/Insights.jsx'));
 const News = lazy(() => import('./pages/News.jsx'));
-const Learn = lazy(() => import('./pages/Learn.jsx'));
 const About = lazy(() => import('./pages/About.jsx'));
-const More = lazy(() => import('./pages/More.jsx'));
 const Profile = lazy(() => import('./pages/Profile.jsx'));
 const Community = lazy(() => import('./pages/Community.jsx'));
-const Rehearse = lazy(() => import('./pages/Rehearse.jsx'));
+// Unlinked component gallery for screenshots and review.
+const UiGallery = lazy(() => import('./dev/UiGallery.jsx'));
 
-// Home has no entry of its own: the wordmark links there, the way a masthead does.
-const NAV = [
-  { to: '/map', key: 'nav.map', icon: MapIcon },
-  { to: '/for-you', key: 'nav.forYou', icon: StarIcon },
-  { to: '/cities', key: 'nav.cities', icon: BuildingIcon },
-  { to: '/insights', key: 'nav.insights' },
-  { to: '/news', key: 'nav.news', icon: NewsIcon },
-  { to: '/community', key: 'nav.community' },
-  { to: '/learn', key: 'nav.learn', icon: BookIcon },
-  { to: '/rehearse', key: 'nav.rehearse' },
-  { to: '/about', key: 'nav.about' },
-];
-const TABS = [NAV[0], NAV[1], NAV[2], NAV[6], { to: '/more', key: 'nav.more', icon: MoreIcon }];
-
-function ScrollToTop() {
-  const { pathname } = useLocation();
-  useEffect(() => {
-    if (!location.hash) window.scrollTo(0, 0);
-  }, [pathname]);
-  return null;
-}
-
-function Loading() {
+function PageLoading() {
   return (
-    <div className="container" role="status" aria-live="polite">
-      <span className="spinner" /> {t('common.loading')}
+    <div className="wrap page-loading" role="status" aria-live="polite">
+      <span className="vh">{t('common.loading')}</span>
+      <span className="page-loading__line page-loading__line--title" aria-hidden="true" />
+      <span className="page-loading__line page-loading__line--short" aria-hidden="true" />
+      <span className="page-loading__block" aria-hidden="true" />
     </div>
   );
 }
 
-/** Keeps one broken page from blanking the whole app. */
+/** Keeps one broken page from blanking the whole app. Resets on the next navigation. */
 class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
@@ -79,110 +64,146 @@ class ErrorBoundary extends Component {
 
   render() {
     if (!this.state.error) return this.props.children;
-    // A reload is already on its way: say so instead of showing an error that is about
-    // to disappear.
     if (isReloadPending()) {
       return (
-        <div className="container" role="status" aria-live="polite">
-          <span className="spinner" aria-hidden="true" /> {t('errors.updating')}
+        <div className="wrap page-error" role="status" aria-live="polite">
+          <p>
+            <span className="spinner" aria-hidden="true" /> {t('errors.updating')}
+          </p>
         </div>
       );
     }
     const message = String((this.state.error && this.state.error.message) || this.state.error || '');
     return (
-      <div className="container" role="alert">
-        <h1>{t('errors.boundaryTitle')}</h1>
-        <p className="muted">{t('errors.boundaryBody')}</p>
-        <p className="row">
-          <button type="button" className="btn primary" onClick={() => window.location.reload()}>
-            {t('errors.reload')}
-          </button>
-          <NavLink to="/map" className="btn">
-            {t('errors.backToMap')}
-          </NavLink>
-        </p>
-        {message && (
-          <p className="hint">
-            {t('errors.detail')} <code>{message.slice(0, 300)}</code>
-          </p>
-        )}
+      <div className="wrap page-error" role="alert">
+        <h1 className="t-title">{t('errors.boundaryTitle')}</h1>
+        <EmptyState
+          icon="alert"
+          title={t('errors.boundaryLead')}
+          actions={
+            <>
+              <button type="button" className="btn btn--primary" onClick={() => window.location.reload()}>
+                {t('errors.reload')}
+              </button>
+              <Link className="btn btn--secondary" to="/">
+                {t('errors.goHome')}
+              </Link>
+            </>
+          }
+        >
+          {t('errors.boundaryBody')}
+        </EmptyState>
+        {message && <p className="page-error__detail">{`${t('errors.detail')} ${message.slice(0, 300)}`}</p>}
       </div>
     );
   }
 }
 
-export default function App() {
-  const { lang } = useStore();
-  const { pathname } = useLocation();
+/** Old addresses keep working: they forward, with the parts of the query that still mean something. */
+function Redirect({ to, keepSearch = false, set }) {
+  const { search, hash } = useLocation();
+  const params = new URLSearchParams(keepSearch ? search : '');
+  if (set) for (const [k, v] of Object.entries(set)) params.set(k, v);
+  const qs = params.toString();
+  return <Navigate replace to={`${to}${qs ? `?${qs}` : ''}${hash || ''}`} />;
+}
 
-  return (
-    <DataProvider>
-      <div className="app" key={lang}>
-        <a className="skip-link" href="#main">
-          {t('nav.skip')}
-        </a>
-        <div className="frieze" aria-hidden="true" />
-        <header className="topnav">
-          <NavLink to="/" className="brand" aria-label={t('nav.home', { app: BRAND.name })}>
-            <Logo /> {BRAND.name}
-          </NavLink>
-          <nav aria-label={t('nav.primary')}>
-            {NAV.map((n) => (
-              <NavLink key={n.to} to={n.to} end={n.end} className={({ isActive }) => (isActive ? 'active' : undefined)}>
-                {t(n.key)}
-              </NavLink>
-            ))}
-          </nav>
-          <div className="nav-tools">
-            <ProfileSwitcher />
-            <LanguageSwitcher />
-          </div>
-        </header>
-
-        <main id="main" tabIndex={-1}>
-          <ScrollToTop />
-          <ErrorBoundary resetKey={pathname}>
-            <Suspense fallback={<Loading />}>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/map" element={<MapPage />} />
-                <Route path="/start" element={<Onboarding />} />
-                <Route path="/for-you" element={<ForYou />} />
-                <Route path="/cities" element={<Cities />} />
-                <Route path="/city/:id" element={<CityPage />} />
-                <Route path="/insights" element={<Insights />} />
-                <Route path="/news" element={<News />} />
-                <Route path="/learn" element={<Learn />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/more" element={<More />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/community" element={<Community />} />
-                <Route path="/rehearse" element={<Rehearse />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-          </ErrorBoundary>
-        </main>
-
-        <nav className="tabbar" aria-label={t('nav.primaryMobile')}>
-          {TABS.map((n) => (
-            <NavLink key={n.to} to={n.to} end={n.end} className={({ isActive }) => (isActive ? 'active' : undefined)}>
-              <n.icon /> {t(n.key)}
-            </NavLink>
-          ))}
-        </nav>
-      </div>
-    </DataProvider>
-  );
+/** /learn?tab=comment was the comment builder; the other tabs became sections of Prepare. */
+function LearnRedirect() {
+  const [params] = useSearchParams();
+  const tab = params.get('tab');
+  const city = params.get('city');
+  const qs = city ? `?city=${encodeURIComponent(city)}` : '';
+  if (tab === 'comment') return <Navigate replace to={`/prepare/write${qs}`} />;
+  return <Navigate replace to={`/prepare${qs}${tab && tab !== 'checklist' ? `#${tab}` : ''}`} />;
 }
 
 function NotFound() {
   return (
-    <div className="container">
-      <h1>{t('errors.notFoundTitle')}</h1>
-      <p>
-        <NavLink to="/map">{t('nav.map')}</NavLink> · <NavLink to="/cities">{t('nav.cities')}</NavLink>
-      </p>
+    <div className="wrap page-error">
+      <h1 className="t-title">{t('errors.notFoundTitle')}</h1>
+      <EmptyState
+        icon="map"
+        title={t('errors.notFoundLead')}
+        actions={
+          <>
+            <Link className="btn btn--primary" to="/">
+              {t('errors.goHome')}
+            </Link>
+            <Link className="btn btn--secondary" to="/meetings">
+              {t('nav.meetings')}
+            </Link>
+          </>
+        }
+      >
+        {t('errors.notFoundBody')}
+      </EmptyState>
     </div>
+  );
+}
+
+function skipToMain(e) {
+  const main = document.getElementById('main');
+  if (!main) return;
+  e.preventDefault();
+  main.focus({ preventScroll: true });
+  main.scrollIntoView({ block: 'start' });
+}
+
+function Shell() {
+  const { lang } = useStore();
+  const location = useLocation();
+  const { footerHidden } = useShellChrome();
+
+  return (
+    <>
+      <a className="skip" href="#main" onClick={skipToMain}>
+        {t('nav.skip')}
+      </a>
+      <AppHeader />
+      <main id="main" tabIndex={-1}>
+        <ErrorBoundary resetKey={location.key}>
+          <Suspense fallback={<PageLoading />}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/meetings" element={<Meetings />} />
+              <Route path="/cities" element={<Cities />} />
+              <Route path="/city/:id" element={<CityPage />} />
+              <Route path="/prepare" element={<Prepare />} />
+              <Route path="/prepare/write" element={<Write />} />
+              <Route path="/prepare/practice" element={<Practice />} />
+              <Route path="/community" element={<Community />} />
+              <Route path="/news" element={<News />} />
+              <Route path="/insights" element={<Insights />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/__ui" element={<UiGallery />} />
+              {/* Addresses from before the redesign */}
+              <Route path="/map" element={<Redirect to="/meetings" keepSearch set={{ view: 'map' }} />} />
+              <Route path="/for-you" element={<Redirect to="/" />} />
+              <Route path="/start" element={<Redirect to="/" set={{ setup: '1' }} />} />
+              <Route path="/learn" element={<LearnRedirect />} />
+              <Route path="/rehearse" element={<Redirect to="/prepare/practice" keepSearch />} />
+              <Route path="/more" element={<Redirect to="/" />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </ErrorBoundary>
+      </main>
+      {!footerHidden && <AppFooter />}
+      <TabBar />
+      <SetupHost />
+      <RouteEffects languageKey={lang} />
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <DataProvider>
+      <PageMetaProvider>
+        <Shell />
+      </PageMetaProvider>
+    </DataProvider>
   );
 }

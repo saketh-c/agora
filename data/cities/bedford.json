@@ -49,6 +49,7 @@
     {
       "date": "2026-11-10",
       "status": "rescheduled",
+      "movedTo": "2026-11-17",
       "note": "No second-Tuesday meeting in November; the city calendar shows a single November regular meeting on Tuesday Nov. 17, 2026 at 6 p.m. (third Tuesday).",
       "source": "https://bedfordtx.gov/common/modules/iCalendar/iCalendar.aspx?catID=14&feed=calendar"
     },

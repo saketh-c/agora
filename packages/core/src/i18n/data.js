@@ -20,9 +20,22 @@ export const CITY_TEXT_FIELDS = Object.freeze([
 /** Array fields and the string fields inside each element that get localized. */
 export const CITY_ARRAY_FIELDS = Object.freeze({
   meetings: ['label', 'notes'],
-  scheduleExceptions: ['note'],
+  scheduleExceptions: ['note', 'label'],
   youthPrograms: ['description', 'ages', 'applyWindow'],
   agendaItems: ['title', 'summary'],
+});
+
+/**
+ * Translated fields whose English original stays next to the translation as `<field>Source`
+ * (for example `scheduleExceptions[i].noteSource`). The schedule engine reads meaning from
+ * them: it parses exception notes and builds meeting ids and agenda matches from labels, so a
+ * localized city expands to exactly the same meetings, times and ids as the English one.
+ * Agenda titles keep theirs so an item can be looked up in the English data.
+ */
+export const CITY_SOURCE_FIELDS = Object.freeze({
+  meetings: ['label'],
+  scheduleExceptions: ['note', 'label'],
+  agendaItems: ['title'],
 });
 
 function getPath(obj, path) {
@@ -54,10 +67,13 @@ export function collectCityStrings(city, into = new Set()) {
   return into;
 }
 
-/** Apply a translation memory ({ english: translated }) to one city. Returns a new object. */
+/**
+ * Apply a translation memory ({ english: translated }) to one city. Returns a new object.
+ * Fields listed in CITY_SOURCE_FIELDS keep their English original as `<field>Source` whenever
+ * they are replaced.
+ */
 export function localizeCity(city, strings) {
   if (!strings || !city) return city;
-  const tr = (s) => (typeof s === 'string' && strings[s] ? strings[s] : s);
   const out = { ...city };
   for (const path of CITY_TEXT_FIELDS) {
     const v = getPath(out, path);
@@ -65,9 +81,15 @@ export function localizeCity(city, strings) {
   }
   for (const [arrayKey, fields] of Object.entries(CITY_ARRAY_FIELDS)) {
     if (!Array.isArray(out[arrayKey])) continue;
+    const keep = CITY_SOURCE_FIELDS[arrayKey] || [];
     out[arrayKey] = out[arrayKey].map((item) => {
       const copy = { ...item };
-      for (const f of fields) copy[f] = tr(copy[f]);
+      for (const f of fields) {
+        const v = copy[f];
+        if (typeof v !== 'string' || !strings[v]) continue;
+        if (keep.includes(f) && typeof copy[`${f}Source`] !== 'string') copy[`${f}Source`] = v;
+        copy[f] = strings[v];
+      }
       return copy;
     });
   }

@@ -1,8 +1,8 @@
-import { upcomingMeetings, daysBetween, hourOf } from './schedule.js';
+import { upcomingMeetings, daysBetween, hourOf, agendaFor, parseDate, compareDates } from './schedule.js';
 import { haversineMiles, cityPoint } from './geo.js';
 import { getTopic, isTopicId } from './topics.js';
 import { milesText, formatDate, formatTime } from './format.js';
-import { t, tn, joinList, isLocale } from './i18n/index.js';
+import { t, tn, tList, joinList, isLocale, lowerFirst } from './i18n/index.js';
 
 /**
  * User preferences. No account needed: the web app keeps these in localStorage and
@@ -29,7 +29,8 @@ export function normalizePrefs(input) {
   p.lang = isLocale(p.lang) ? p.lang : null;
   p.interests = Array.isArray(p.interests) ? p.interests.filter(isTopicId) : [];
   p.availability = { ...base.availability, ...(p.availability || {}) };
-  if (p.location && (typeof p.location.lat !== 'number' || typeof p.location.lng !== 'number')) p.location = null;
+  // NaN or Infinity (for example from ?lat=abc) would make every distance meaningless, so such a location is dropped.
+  if (p.location && !(Number.isFinite(p.location.lat) && Number.isFinite(p.location.lng))) p.location = null;
   p.maxMiles = Number.isFinite(Number(p.maxMiles)) && Number(p.maxMiles) > 0 ? Number(p.maxMiles) : base.maxMiles;
   p.virtualOk = p.virtualOk !== false;
   p.canSpeakOnly = p.canSpeakOnly === true;
@@ -41,11 +42,23 @@ function itemMatches(item, interests) {
   return (item.topics || []).some((t) => interests.includes(t));
 }
 
+/** Short names of the user's topics that a set of agenda items touches (at most two), joined for a sentence. */
+function topicsPhrase(items, interests) {
+  const ids = [...new Set(items.flatMap((it) => (it.topics || []).filter((id) => interests.includes(id))))];
+  return joinList(
+    ids.slice(0, 2).map((id) => {
+      const topic = getTopic(id);
+      return topic.short || lowerFirst(topic.label);
+    }),
+  );
+}
+
 /**
- * Score one meeting occurrence for a user. Returns the score plus plain-language
- * reasons so the UI can show why something was recommended.
+ * Score one meeting occurrence for a user. Returns the score plus plain-language reasons so
+ * the UI can show why something was recommended. Reasons come strongest first (by points,
+ * ignoring sign), so a page that shows the first one or two shows the ones that mattered.
  */
-export function scoreMeeting(meeting, city, prefs, { today }) {
+export function scoreMeeting(meeting, city, prefs, { today } = {}) {
   const reasons = [];
   let score = 0;
   const add = (points, text, kind) => {
@@ -53,14 +66,22 @@ export function scoreMeeting(meeting, city, prefs, { today }) {
     reasons.push({ text, kind, points });
   };
 
-  // Topics: agenda items that hit the user's interests.
+  // Topics. An item on this meeting's own agenda is the strongest signal. Without one, a recent
+  // agenda at this council that touched the user's topics is a weak hint, dated so it reads as past.
   const matchedItems = (meeting.agendaItems || []).filter((it) => itemMatches(it, prefs.interests));
   if (matchedItems.length) {
-    const topicIds = [...new Set(matchedItems.flatMap((it) => it.topics.filter((t) => prefs.interests.includes(t))))];
-    const labels = topicIds.slice(0, 2).map((id) => getTopic(id).short || getTopic(id).label.toLowerCase());
-    add(Math.min(9, matchedItems.length * 3), tn('match.itemsOn', matchedItems.length, { topics: joinList(labels) }), 'topic');
-  } else if (prefs.interests.length && meeting.type === 'regular') {
-    add(1, t('match.votingMeeting'), 'topic');
+    add(Math.min(9, matchedItems.length * 3), tn('match.itemsOn', matchedItems.length, { topics: topicsPhrase(matchedItems, prefs.interests) }), 'topic');
+  } else if (prefs.interests.length && city && today) {
+    const recent = agendaFor(city, today).recent.filter((it) => itemMatches(it, prefs.interests));
+    if (recent.length) {
+      const latest = recent[0].meetingDate;
+      const { m, d } = parseDate(latest);
+      const topics = topicsPhrase(
+        recent.filter((it) => it.meetingDate === latest),
+        prefs.interests,
+      );
+      add(1, t('match.recentAgenda', { topics, month: tList('format.monthsShort')[m - 1], day: d }), 'topic');
+    }
   }
 
   // Time of day and day of week.
@@ -82,40 +103,50 @@ export function scoreMeeting(meeting, city, prefs, { today }) {
     add(-1, t('match.daytimeMeeting'), 'time');
   }
 
-  // Distance and home city.
+  // Distance and home city. Past the user's own limit always counts against a meeting, even
+  // when the limit is under the 5 and 10 mile tiers.
   let distanceMiles = null;
   if (prefs.location) {
     distanceMiles = haversineMiles(prefs.location, cityPoint(city));
     if (distanceMiles != null) {
       const distance = milesText(distanceMiles);
-      if (distanceMiles <= 5) add(4, t('match.away', { distance }), 'distance');
+      if (distanceMiles > prefs.maxMiles) add(-5, t('match.awayPastLimit', { distance, max: prefs.maxMiles }), 'distance');
+      else if (distanceMiles <= 5) add(4, t('match.away', { distance }), 'distance');
       else if (distanceMiles <= 10) add(2, t('match.away', { distance }), 'distance');
-      else if (distanceMiles <= prefs.maxMiles) add(0, t('match.away', { distance }), 'distance');
-      else add(-5, t('match.awayPastLimit', { distance, max: prefs.maxMiles }), 'distance');
+      else add(0, t('match.away', { distance }), 'distance');
     }
   }
-  if (prefs.homeCityId && prefs.homeCityId === city.cityId) add(3, t('match.yourCity'), 'distance');
+  if (prefs.homeCityId && city && prefs.homeCityId === city.cityId) add(3, t('match.yourCity'), 'distance');
 
-  // Ability to participate.
-  if (meeting.openToPublicComment) add(2, t('match.canSignUp'), 'speak');
-  if (city.publicComment && city.publicComment.virtualAllowed && prefs.virtualOk) add(1, t('match.remoteAllowed'), 'speak');
+  // Ability to participate. Remote comment only matters where the public may comment at all.
+  if (meeting.openToPublicComment) {
+    add(2, t('match.canSignUp'), 'speak');
+    if (city && city.publicComment && city.publicComment.virtualAllowed && prefs.virtualOk) add(1, t('match.remoteAllowed'), 'speak');
+  }
 
   // Timing.
   const days = daysBetween(today, meeting.date);
   if (days <= 3) add(2, t('match.thisWeek'), 'soon');
   else if (days <= 7) add(1, t('match.withinWeek'), 'soon');
 
-  if ((city.youthPrograms || []).length) add(1, t('match.youthPrograms'), 'youth');
+  if (city && (city.youthPrograms || []).length) add(1, t('match.youthPrograms'), 'youth');
   if (meeting.status === 'rescheduled' || meeting.status === 'special') add(0, t('match.scheduleChange'), 'note');
 
+  // Stable sort: equal strengths keep the order above.
+  reasons.sort((a, b) => Math.abs(b.points) - Math.abs(a.points));
   return { score, reasons, distanceMiles, matchedItems };
 }
 
-/** Rank upcoming meetings for a user. */
-export function matchMeetings(cities, prefsInput, { today, days = 45, limit = 25 } = {}) {
+/**
+ * Rank upcoming meetings for a user over the `days` calendar days starting `today`.
+ * `now` (an ISO string) drops meetings that already ended today. `perCity` caps how many
+ * meetings one council may contribute, so a ranked list is not one city's calendar
+ * (default: no cap).
+ */
+export function matchMeetings(cities, prefsInput, { today, days = 45, limit = 25, now, perCity } = {}) {
   const prefs = normalizePrefs(prefsInput);
   const byId = new Map(cities.map((c) => [c.cityId, c]));
-  const meetings = upcomingMeetings(cities, { from: today, days });
+  const meetings = upcomingMeetings(cities, { from: today, days, now });
   const scored = [];
   for (const m of meetings) {
     if (prefs.canSpeakOnly && !m.openToPublicComment) continue;
@@ -124,21 +155,35 @@ export function matchMeetings(cities, prefsInput, { today, days = 45, limit = 25
     if (prefs.location && distanceMiles != null && distanceMiles > prefs.maxMiles * 2) continue;
     scored.push({ ...m, score, reasons, distanceMiles, matchedItems });
   }
-  scored.sort((a, b) => b.score - a.score || (a.date < b.date ? -1 : a.date > b.date ? 1 : 0) || a.cityName.localeCompare(b.cityName));
-  return scored.slice(0, limit);
+  scored.sort((a, b) => b.score - a.score || compareDates(a.date, b.date) || a.time.localeCompare(b.time) || a.cityName.localeCompare(b.cityName));
+  const cap = Number.isInteger(perCity) && perCity > 0 ? perCity : Infinity;
+  const perCityCount = new Map();
+  const out = [];
+  for (const m of scored) {
+    if (out.length >= limit) break;
+    const n = perCityCount.get(m.cityId) || 0;
+    if (n >= cap) continue;
+    perCityCount.set(m.cityId, n + 1);
+    out.push(m);
+  }
+  return out;
 }
 
-/** Agenda items across all cities that touch the user's interests, soonest first. */
-export function matchAgendaItems(cities, prefsInput, { today, limit = 30 } = {}) {
+/**
+ * Agenda items across all cities that touch the user's interests. By default the upcoming
+ * ones (dated today or later, or undated), soonest first among equal scores; with
+ * `recent: true` the ones from the last 60 days, newest first.
+ */
+export function matchAgendaItems(cities, prefsInput, { today, limit = 30, recent = false } = {}) {
   const prefs = normalizePrefs(prefsInput);
   const out = [];
   for (const city of cities) {
     const distanceMiles = prefs.location ? haversineMiles(prefs.location, cityPoint(city)) : null;
     if (distanceMiles != null && distanceMiles > prefs.maxMiles * 2) continue;
-    for (const item of city.agendaItems || []) {
+    const split = agendaFor(city, today);
+    for (const item of recent ? split.recent : split.upcoming) {
       const hits = (item.topics || []).filter((t) => prefs.interests.includes(t));
       if (!hits.length && prefs.interests.length) continue;
-      if (item.meetingDate && item.meetingDate < today) continue;
       out.push({
         ...item,
         cityId: city.cityId,
@@ -149,7 +194,8 @@ export function matchAgendaItems(cities, prefsInput, { today, limit = 30 } = {})
       });
     }
   }
-  out.sort((a, b) => b.score - a.score || String(a.meetingDate || '9').localeCompare(String(b.meetingDate || '9')));
+  const when = (x) => String(x.meetingDate || '9');
+  out.sort((a, b) => b.score - a.score || (recent ? when(b).localeCompare(when(a)) : when(a).localeCompare(when(b))));
   return out.slice(0, limit);
 }
 
@@ -167,16 +213,26 @@ export function matchYouthPrograms(cities, prefsInput) {
   return out;
 }
 
-/** Everything the "Your plan" screen needs, in one call. */
-export function buildPlan(cities, prefsInput, { today, days = 45 } = {}) {
+/**
+ * Everything the "Your plan" screen needs, in one call. The ranked meetings hold at most two
+ * per council. `recentAgendaItems` lists matching items from the last 60 days, for when
+ * nothing on the user's topics is on an upcoming agenda yet.
+ */
+export function buildPlan(cities, prefsInput, { today, days = 45, now } = {}) {
   const prefs = normalizePrefs(prefsInput);
-  const meetings = matchMeetings(cities, prefs, { today, days, limit: 12 });
+  const meetings = matchMeetings(cities, prefs, { today, days, limit: 12, now, perCity: 2 });
   const agendaItems = matchAgendaItems(cities, prefs, { today, limit: 12 });
+  const recentAgendaItems = matchAgendaItems(cities, prefs, { today, limit: 12, recent: true });
   const youthPrograms = matchYouthPrograms(cities, prefs).slice(0, 8);
   const top = meetings[0] || null;
-  const why = top ? top.reasons.filter((r) => r.points > 0).slice(0, 2).map((r) => r.text.charAt(0).toLowerCase() + r.text.slice(1)) : [];
+  const why = top
+    ? top.reasons
+        .filter((r) => r.points > 0)
+        .slice(0, 2)
+        .map((r) => lowerFirst(r.text))
+    : [];
   const summary = top
     ? t('match.summary', { city: top.cityName, label: top.label, date: formatDate(top.date), time: formatTime(top.time), why: why.length ? ` (${why.join('; ')})` : '' })
     : t('match.noMatches');
-  return { prefs, meetings, agendaItems, youthPrograms, summary };
+  return { prefs, meetings, agendaItems, recentAgendaItems, youthPrograms, summary };
 }

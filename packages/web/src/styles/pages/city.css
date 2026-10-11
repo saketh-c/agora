@@ -1,0 +1,83 @@
+/* City page ( /city/:id ). Ported from the podium mock, section 'City page' (.city-head,
+   .city-grid, .city-main, .city-side, .sched, .youth, .links) and .city-head__mine.
+   Shared pieces (.meetcard, .howto, .disc, .verified, .crumbs) live in components.css. */
+
+.city-head__mine { display: inline-flex; margin-top: 4px; border-radius: var(--r-pill); }
+.city-head__mine:focus { outline: none; }
+.city-head__mine:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.city-head__set { flex: none; }
+
+.city-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s7); margin-top: var(--s5); }
+.city-main, .city-side { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s7); align-content: start; min-width: 0; }
+@media (min-width: 1024px) {
+  .city-grid { grid-template-columns: minmax(0, 8fr) minmax(0, 4fr); gap: var(--s6); margin-top: var(--s6); }
+  .city-main, .city-side { gap: var(--s8); }
+}
+
+/* Anchors (#speak, #schedule, #agenda) land below the sticky header, not under it. */
+.city-sec, .city #agenda { scroll-margin-top: calc(var(--header-h) + var(--s4)); }
+
+/* City data carries long URLs and emails: let them wrap instead of widening the page. */
+.city .howto, .city .disc__body, .city .youth, .city .lrow, .city .meetcard__also { overflow-wrap: anywhere; }
+
+/* Next meeting card: the tile is the large one, as mocked. */
+.meetcard__w span { white-space: nowrap; }
+.meetcard .btn-row--tight .btn--quiet { padding: 0 var(--s3); }
+.meetcard .btn-row .btn-row { margin-top: 0; }
+.meetcard .deadline { display: flex; align-items: flex-start; gap: var(--s2); font-size: 16px; line-height: 24px; }
+.meetcard .deadline .icon { width: 20px; height: 20px; margin-top: 2px; }
+.city .empty .btn-row { margin-top: var(--s4); }
+
+/* How to speak */
+.city-rules { margin-top: var(--s2); }
+.city-rules .disc__body p { font-size: 14px; line-height: 20px; }
+
+/* Schedule rows */
+.sched { display: grid; gap: 0; }
+.sched li + li { border-top: 1px solid var(--hairline); }
+.sched__row {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s3); align-items: center;
+  min-height: 44px; padding: var(--s2) var(--s2); margin: 0 calc(-1 * var(--s2)); width: calc(100% + 2 * var(--s2));
+  border: 0; border-radius: var(--r-tile); background: transparent; text-align: left; font: inherit; font-size: 14px; line-height: 20px; color: var(--ink);
+}
+@media (hover: hover) { .sched__row:hover { background: var(--row-hover); } }
+.sched__when strong { font-weight: 700; }
+.sched__note { display: block; color: var(--slate); }
+.sched__row.is-cancelled .sched__when { text-decoration: line-through; text-decoration-thickness: 1.5px; color: var(--slate); }
+.sched__row .st { font-weight: 600; white-space: nowrap; }
+.sched__all { margin: var(--s1) 0 0 calc(-1 * var(--s4)); }
+.sched__foot { font-size: 14px; line-height: 20px; color: var(--slate); }
+
+/* Agenda items */
+.agenda { display: grid; gap: 0; }
+.agenda__item { padding: var(--s3) 0; }
+.agenda__item + .agenda__item { border-top: 1px solid var(--hairline); }
+.agenda__date { font: 700 14px/20px var(--font-text); color: var(--slate); padding-top: var(--s2); }
+.agenda__date:first-child { padding-top: 0; }
+.agenda__t { font-weight: 600; }
+.agenda__t a { color: inherit; text-decoration: underline; text-decoration-color: var(--edge); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.agenda__t a:hover { text-decoration-color: var(--ink); }
+.agenda__s { margin-top: 2px; font-size: 14px; line-height: 20px; color: var(--slate); }
+.agenda__btn { margin: var(--s1) 0 0 calc(-1 * var(--s4)); }
+.agenda__x { margin-top: var(--s2); }
+
+/* Side column */
+.youth li { padding: var(--s3) 0; border-top: 1px solid var(--hairline); }
+.youth li:first-child { border-top: 0; padding-top: 0; }
+.youth li:last-child { padding-bottom: 0; }
+.youth__t { font-weight: 700; }
+.youth__t a { color: inherit; text-decoration: none; display: inline; }
+.youth__t a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.youth__t .icon { display: inline-block; vertical-align: -2px; margin-left: 6px; color: var(--slate); }
+.youth__last { white-space: nowrap; }
+.youth__m { font-size: 14px; line-height: 20px; color: var(--slate); margin-top: 2px; }
+.youth .st { margin-top: var(--s1); font-size: 14px; line-height: 20px; font-weight: 600; align-items: flex-start; }
+.youth .st .icon { margin-top: 1px; }
+.links .lrow { min-height: 52px; }
+.city__verified { margin-top: var(--s3); }
+.city__sources { margin-top: var(--s1); }
+.city__sources ul { display: grid; gap: var(--s1); font-size: 14px; line-height: 20px; }
+.city__quiet { font-size: 14px; line-height: 20px; color: var(--slate); }
+.skel--line { display: block; height: 56px; border-radius: 0; background: var(--card); position: relative; }
+.skel--line::after { content: ""; position: absolute; left: var(--s4); right: 30%; top: 18px; height: 12px; border-radius: var(--r-pill); background: var(--well); box-shadow: 0 16px 0 -2px var(--well); animation: pulse 1.6s var(--ease) infinite; }
+.city__missing { margin-top: var(--s5); max-width: 560px; }

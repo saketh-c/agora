@@ -45,12 +45,14 @@
     {
       "date": "2026-10-07",
       "status": "rescheduled",
+      "movedFrom": "2026-10-06",
       "note": "City calendar places the first October council meeting on Wednesday, Oct 7 at 6:30 p.m. instead of the usual first Tuesday (Oct 6, which is National Night Out in Texas). The calendar does not state the reason.",
       "source": "https://www.thecolonytx.gov/calendar.aspx?CID=33&month=10&year=2026"
     },
     {
       "date": "2026-11-04",
       "status": "rescheduled",
+      "movedFrom": "2026-11-03",
       "note": "City calendar places the first November council meeting on Wednesday, Nov 4 at 6:30 p.m. instead of Tuesday, Nov 3 (Election Day). The calendar does not state the reason.",
       "source": "https://www.thecolonytx.gov/calendar.aspx?CID=33&month=11&year=2026"
     }

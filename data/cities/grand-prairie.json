@@ -61,7 +61,7 @@
   "scheduleExceptions": [
     {
       "date": "2026-09-15",
-      "status": "special",
+      "status": "note",
       "note": "Regular meeting includes the state-required public hearing on the proposed 2026 property tax rate of $0.660000 per $100 valuation (unchanged from 2025 but above the no-new-revenue rate of $0.635388).",
       "source": "https://www.gptx.org/files/sharedassets/public/v/2/departments/budget/documents/budget-and-tax-matters/2026-notice-of-public-hearing-on-tax-increase.pdf"
     },
@@ -73,7 +73,7 @@
     },
     {
       "date": "2026-10-29",
-      "status": "special",
+      "status": "note",
       "note": "District 1 Town Hall with Council Member Jorja Clemson, 6:00 to 8:00 p.m., Council Chambers.",
       "source": "https://www.gptx.org/Community-Calendar/City-Council-Member-Jorja-Clemson-Town-Hall-Meeting-October-2026"
     },

@@ -74,7 +74,7 @@ test('translate, pluralize, and list joining follow the locale', () => {
   assert.equal(tn('common.agendaItems', 1), '1 agenda item');
   assert.equal(tn('common.agendaItems', 4), '4 agenda items');
   assert.equal(joinList(['a', 'b', 'c']), 'a, b and c');
-  assert.equal(t('map.cityMeetings', { city: 'Plano' }), 'Plano meetings');
+  assert.equal(t('city.councilTitle', { city: 'Plano' }), 'Plano City Council');
   assert.equal(t('nothing.here.at.all'), 'nothing.here.at.all', 'an unknown key returns the key');
   setLocale('es');
   assert.notEqual(t('common.today'), 'Today');
@@ -90,8 +90,10 @@ test('dates, times, and recurrence render in the active locale', () => {
     setLocale(code);
     assert.notEqual(formatDate('2026-09-14'), en.date, `${code} date should differ from English`);
     assert.notEqual(relativeDays('2026-09-16', '2026-09-14'), en.rel, `${code} relative day should differ`);
-    assert.ok(describeRecurrence({ kind: 'nth-weekday', weekday: 1, ordinals: [2, 4], time: '19:00' }).includes('7:00'), 'the time stays readable');
-    assert.equal(formatTime('19:00').startsWith('7:00'), true);
+    // Each locale keeps its own clock: 12-hour in Spanish, 24-hour in Vietnamese (format.test.js has the details).
+    const clock = code === 'vi' ? '19:00' : '7:00 p.m.';
+    assert.ok(describeRecurrence({ kind: 'nth-weekday', weekday: 1, ordinals: [2, 4], time: '19:00' }).includes(clock), 'the time stays readable');
+    assert.equal(formatTime('19:00'), clock);
   }
 });
 
@@ -148,4 +150,24 @@ test('translation coverage reports what is still English', () => {
   assert.equal(coverage.total, all.length);
   assert.equal(coverage.translated, 1);
   assert.equal(coverage.missing.length, all.length - 1);
+});
+
+test('localized records keep the English source of the fields the engine reads', () => {
+  const strings = {
+    'City Council Regular Meeting': 'Reunión regular del concejo municipal',
+    'Election Day.': 'Día de elecciones.',
+    'Rezoning on Miller Road': 'Rezonificación en Miller Road',
+    'Voting meeting.': 'Reunión con votación.',
+  };
+  const out = localizeCity(city, strings);
+  assert.equal(out.meetings[0].label, 'Reunión regular del concejo municipal');
+  assert.equal(out.meetings[0].labelSource, 'City Council Regular Meeting');
+  assert.equal(out.meetings[0].notesSource, undefined, 'notes are display-only, so no source is kept');
+  assert.equal(out.scheduleExceptions[0].noteSource, 'Election Day.');
+  assert.equal(out.agendaItems[0].titleSource, 'Rezoning on Miller Road');
+  assert.equal(out.agendaItems[0].summarySource, undefined);
+  assert.equal(localizeCity(out, strings).meetings[0].labelSource, 'City Council Regular Meeting', 'localizing twice keeps the English source');
+  const untranslated = localizeCity(city, { 'Fill out a speaker card.': 'x' });
+  assert.equal(untranslated.meetings[0].labelSource, undefined, 'an untranslated field is already English');
+  assert.equal(city.meetings[0].labelSource, undefined, 'the source record is not mutated');
 });

@@ -1,0 +1,115 @@
+/* Prepare hub ( /prepare ) and Write ( /prepare/write ).
+   Ported from DESIGN/podium/styles.css: 'Prepare' (.prep, .forline, .prep-prog, .builder,
+   .draft, .ref) and the Round 1 fixes (.draft .ruler, .bsum, .bopen, .builder__form gap).
+   Shared pieces come from components.css: .steps/.step, .ruler, .prog, .facts, .check-row. */
+
+.prep { max-width: calc(1100px + 2 * var(--gutter)); }
+.prep .page-head__extra { margin-top: var(--s3); }
+
+/* "Getting ready for" */
+.forline { display: flex; align-items: center; gap: var(--s2) var(--s3); padding: var(--s3) var(--s3) var(--s3) var(--s4); background: var(--card); border-radius: var(--r-group); }
+.forline__t { flex: 1 1 0; min-width: 0; max-width: none; }
+.forline .btn { flex: none; }
+.forline__t span { display: block; font-size: 14px; line-height: 20px; color: var(--slate); }
+.forline__t strong { display: block; font-weight: 700; overflow-wrap: anywhere; }
+.forline .btn--quiet { margin-right: calc(-1 * var(--s1)); }
+.prep-notice { margin-top: var(--s3); }
+
+/* Progress */
+.prep-prog { margin: var(--s5) 0 var(--s3); }
+.prep-prog__h { font-weight: 700; max-width: none; }
+
+/* Step cards (base styles in components.css) */
+.step__h { min-width: 0; }
+.step__txt { min-width: 0; }
+.step__head:focus-visible { outline-offset: -2px; }
+.step__s > span { min-width: 0; }
+/* "Not started" is the default state; where it would squeeze the title (small phones, and the
+   longer Spanish and Vietnamese labels) it is hidden visually and kept for screen readers. */
+@media (max-width: 359px) {
+  .step__statetxt--quiet { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+}
+@media (max-width: 429px) {
+  :lang(es) .step__statetxt--quiet, :lang(vi) .step__statetxt--quiet { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+}
+.step__clamp { display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.step__lead { color: var(--slate); }
+.step__actions { margin-top: var(--s4); }
+.step__check { margin-top: var(--s3); }
+.step__body > .builder + .step__check { margin-top: var(--s4); }
+.prep-facts { margin-top: 0; }
+.prep-facts > div:first-child { border-top: 0; padding-top: 0; }
+.prep-facts dd p { max-width: 65ch; }
+.prep-late { color: var(--stop-ink); }
+.prep-link { display: inline-flex; align-items: center; min-height: 44px; }
+.prep-rules { margin-top: var(--s2); }
+.prep-rules .disc__body { font-size: 14px; line-height: 20px; overflow-wrap: anywhere; }
+@media (max-width: 599px) {
+  .prep-facts > div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+}
+.prep-check { margin-top: var(--s1); }
+.prep-facts + .prep-check { margin-top: var(--s3); border-top: 1px solid var(--hairline); padding-top: var(--s1); }
+.prep-check .check-row + .check-row { border-top: 1px solid var(--hairline); }
+
+/* Comment builder */
+.builder { display: grid; gap: var(--s5); }
+.builder__form { display: grid; gap: var(--s2); align-content: start; min-width: 0; }
+.builder__group { display: grid; gap: var(--s4); min-width: 0; }
+.builder__group + .builder__group { margin-top: var(--s4); }
+.builder__group > .field + .field { margin-top: 0; }
+.builder__gh { font: 700 16px/24px var(--font-text); margin-bottom: var(--s3); }
+.bopen { margin-top: var(--s3); }
+.bsum { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--s3); align-items: center; padding: var(--s3) var(--s2) var(--s3) var(--s3); border-radius: var(--r-tile); background: var(--floor); }
+.bsum__ic { width: 28px; height: 28px; border-radius: 50%; background: var(--ink); color: var(--card); display: grid; place-items: center; }
+.bsum__ic .icon { width: 16px; height: 16px; stroke-width: 3; }
+.bsum__txt { min-width: 0; }
+.bsum__t { display: block; font-weight: 700; font-size: 14px; line-height: 20px; }
+.bsum__v { display: block; font-size: 14px; line-height: 20px; color: var(--slate); overflow-wrap: anywhere; }
+
+/* The draft and its timer */
+.draft { background: var(--floor); border-radius: var(--r-group); padding: var(--s4); min-width: 0; }
+.draft__head { margin: 0; align-items: baseline; }
+.draft__head .t-small { flex: none; }
+.draft .ruler { background: transparent; margin-top: var(--s3); }
+.draft__ai { margin-top: var(--s4); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s2); }
+.draft__ai .btn--quiet { margin-right: calc(-1 * var(--s3)); }
+.draft__text { margin-top: var(--s4); background: var(--card); border-radius: var(--r-tile); padding: var(--s4); font-size: 16px; line-height: 26px; overflow-wrap: anywhere; }
+.draft__text p { max-width: none; }
+.draft__text p + p { margin-top: var(--s3); }
+:lang(vi) .draft__text { line-height: 28px; }
+.draft .btn-row { margin-top: var(--s4); }
+.draft .btn--primary { flex: 1 1 auto; }
+.draft__note { margin-top: var(--s2); font-size: 14px; line-height: 20px; color: var(--slate); }
+.draft__status > .notice { margin-top: var(--s3); }
+
+.prep-write { margin-top: var(--s5); }
+
+@media (min-width: 1024px) {
+  .builder { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: var(--s6); align-items: start; }
+  .draft { position: sticky; top: calc(var(--header-h) + var(--s4)); padding: var(--s5); }
+  .draft .btn--primary { flex: 0 0 auto; }
+}
+
+/* Meeting picker (sheet) */
+.prep-pick + .prep-pick { margin-top: var(--s3); }
+.prep-pick__row { align-items: center; }
+.prep-pick__row .row__main { padding-top: 0; }
+.prep-pick__check { width: 24px; height: 24px; color: var(--ink); }
+.prep-pick__tile { justify-content: center; }
+.prep-pick__more { margin-top: var(--s4); }
+.prep-pick__more .link { display: inline-flex; align-items: center; min-height: 44px; }
+
+/* Reference */
+.ref { margin-top: var(--s7); }
+.prep-tips li { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: var(--s3); align-items: start; padding: var(--s3) 0; border-top: 1px solid var(--hairline); }
+.prep-tips li:first-child { border-top: 0; padding-top: 0; }
+.prep-tips li > span:last-child { padding-top: 4px; }
+.prep-tips__n { width: 32px; height: 32px; border-radius: 50%; background: var(--ink); color: var(--card); display: grid; place-items: center; font: 800 14px/1 var(--font-display); font-stretch: 112.5%; }
+.prep-gloss > div { padding: var(--s3) 0; border-top: 1px solid var(--hairline); }
+.prep-gloss > div:first-child { border-top: 0; padding-top: 0; }
+.prep-gloss dt { font-weight: 700; }
+.prep-gloss dd { margin: 2px 0 0; color: var(--slate); }
+
+@media (forced-colors: active) {
+  .forline, .bsum, .draft, .draft__text { border: 1px solid CanvasText; }
+}

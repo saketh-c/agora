@@ -1,0 +1,55 @@
+/* Chart base. Ported from the podium mock (section 22).
+   Rules: text fixed at 12/14px (never scaled by a viewBox: size SVGs in CSS pixels, or put
+   labels in HTML), one accent hue (Ink) plus grays, direct labels instead of legends, and a
+   table view for every chart (.chart-table, toggled with a Disclosure or a Segmented). */
+
+.chart { font-family: var(--font-text); overflow: visible; }
+.chart text { font-size: 12px; font-weight: 600; fill: var(--slate); }
+.chart .lbl-lg { font-size: 14px; }
+.chart .val { fill: var(--ink); font-weight: 700; }
+.chart .bar { fill: var(--edge); }
+.chart .bar--hi { fill: var(--ink); }
+.chart .bar--go { fill: var(--go); }
+.chart .track { fill: var(--well); }
+.chart .grid { stroke: var(--hairline); stroke-width: 1; }
+.chart .axis { stroke: var(--edge); stroke-width: 1; }
+.chart .you { fill: var(--go); stroke: var(--ink); stroke-width: 2; }
+
+/* A figure: takeaway title, the chart, a one-line source/caption. */
+.figure { background: var(--card); border-radius: var(--r-group); padding: var(--s4); min-width: 0; }
+@media (min-width: 1024px) { .figure { padding: var(--s5); } }
+.figure__t { font: 700 16px/24px var(--font-text); }
+.figure__s { font-size: 14px; line-height: 20px; color: var(--slate); margin-top: 2px; }
+.figure__body { margin-top: var(--s4); overflow-x: auto; }
+.figure__cap { margin-top: var(--s3); font-size: 12px; line-height: 16px; color: var(--muted); }
+
+/* HTML bar list: a chart made of rows, so labels never scale */
+.barlist { display: grid; gap: var(--s2); }
+.barlist__row { display: grid; grid-template-columns: minmax(96px, 30%) 1fr auto; gap: var(--s3); align-items: center; font-size: 14px; line-height: 20px; }
+.barlist__lbl { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.barlist__track { height: 12px; border-radius: var(--r-pill); background: var(--well); overflow: hidden; }
+.barlist__fill { height: 100%; border-radius: var(--r-pill); background: var(--edge); }
+.barlist__row.is-hi .barlist__fill { background: var(--ink); }
+.barlist__val { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* Stat tile */
+.stat { background: var(--card); border-radius: var(--r-group); padding: var(--s4); }
+.stat__n { font-family: var(--font-display); font-stretch: 125%; font-weight: 800; font-size: 28px; line-height: 32px; letter-spacing: -0.02em; }
+.stat__l { font-size: 14px; line-height: 20px; color: var(--slate); margin-top: var(--s1); }
+
+/* Table view for every chart */
+.chart-table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 20px; }
+.chart-table caption { text-align: left; font-weight: 700; padding-bottom: var(--s2); }
+.chart-table th, .chart-table td { text-align: left; padding: var(--s2) var(--s3) var(--s2) 0; border-top: 1px solid var(--hairline); vertical-align: top; }
+.chart-table thead th { font-weight: 600; color: var(--slate); border-top: 0; }
+.chart-table td.n, .chart-table th.n { text-align: right; font-variant-numeric: tabular-nums; padding-right: 0; }
+
+/* Figure parts used by components/charts.jsx Figure (title row with optional tools, table view). */
+.figure__head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--s3); }
+.figure__text { display: block; min-width: 0; }
+.figure__s { display: block; }
+.figure__table { margin-top: var(--s2); }
+.figure__table .disc__body { padding-top: var(--s2); color: var(--ink); }
+.chart-table-wrap { overflow-x: auto; }
+.barlist__sub { display: block; font-weight: 400; color: var(--slate); }
+.barlist__fill { display: block; }

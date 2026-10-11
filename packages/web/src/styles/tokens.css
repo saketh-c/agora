@@ -1,0 +1,95 @@
+/* Agora design tokens, direction "Your turn at the podium".
+   Ported from the podium mock (DESIGN/podium/styles.css, section 1). Light theme only.
+
+   Identity in one line: Ink on Card on Floor; color is the podium timer light.
+   - Go (green) = your turn / you can speak. Fill only; text on it is Ink.
+   - Amber = time is running out (deadlines). Fill only; text on it is Ink, or use --amber-ink on --amber-tint.
+   - Stop (red) = stop / cancelled. Fill with white text, or --stop-ink on --stop-tint.
+   Every other surface is neutral. Spend boldness once per screen. */
+
+:root {
+  /* core color */
+  --floor: #F2F3F6;      /* page */
+  --card: #FFFFFF;       /* surface, raised surface (with --lift), text on Ink */
+  --well: #E8EAF0;       /* sunken fills: tracks, watch-only tiles, skeletons */
+  --hairline: #D9DCE4;   /* decorative dividers only */
+  --edge: #858A99;       /* control boundaries, 3:1 */
+  --muted: #61667A;      /* tertiary text, placeholders */
+  --slate: #474C5E;      /* secondary text */
+  --ink: #15182B;        /* text, primary action, selected, focus */
+  --go: #1ED28A;         /* signal: your turn / you can speak (fill only) */
+  --amber: #FFBD2E;      /* heads-up light (fill only) */
+  --stop: #D7263F;       /* stop light (fill with white text) */
+
+  /* derived */
+  --ink-hover: #2B3049;
+  --ink-tint: #E2E5EE;
+  --go-ink: #0A6E49;
+  --go-tint: #DCF7EA;
+  --amber-ink: #875000;
+  --amber-tint: #FFF2D6;
+  --stop-ink: #B01F35;
+  --stop-tint: #FFE8EC;
+  --row-hover: #F7F8FA;
+  --row-press: #F0F1F5;
+  --chip-hover: #F4F5F8;
+
+  /* state layers */
+  --hover: rgb(21 24 43 / .06);
+  --press: rgb(21 24 43 / .10);
+  --scrim: rgb(21 24 43 / .32);
+
+  /* elevation */
+  --lift: 0 1px 2px rgb(21 24 43 / .08), 0 12px 32px -4px rgb(21 24 43 / .18);
+
+  /* type: Mona Sans (wide, 800) for display, Public Sans for text. Both self-hosted
+     through Fontsource; the variable Mona Sans file carries the wdth axis, so
+     font-stretch: 125% is real, not synthesized. */
+  --font-display: 'Mona Sans Variable', 'Mona Sans', 'Public Sans Variable', system-ui, sans-serif;
+  --font-text: 'Public Sans Variable', 'Public Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* space: 4 8 12 16 24 32 48 64 (+96 hero) */
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px; --s9: 96px;
+
+  /* radius by role */
+  --r-tile: 12px;   /* date tiles, inputs, textareas, small media */
+  --r-group: 16px;  /* list groups, content cards (20 on desktop) */
+  --r-field: 24px;  /* color-field cards (28 on desktop) */
+  --r-sheet: 28px;  /* sheets, dialogs, side panel top corners */
+  --r-pop: 16px;    /* menus, popovers, toasts */
+  --r-pill: 999px;  /* every control: buttons, chips, segmented, search, tab indicator, badges */
+
+  /* motion */
+  --d1: 100ms; --d2: 200ms; --d3: 300ms;
+  --ease: cubic-bezier(.2, 0, 0, 1);
+  --ease-in: cubic-bezier(.05, .7, .1, 1);
+  --ease-out: cubic-bezier(.3, 0, .8, .15);
+
+  /* layout */
+  --gutter: max(16px, env(safe-area-inset-left), env(safe-area-inset-right));
+  --header-h: 56px;
+  --tabbar-h: 64px;
+  --maxw: 1200px;
+
+  /* layers */
+  --z-header: 20;
+  --z-tabbar: 30;
+  --z-menu: 15;     /* in-page menus scroll under the sticky header; header menus live inside it */
+  --z-sheet: 1000;   /* above Leaflet panes and controls (which top out around 800) */
+  --z-skip: 1100;
+
+  color-scheme: light;
+}
+
+@media (min-width: 600px) {
+  :root { --gutter: max(24px, env(safe-area-inset-left), env(safe-area-inset-right)); }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --gutter: max(32px, env(safe-area-inset-left), env(safe-area-inset-right));
+    --header-h: 64px;
+    --r-group: 20px;
+    --r-field: 28px;
+  }
+}

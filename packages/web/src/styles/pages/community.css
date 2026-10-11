@@ -1,0 +1,105 @@
+/* Community ( /community ).
+   Composed from the shared pieces: .page-head, .notice, .chipbar of Chip, the .post card,
+   .group/.lrow for the side links, Sheet for filters, writing and sending, and .toast.
+   Everything here is layout and the few parts only this page has. */
+
+/* ---------- Layout: feed + side links (desktop) ---------- */
+.cm-grid { display: grid; gap: var(--s7); margin-top: var(--s6); }
+.cm-main { min-width: 0; }
+@media (min-width: 1024px) {
+  .cm-grid { grid-template-columns: minmax(0, 1fr) minmax(300px, 380px); gap: var(--s7); align-items: start; margin-top: var(--s6); }
+  .cm-side { position: sticky; top: calc(var(--header-h) + var(--s5)); }
+}
+
+/* the one primary action, with the one line that explains where posts go */
+.cm-share { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s4); }
+.cm-share__note { display: flex; align-items: flex-start; gap: var(--s2); font-size: 14px; line-height: 20px; color: var(--slate); min-width: 0; flex: 1 1 260px; }
+.cm-share__note .icon { margin-top: 1px; color: var(--slate); }
+
+/* kind chips, with the Filters chip set off by a short rule */
+.cm-chips { align-items: center; }
+.cm-chips__rule { flex: none; width: 1px; height: 24px; margin: 0 var(--s1); background: var(--hairline); }
+
+.cm-listbar { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); min-height: 44px; margin-top: var(--s2); }
+.cm-listbar__count { font-size: 14px; line-height: 20px; font-weight: 600; color: var(--slate); }
+
+.cm-feed { display: grid; gap: var(--s3); margin-top: var(--s1); }
+@media (min-width: 1024px) { .cm-feed { gap: var(--s4); } }
+
+/* ---------- Post card (extends the shared .post) ---------- */
+.cm-post { position: relative; }
+.cm-post__top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--s2) var(--s3); }
+.cm-post .post__t:focus { outline: none; }
+.cm-post:has(.post__t:focus-visible), .cm-post:has(.post__t:focus) { box-shadow: 0 0 0 2px var(--ink); }
+:lang(vi) .cm-post .post__t { line-height: 1.5; }
+.cm-post__b { overflow-wrap: anywhere; }
+.cm-post__b p + p { margin-top: var(--s3); }
+.cm-post__links { margin-top: var(--s4); gap: var(--s2); }
+
+.cm-by { display: grid; min-width: 0; }
+.cm-by strong { font-weight: 700; }
+.cm-by__sub { color: var(--slate); }
+.cm-mark { background: var(--well); }
+.cm-mark .cm-mark__svg { width: 20px; height: 20px; }
+
+.cm-helpful {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin: -12px 0 -12px -10px; padding: 0 12px 0 10px;
+  border: 0; border-radius: var(--r-pill); background: transparent; color: var(--slate); font: 600 14px/20px var(--font-text);
+  transition: background-color var(--d1) var(--ease), color var(--d1) var(--ease);
+}
+.cm-helpful .icon { width: 18px; height: 18px; }
+@media (hover: hover) { .cm-helpful:hover { background: var(--hover); color: var(--ink); } }
+.cm-helpful[aria-pressed="true"] { background: var(--ink-tint); color: var(--ink); }
+.cm-helpful[aria-pressed="true"] .icon path:first-child { fill: currentColor; }
+.cm-own { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); }
+.cm-foot--own { justify-content: flex-start; }
+.cm-by__time { margin-left: auto; align-self: flex-start; font-size: 14px; line-height: 20px; color: var(--slate); white-space: nowrap; }
+.post__foot time { white-space: nowrap; }
+
+/* ---------- Media ---------- */
+.cm-media { display: grid; gap: var(--s3); margin-top: var(--s4); }
+.cm-photos { display: grid; gap: var(--s2); grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.cm-photos img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--r-tile); background: var(--well); }
+.cm-photos--1 { grid-template-columns: minmax(0, 1fr); }
+.cm-photos--1 img { width: auto; max-width: 100%; max-height: 520px; aspect-ratio: auto; object-fit: contain; }
+.cm-photos--3 figure:first-child { grid-column: 1 / -1; }
+.cm-photos--3 figure:first-child img { aspect-ratio: 16 / 9; }
+.cm-media figcaption { margin-top: var(--s2); font-size: 14px; line-height: 20px; color: var(--slate); }
+.cm-video { max-width: 560px; }
+.cm-video video { width: 100%; aspect-ratio: 16 / 9; border-radius: var(--r-tile); background: var(--well); object-fit: contain; }
+.cm-embed { aspect-ratio: 16 / 9; border-radius: var(--r-tile); overflow: hidden; background: var(--well); }
+.cm-embed iframe { display: block; width: 100%; height: 100%; border: 0; }
+.cm-embed__play { width: 100%; height: 100%; border: 0; background: transparent; display: grid; place-content: center; justify-items: center; gap: var(--s2); color: var(--ink); font: 600 14px/20px var(--font-text); }
+.cm-embed__ic { width: 56px; height: 56px; border-radius: 50%; background: var(--ink); color: var(--card); display: grid; place-items: center; }
+.cm-embed__ic .icon { fill: currentColor; margin-left: 3px; }
+@media (hover: hover) { .cm-embed__play:hover .cm-embed__ic { background: var(--ink-hover); } }
+
+/* ---------- Sheets: write, filter, send ---------- */
+.cm-form { display: grid; gap: var(--s5); }
+.cm-form .field + .field { margin-top: 0; }
+.cm-form__two { display: grid; gap: var(--s5); }
+@media (min-width: 600px) { .cm-form__two { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; } }
+.cm-form__note { color: var(--amber-ink); font-weight: 600; }
+.cm-thumbs { display: grid; gap: var(--s2); margin-top: var(--s2); }
+.cm-thumb { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--s3); align-items: center; }
+.cm-thumb img { width: 56px; height: 56px; object-fit: cover; border-radius: var(--r-tile); background: var(--well); }
+.cm-thumb__fields { display: flex; align-items: center; gap: var(--s1); min-width: 0; }
+.cm-thumb__fields .input { flex: 1 1 auto; min-width: 0; }
+.cm-file { display: flex; align-items: center; gap: var(--s3); margin-top: var(--s2); padding: var(--s1) var(--s1) var(--s1) var(--s3); border-radius: var(--r-tile); background: var(--floor); font-size: 14px; line-height: 20px; }
+.cm-file > .icon { width: 20px; height: 20px; color: var(--slate); }
+.cm-file__name { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+.cm-sort { margin-top: var(--s5); }
+.cm-sort .check-row input[disabled] + span { color: var(--muted); }
+.cm-sheet-foot .btn--primary { flex: 1 1 auto; }
+@media (min-width: 1024px) { .cm-sheet-foot .btn--primary { flex: 0 0 auto; } }
+.cm-send { display: grid; gap: var(--s4); }
+
+/* ---------- Toast ---------- */
+.cm-toaster {
+  position: fixed; left: 0; right: 0; bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + var(--s3)); z-index: calc(var(--z-tabbar) + 1);
+  display: flex; justify-content: center; padding: 0 var(--gutter); pointer-events: none;
+}
+.cm-toaster .toast { pointer-events: auto; max-width: 560px; padding-right: var(--s4); animation: cm-toast-in var(--d3) var(--ease-in); }
+.cm-toaster .toast > .icon { flex: none; }
+@keyframes cm-toast-in { from { opacity: 0; transform: translateY(8px); } }
+@media (min-width: 1024px) { .cm-toaster { bottom: var(--s6); } }

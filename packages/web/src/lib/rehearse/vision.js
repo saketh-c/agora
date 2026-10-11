@@ -1,6 +1,6 @@
 /**
- * How it looked: where the eyes went, whether the head dropped to the notes, sway,
- * shoulder tilt, and hands. Landmarks come from MediaPipe models served from this app's
+ * How it looked: where the eyes went, whether the head dropped to the notes, sway, and
+ * hands. Landmarks come from MediaPipe models served from this app's
  * own origin and run entirely in the browser; frames are never stored or sent anywhere.
  * The summaries are pure functions over per-frame samples so they run in tests.
  */
@@ -9,7 +9,6 @@ export const THRESHOLDS = Object.freeze({
   yawDeg: 18,
   pitchUpDeg: 16,
   pitchDownDeg: -14,
-  smile: 0.4,
   handNearFace: 0.9,
 });
 
@@ -41,24 +40,47 @@ export function isEyeContact({ yaw, pitch }) {
   return Math.abs(yaw) < THRESHOLDS.yawDeg && pitch > THRESHOLDS.pitchDownDeg && pitch < THRESHOLDS.pitchUpDeg;
 }
 
-/** Load both models. Tries the GPU first and falls back to the CPU on machines without it. */
+/**
+ * Load both models. Tries the GPU first and falls back to the CPU on machines without it.
+ * A half-built pair (the face model loaded, the pose model failed) is closed before the
+ * fallback, so a failed attempt never leaves a WebGL context or a graph behind.
+ */
 export async function loadVision(modelBase) {
   const mp = await import('@mediapipe/tasks-vision');
   const fileset = await mp.FilesetResolver.forVisionTasks(`${modelBase}/wasm`);
   const make = async (delegate) => {
-    const face = await mp.FaceLandmarker.createFromOptions(fileset, {
-      baseOptions: { modelAssetPath: `${modelBase}/face_landmarker.task`, delegate },
-      runningMode: 'VIDEO',
-      numFaces: 1,
-      outputFaceBlendshapes: true,
-      outputFacialTransformationMatrixes: false,
-    });
-    const pose = await mp.PoseLandmarker.createFromOptions(fileset, {
-      baseOptions: { modelAssetPath: `${modelBase}/pose_landmarker_lite.task`, delegate },
-      runningMode: 'VIDEO',
-      numPoses: 1,
-    });
-    return { face, pose, delegate, close: () => { face.close(); pose.close(); } };
+    let face = null;
+    try {
+      face = await mp.FaceLandmarker.createFromOptions(fileset, {
+        baseOptions: { modelAssetPath: `${modelBase}/face_landmarker.task`, delegate },
+        runningMode: 'VIDEO',
+        numFaces: 1,
+        outputFaceBlendshapes: false,
+        outputFacialTransformationMatrixes: false,
+      });
+      const pose = await mp.PoseLandmarker.createFromOptions(fileset, {
+        baseOptions: { modelAssetPath: `${modelBase}/pose_landmarker_lite.task`, delegate },
+        runningMode: 'VIDEO',
+        numPoses: 1,
+      });
+      return {
+        face,
+        pose,
+        close: () => {
+          face.close();
+          pose.close();
+        },
+      };
+    } catch (err) {
+      if (face) {
+        try {
+          face.close();
+        } catch {
+          /* already gone */
+        }
+      }
+      throw err;
+    }
   };
   try {
     return await make('GPU');
@@ -67,9 +89,25 @@ export async function loadVision(modelBase) {
   }
 }
 
-function blend(list, name) {
-  const c = list && list.find((x) => x.categoryName === name);
-  return c ? c.score : 0;
+let shared = null;
+
+/**
+ * The models for this session: loaded and warmed up once, then reused by every take, so a
+ * second practice run opens straight into "ready". A failure is remembered too, so a build
+ * without the model files does not ask for them again on every run.
+ */
+export function getVision(modelBase) {
+  if (!shared) {
+    shared = loadVision(modelBase).then((models) => {
+      try {
+        warmUp(models, null);
+      } catch {
+        /* the first real frame absorbs the setup instead */
+      }
+      return models;
+    });
+  }
+  return shared;
 }
 
 /**
@@ -99,9 +137,6 @@ export function analyzeFrame(models, video, detectMs, prev, elapsedSec) {
   const f = models.face.detectForVideo(video, tMs);
   if (f && f.faceLandmarks && f.faceLandmarks[0]) {
     Object.assign(sample, headPoseFromLandmarks(f.faceLandmarks[0]), { faceFound: true });
-    const bs = f.faceBlendshapes && f.faceBlendshapes[0] ? f.faceBlendshapes[0].categories : null;
-    sample.smile = (blend(bs, 'mouthSmileLeft') + blend(bs, 'mouthSmileRight')) / 2;
-    sample.browUp = blend(bs, 'browInnerUp');
   }
   const p = models.pose.detectForVideo(video, tMs);
   if (p && p.landmarks && p.landmarks[0]) {
@@ -111,7 +146,6 @@ export function analyzeFrame(models, video, detectMs, prev, elapsedSec) {
     const nose = lm[0];
     const shoulderW = Math.hypot(rs.x - ls.x, rs.y - ls.y) || 1e-6;
     sample.poseFound = true;
-    sample.shoulderTilt = (Math.atan2(rs.y - ls.y, rs.x - ls.x) * 180) / Math.PI;
     sample.shoulderMidX = (ls.x + rs.x) / 2;
     const wrists = [lm[15], lm[16]].filter((w) => w && (w.visibility === undefined || w.visibility > 0.5) && w.x > 0 && w.x < 1 && w.y > 0 && w.y < 1);
     sample.handsVisible = wrists.length > 0;
@@ -166,11 +200,8 @@ export function summarizeBody(samples, { fps = 10, durationSec = 0 } = {}) {
     eyeContactShare: face.length ? eye.filter(Boolean).length / face.length : 0,
     lookingDownShare: face.length ? face.filter((s) => s.pitch <= THRESHOLDS.pitchDownDeg).length / face.length : 0,
     headMovement: face.length > 1 ? (headMove / (face.length - 1)) * fps : 0,
-    smileShare: face.length ? face.filter((s) => (s.smile || 0) > THRESHOLDS.smile).length / face.length : 0,
-    expressionVariety: std(face.map((s) => s.smile || 0)),
     poseShare: n ? pose.length / n : 0,
     swayStd: std(pose.map((s) => s.shoulderMidX)),
-    shoulderTiltMean: mean(pose.map((s) => Math.abs(s.shoulderTilt))),
     handsVisibleShare: pose.length ? visibleWrist.length / pose.length : 0,
     handsNearFaceShare: pose.length ? pose.filter((s) => s.handNearFace).length / pose.length : 0,
     gestureActivity: visibleWrist.length ? mean(visibleWrist.map((s) => s.wristMove || 0)) * fps : 0,

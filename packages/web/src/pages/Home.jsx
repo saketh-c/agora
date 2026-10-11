@@ -1,120 +1,112 @@
-import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { upcomingMeetings, matchMeetings, computeStats, BRAND, t, tn } from '@agora/core';
-import { today as todayFn } from '../lib/data.js';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { nextMeetingFor, t } from '@agora/core';
 import { useCities } from '../lib/DataProvider.jsx';
 import { useStore } from '../lib/store.jsx';
-import MeetingCard from '../components/MeetingCard.jsx';
-import MeetingDrawer from '../components/MeetingDrawer.jsx';
-import { StatTile } from '../components/charts.jsx';
-import { ScheduleRibbon } from '../components/viz.jsx';
-import { StarIcon, ArrowIcon } from '../components/icons.jsx';
+import { MeetingDetail, MeetingDetailBadge, Sheet } from '../components/ui/index.js';
+import HomeFirst from '../components/home/HomeFirst.jsx';
+import HomeReturning from '../components/home/HomeReturning.jsx';
+import useClock from '../components/home/useClock.js';
+import { SETUP_SAVED } from '../components/shell/SetupHost.jsx';
+import { findMeeting } from '../components/home/homeData.js';
+import '../styles/pages/home.css';
 
-const RIBBON_DAYS = 45;
-const pct = (x) => `${Math.round(x * 100)}%`;
+/** The meeting named by ?meeting=<id>, in a sheet (phones) or a side panel (desktop). */
+function MeetingSheet({ id, onClose, onOpenMeeting }) {
+  const { cityById } = useCities();
+  const { prefs } = useStore();
+  const { today, now } = useClock();
+  const found = useMemo(() => findMeeting(cityById, id), [cityById, id]);
+  // Keep showing the last meeting while the sheet animates closed.
+  const last = useRef(null);
+  if (found) last.current = found;
+  const meeting = found || last.current;
+  const city = meeting ? cityById(meeting.cityId) : null;
+  const nextSpeakable = useMemo(
+    () => (meeting && city && !meeting.openToPublicComment ? nextMeetingFor(city, today, { publicCommentOnly: true, now }) : null),
+    [meeting, city, today, now],
+  );
+  return (
+    <Sheet open={Boolean(found)} onClose={onClose} variant="side" labelledBy="home-md-h" barStart={meeting ? <MeetingDetailBadge meeting={meeting} homeCityId={prefs.homeCityId} /> : null}>
+      {meeting && <MeetingDetail meeting={meeting} city={city} today={today} now={now} headingId="home-md-h" nextSpeakable={nextSpeakable} onOpenMeeting={onOpenMeeting} />}
+    </Sheet>
+  );
+}
 
-/** What the app is, what is happening next, and the one thing to do about it. */
+/**
+ * Home ( / ). Before setup: the first-visit question and three meetings you can speak at. After:
+ * your next meeting and what is coming up. ?meeting=<id> opens a meeting's details in a sheet
+ * that Back closes. (?setup=1, "Your city, topics and times", is the shell's: see SetupHost.)
+ */
 export default function Home() {
-  const { prefs, onboarded, profile } = useStore();
-  const { cities, cityById } = useCities();
-  const today = todayFn();
-  const [open, setOpen] = useState(null);
+  const { setupComplete, profile } = useStore();
+  const [params, setParams] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  // The profile that just finished setup here: its returning view takes focus on arrival.
+  const [arrived, setArrived] = useState(null);
+  const [saved, setSaved] = useState('');
 
-  const stats = useMemo(() => computeStats(cities, { today, days: 30 }), [cities, today]);
-  const ribbon = useMemo(() => upcomingMeetings(cities, { from: today, days: RIBBON_DAYS }), [cities, today]);
-  // Once someone has answered the setup questions, lead with their meetings rather than
-  // whatever happens to be soonest across the region.
-  const featured = useMemo(
-    () => (onboarded ? matchMeetings(cities, prefs, { today, days: RIBBON_DAYS, limit: 4 }) : upcomingMeetings(cities, { from: today, days: 14 }).slice(0, 4)),
-    [cities, onboarded, prefs, today],
+  // Clear the spoken confirmation, so the same words are announced again next time.
+  useEffect(() => {
+    if (!saved) return undefined;
+    const timer = setTimeout(() => setSaved(''), 4000);
+    return () => clearTimeout(timer);
+  }, [saved]);
+
+  // Setup finished in the shell's sheet ("Your city, topics and times"): the returning view
+  // that replaces the first-visit one takes focus, as it does after the question card.
+  useEffect(() => {
+    const onSaved = (e) => {
+      if (e.detail && e.detail.completed) setArrived(profile.id);
+    };
+    window.addEventListener(SETUP_SAVED, onSaved);
+    return () => window.removeEventListener(SETUP_SAVED, onSaved);
+  }, [profile.id]);
+
+  const openMeeting = useCallback(
+    (meeting) => {
+      const next = new URLSearchParams(params);
+      next.set('meeting', meeting.id);
+      // Opening one meeting from another replaces it, so Back still closes the sheet in one step.
+      const replace = params.has('meeting');
+      setParams(next, { replace, state: replace ? location.state : { homeSheet: true } });
+    },
+    [params, setParams, location.state],
+  );
+
+  /** Close a sheet: step back if we opened it, otherwise drop its parameter in place. */
+  const closeParam = useCallback(
+    (key) => {
+      if (location.state && location.state.homeSheet) {
+        navigate(-1);
+        return;
+      }
+      const next = new URLSearchParams(params);
+      next.delete(key);
+      setParams(next, { replace: true });
+    },
+    [location.state, navigate, params, setParams],
   );
 
   return (
-    <div className="container">
-      <section className="hero">
-        <div>
-          <h1 className="hero-title">{BRAND.tagline}</h1>
-          <p className="lead">{BRAND.shortDescription}</p>
-          <div className="row" style={{ marginTop: 18 }}>
-            {onboarded ? (
-              <Link to="/for-you" className="btn primary">
-                <StarIcon /> {t('home.seeMyMeetings')}
-              </Link>
-            ) : (
-              <Link to="/start" className="btn primary">
-                <StarIcon /> {t('home.getStarted')}
-              </Link>
-            )}
-            <Link to="/map" className="btn">
-              {t('home.browseMap')} <ArrowIcon />
-            </Link>
-          </div>
-          {onboarded && (
-            <p className="hint" style={{ marginTop: 12 }}>
-              {t('home.signedInAs', { name: profile.name })} <Link to="/profile">{t('profile.manage')}</Link>
-            </p>
-          )}
-        </div>
-        <div>
-          <p className="hero-note">{t('home.whyNote')}</p>
-        </div>
-      </section>
-
-      <div className="tiles" style={{ margin: '26px 0 22px' }}>
-        <StatTile value={stats.totals.cities} label={t('insights.citiesCovered')} />
-        <StatTile value={stats.totals.meetings} label={t('insights.meetingsNext30')} />
-        <StatTile value={pct(stats.totals.eveningShare)} label={t('insights.startAfter5')} />
-        <StatTile value={stats.totals.citiesWithYouthPrograms} label={t('insights.citiesWithYouth')} />
-      </div>
-
-      <ScheduleRibbon meetings={ribbon} from={today} days={RIBBON_DAYS} title={t('home.ribbonTitle', { n: RIBBON_DAYS })} />
-
-      <section aria-labelledby="h-next" style={{ marginTop: 26 }}>
-        <div className="section-head">
-          <h2 id="h-next">{onboarded ? t('home.nextForYou') : t('home.happeningNext')}</h2>
-          <Link className="btn quiet" to={onboarded ? '/for-you' : '/map'}>
-            {t('home.seeAll')}
-          </Link>
-        </div>
-        <ul className="rows">
-          {featured.map((m) => (
-            <li key={m.id}>
-              <MeetingCard meeting={m} today={today} onSelect={setOpen} selected={Boolean(open && open.id === m.id)} compact={!onboarded} />
-            </li>
-          ))}
-        </ul>
-        {featured.length === 0 && <p className="empty">{t('home.nothingScheduled')}</p>}
-      </section>
-
-      <section className="section" aria-labelledby="h-do">
-        <div className="section-head">
-          <h2 id="h-do">{t('home.whatYouCanDo')}</h2>
-        </div>
-        <ul className="linkgrid list-reset">
-          {[
-            ['/map', 'home.doMap', 'home.doMapNote'],
-            ['/cities', 'home.doCities', 'home.doCitiesNote'],
-            ['/learn', 'home.doLearn', 'home.doLearnNote'],
-            ['/rehearse', 'home.doRehearse', 'home.doRehearseNote'],
-            ['/insights', 'home.doInsights', 'home.doInsightsNote'],
-          ].map(([to, title, note]) => (
-            <li key={to}>
-              <Link to={to} style={{ fontWeight: 700, textDecoration: 'none' }}>
-                {t(title)}
-              </Link>
-              <p className="hint" style={{ margin: '2px 0 0' }}>
-                {t(note)}
-              </p>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <p className="hint section">
-        {BRAND.nonpartisanNote} {tn('home.dataLine', cities.length)} <Link to="/about">{t('home.aboutTheData')}</Link>
+    <div className="home-page">
+      {setupComplete ? (
+        <HomeReturning key={profile.id} focusHeading={arrived === profile.id} onOpenMeeting={openMeeting} />
+      ) : (
+        <HomeFirst
+          key={profile.id}
+          onOpenMeeting={openMeeting}
+          onDone={(place) => {
+            setArrived(profile.id);
+            setSaved(t('home.setup.ready', { city: place.city.name }));
+          }}
+        />
+      )}
+      <p className="vh" role="status" aria-live="polite">
+        {saved}
       </p>
-
-      {open && <MeetingDrawer meeting={open} city={cityById(open.cityId)} today={today} onClose={() => setOpen(null)} />}
+      <MeetingSheet id={params.get('meeting')} onClose={() => closeParam('meeting')} onOpenMeeting={openMeeting} />
     </div>
   );
 }

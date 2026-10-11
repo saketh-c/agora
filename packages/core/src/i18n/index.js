@@ -1,14 +1,15 @@
 /**
  * Internationalization for every string the engine, the web app, and the CLI produce.
  *
- * Dictionaries live in ./locales/<code>.js. `t()` looks a dotted key up in the current
- * locale and falls back to English, so a missing translation never breaks the app.
+ * Dictionaries live in ./locales/<code>/, one file per namespace, assembled by that
+ * folder's index.js. `t()` looks a dotted key up in the current locale and falls back to
+ * English, so a missing translation never breaks the app.
  * City data (public comment rules, agenda items, and so on) is translated separately
  * with a translation memory; see ./data.js.
  */
-import en from './locales/en.js';
-import es from './locales/es.js';
-import vi from './locales/vi.js';
+import en from './locales/en/index.js';
+import es from './locales/es/index.js';
+import vi from './locales/vi/index.js';
 
 export const LOCALES = Object.freeze([
   { code: 'en', name: 'English', nativeName: 'English' },
@@ -98,6 +99,18 @@ export function joinList(items, locale) {
   const and = t('format.and', undefined, locale);
   if (list.length === 2) return `${list[0]} ${and} ${list[1]}`;
   return `${list.slice(0, -1).join(', ')} ${and} ${list[list.length - 1]}`;
+}
+
+/**
+ * Lowercase the first letter so a phrase can continue a sentence ("Rent, first apartments"
+ * becomes "rent, first apartments"), unless the first word is an acronym or a mixed-case name
+ * such as "DART" or "Wi-Fi", which must keep its capitals in every language.
+ */
+export function lowerFirst(text) {
+  const s = String(text || '');
+  const firstWord = s.split(/[\s,.;:!?()]/)[0];
+  if (/\p{Lu}/u.test(firstWord.slice(1))) return s;
+  return s.charAt(0).toLowerCase() + s.slice(1);
 }
 
 /** Every dotted key in a dictionary, used by the coverage check script. */

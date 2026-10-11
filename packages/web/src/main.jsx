@@ -1,8 +1,11 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import 'leaflet/dist/leaflet.css';
-import './styles.css';
+// Fonts, self-hosted (no CDN at runtime). Mona Sans with the wdth axis, so the display type's
+// font-stretch: 125% is the real wide cut; Public Sans for text. Both carry Vietnamese.
+import '@fontsource-variable/mona-sans/wdth.css';
+import '@fontsource-variable/public-sans/wght.css';
+import './styles/index.css';
 import { StoreProvider } from './lib/store.jsx';
 import { reloadOnce } from './lib/recover.js';
 import App from './App.jsx';

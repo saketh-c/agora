@@ -1,0 +1,41 @@
+/* Profiles and backup ( /profile ). A quiet page: the profiles as one list group, backup as one
+   card, and Sheets for adding, editing and deleting. */
+
+.pf-privacy { margin-top: var(--s1); }
+.pf-how { margin-top: var(--s1); }
+.pf-how .disc__body p { max-width: 60ch; }
+
+.pf-cols { display: grid; gap: var(--s7); margin-top: var(--s6); }
+@media (min-width: 1024px) { .pf-cols { grid-template-columns: minmax(0, 1fr) minmax(300px, 400px); gap: var(--s7); align-items: start; margin-top: var(--s7); } }
+
+/* The row menus hang below their row, so the list must not clip them (.group hides overflow
+   to round its corners; the rows here have no background of their own to clip). */
+.pf-list { overflow: visible; }
+.pf-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--s3); align-items: center; padding: var(--s3) var(--s2) var(--s3) var(--s4); min-height: 72px; }
+.pf-row__main { min-width: 0; }
+.pf-row__name { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1) var(--s2); font-weight: 600; }
+.pf-row__n { min-width: 0; overflow-wrap: anywhere; }
+.pf-row__name .badge { min-height: 24px; padding: 0 8px 0 6px; font-size: 12px; line-height: 16px; }
+.pf-row__name .badge .icon { width: 14px; height: 14px; }
+.pf-row__meta { font-size: 14px; line-height: 20px; color: var(--slate); margin-top: 2px; overflow-wrap: anywhere; }
+.pf-row__act { display: flex; align-items: center; gap: var(--s1); }
+.pf-row .menu-anchor > .menu:not(.menu--up) { top: calc(100% + 2px); }
+.pf-add { margin-top: var(--s3); }
+
+.pf-backup { display: grid; gap: var(--s4); }
+.pf-backup > p { color: var(--slate); }
+
+.pf-form { display: grid; gap: var(--s5); }
+.pf-form .field + .field { margin-top: 0; }
+.pf-last { margin-top: var(--s3); color: var(--stop-ink); font-weight: 600; }
+.pf-sheet-foot .btn--primary { flex: 1 1 auto; }
+@media (min-width: 1024px) { .pf-sheet-foot .btn--primary { flex: 0 0 auto; } }
+
+/* toast */
+.pf-toaster {
+  position: fixed; left: 0; right: 0; bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + var(--s3)); z-index: calc(var(--z-tabbar) + 1);
+  display: flex; justify-content: center; padding: 0 var(--gutter); pointer-events: none;
+}
+.pf-toaster .toast { pointer-events: auto; max-width: 560px; padding-right: var(--s4); animation: pf-toast-in var(--d3) var(--ease-in); }
+@keyframes pf-toast-in { from { opacity: 0; transform: translateY(8px); } }
+@media (min-width: 1024px) { .pf-toaster { bottom: var(--s6); } }

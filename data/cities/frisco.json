@@ -51,10 +51,10 @@
         "time": "16:00",
         "notes": "Held the afternoon of each regular meeting. On the 2026 city calendar, first-Tuesday sessions start at 4 p.m. (Oct. 6, Nov. 3, Dec. 1) and third-Tuesday sessions at 3:30 p.m. (Sept. 15, Oct. 20, Nov. 17, Dec. 15); the Sept. 15 session is posted on OnBase for 3 p.m. Check the agenda for the exact time and room."
       },
-      "location": "George A. Purefoy Municipal Center, 6101 Frisco Square Blvd., Frisco, TX 75034 (Training Room 252, second floor, on third Tuesdays; Conference Room L120, first floor, on first Tuesdays)",
+      "location": "George A. Purefoy Municipal Center, 6101 Frisco Square Blvd., Frisco, TX 75034",
       "virtualUrl": "https://www.friscotexas.gov/943/Watch-FTVN-Live-Council-Meetings-etc",
       "openToPublicComment": false,
-      "notes": "Discussion-only sessions; no Citizen Input period is listed on work session agendas. A Special Called Budget Work Session was held Sept. 2, 2026 (it appears on the city calendar as a 5 p.m. City Council Meeting), and the council sets separate Summer and Winter Work Session dates each year.",
+      "notes": "Held in Training Room 252 (second floor) on third Tuesdays and in Conference Room L120 (first floor) on first Tuesdays. Discussion-only sessions; no Citizen Input period is listed on work session agendas. A Special Called Budget Work Session was held Sept. 2, 2026 (it appears on the city calendar as a 5 p.m. City Council Meeting), and the council sets separate Summer and Winter Work Session dates each year.",
       "source": "https://www.friscotexas.gov/common/modules/iCalendar/iCalendar.aspx?catID=14&feed=calendar"
     }
   ],
@@ -73,7 +73,7 @@
     },
     {
       "date": "2026-11-03",
-      "status": "special",
+      "status": "note",
       "note": "Regular meeting remains on the city calendar on Election Day (Nov. 3, 2026) at 5 p.m. in the Council Chambers, with the work session at 4 p.m. in Conference Room L120.",
       "source": "https://www.friscotexas.gov/Calendar.aspx?EID=6847"
     }

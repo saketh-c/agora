@@ -63,12 +63,16 @@
       "type": "work-session",
       "label": "Fourth-Tuesday Work Session (as needed)",
       "recurrence": {
-        "kind": "nth-weekday",
+        "kind": "custom",
         "weekday": 2,
         "ordinals": [
           4
         ],
         "time": "15:00",
+        "dates": [
+          "2026-09-22",
+          "2026-10-27"
+        ],
         "notes": "Scheduled as needed. On the 2026 schedule: Sept. 22 (work session only) and Oct. 27 (work session at 3 p.m. plus a 4 p.m. joint meeting with the McKinney Economic Development Corporation). No fourth-Tuesday sessions are listed for November or December 2026."
       },
       "location": "Council Chambers, McKinney City Hall, 401 E. Virginia St., McKinney, TX 75069",
@@ -81,31 +85,32 @@
   "scheduleExceptions": [
     {
       "date": "2026-09-22",
-      "status": "special",
+      "status": "note",
       "note": "Work session only at 3 p.m. (no 6 p.m. regular meeting).",
       "source": "https://www.mckinneytexas.org/DocumentCenter/View/38961/2026-Proposed-Council-Meeting-Dates---PDF"
     },
     {
       "date": "2026-10-06",
       "status": "rescheduled",
+      "movedTo": "2026-10-05",
       "note": "The first-Tuesday meeting is moved to Monday, Oct. 5, 2026 (3 p.m. work session, 6 p.m. regular meeting) because National Night Out is Tuesday, Oct. 6.",
       "source": "https://www.mckinneytexas.org/DocumentCenter/View/38961/2026-Proposed-Council-Meeting-Dates---PDF"
     },
     {
       "date": "2026-10-05",
-      "status": "special",
+      "status": "note",
       "note": "Monday meeting date: 3 p.m. work session and 6 p.m. regular meeting held in place of Tuesday, Oct. 6.",
       "source": "https://www.mckinneytexas.org/DocumentCenter/View/38961/2026-Proposed-Council-Meeting-Dates---PDF"
     },
     {
       "date": "2026-10-27",
-      "status": "special",
+      "status": "note",
       "note": "3 p.m. work session followed by a 4 p.m. joint meeting with the McKinney Economic Development Corporation; no regular meeting.",
       "source": "https://www.mckinneytexas.org/DocumentCenter/View/38961/2026-Proposed-Council-Meeting-Dates---PDF"
     },
     {
       "date": "2026-11-03",
-      "status": "special",
+      "status": "note",
       "note": "Regular meeting is still scheduled on Election Day (3 p.m. work session, 6 p.m. regular meeting).",
       "source": "https://www.mckinneytexas.org/DocumentCenter/View/38961/2026-Proposed-Council-Meeting-Dates---PDF"
     }

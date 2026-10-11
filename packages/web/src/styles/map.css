@@ -1,0 +1,39 @@
+/* Map base. Ported from the podium mock (section 21).
+   OpenStreetMap standard tiles, loaded with crossOrigin and the class "basemap", turned
+   into a quiet gray base (never sepia) so the Ink pins and the Go selection carry the color.
+   The container background is Floor so unloaded tiles do not flash white or gray. */
+
+.map { position: relative; background: var(--floor); overflow: hidden; }
+/* Leaflet's panes and controls use z-index up to 1000. Isolating the map keeps them inside it,
+   so a panel over the map, the sticky header and sheets always paint above the tiles. */
+.map__leaflet { position: absolute; inset: 0; isolation: isolate; z-index: 0; }
+.map--loading { min-height: 240px; animation: pulse 1.6s var(--ease) infinite; }
+.map__note {
+  position: absolute; z-index: 500; top: var(--s4); left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: var(--s2); max-width: calc(100% - 2 * var(--s8));
+  padding: var(--s2) var(--s4); border-radius: var(--r-pill); background: var(--card); box-shadow: var(--lift);
+  font-size: 14px; line-height: 20px; font-weight: 600; color: var(--ink);
+}
+.leaflet-container { background: var(--floor) !important; font-family: var(--font-text) !important; font-size: 14px; }
+.basemap { filter: grayscale(1) contrast(.62) brightness(1.18); }
+.leaflet-control-attribution { font-size: 12px !important; line-height: 16px !important; background: rgb(255 255 255 / .85) !important; color: var(--slate) !important; padding: 2px 8px !important; border-radius: 8px 0 0 0; }
+.leaflet-control-attribution a { color: var(--ink) !important; }
+.leaflet-bottom.leaflet-left .leaflet-control-attribution { border-radius: 0 8px 0 0; }
+.leaflet-div-icon, .pin-icon { background: transparent; border: 0; }
+.leaflet-marker-icon:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; border-radius: 50%; }
+
+/* Pins: Ink dots with a white halo; Go centre = you can speak; selected = Go with a mic. */
+.pin { width: 18px; height: 18px; border-radius: 50%; background: var(--ink); border: 3px solid var(--card); box-shadow: 0 1px 3px rgb(21 24 43 / .35); position: relative; }
+.pin--go::after { content: ""; position: absolute; inset: 3px; border-radius: 50%; background: var(--go); }
+.pin--watch { background: var(--card); border-color: var(--ink); border-width: 2.5px; }
+.pin--sel { width: 34px; height: 34px; background: var(--go); color: var(--ink); border: 3px solid var(--ink); box-shadow: 0 0 0 3px var(--card), 0 4px 10px rgb(21 24 43 / .35); display: grid; place-items: center; }
+.pin--sel::after { display: none; }
+.pin--sel .icon { width: 20px; height: 20px; }
+.pin--you { background: var(--card); border: 3px solid var(--ink); }
+.pin--you::after { content: ""; position: absolute; inset: 3px; border-radius: 50%; background: var(--ink); }
+.pin-label { position: absolute; left: 50%; top: calc(100% + 6px); transform: translateX(-50%); background: var(--ink); color: var(--card); font: 700 12px/16px var(--font-text); padding: 4px 8px; border-radius: var(--r-pill); white-space: nowrap; pointer-events: none; }
+
+/* Floating map controls */
+.mapctl { position: absolute; z-index: 500; display: grid; gap: var(--s2); top: var(--s4); left: var(--s4); }
+.mapctl .iconbtn { background: var(--card); box-shadow: var(--lift); }
+@media (hover: hover) { .mapctl .iconbtn:hover { background: var(--row-hover); } }

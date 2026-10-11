@@ -20,11 +20,11 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png'],
       manifest: {
-        name: 'Agora: DFW city council meetings',
+        name: 'Agora: your turn to speak at city hall',
         short_name: 'Agora',
-        description: 'Find every city council meeting in Dallas-Fort Worth, learn how to sign up to speak, and get matched to the issues you care about.',
-        theme_color: '#1a4f6b',
-        background_color: '#f2efe7',
+        description: 'Find a city council meeting in Dallas-Fort Worth, learn exactly how to sign up to speak, and get ready to say your piece.',
+        theme_color: '#15182B',
+        background_color: '#F2F3F6',
         display: 'standalone',
         start_url: base,
         scope: base,
@@ -36,31 +36,31 @@ export default defineConfig({
           { src: 'icons/maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
         shortcuts: [
-          { name: 'For you', url: `${base}for-you`, description: 'Meetings matched to your interests' },
-          { name: 'Map', url: `${base}map`, description: 'Every DFW council meeting on a map' },
+          { name: 'Meetings', url: `${base}meetings`, description: 'Council meetings near you, on a list or a map' },
+          { name: 'Prepare', url: `${base}prepare`, description: 'Sign up, write your comment and practice it' },
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,webmanifest}'],
-        // The vision models are about 10 MB and only needed by Rehearse, so they are
-        // fetched on first use and then kept, rather than precached for everyone.
-        globIgnores: ['models/**'],
+        // woff2: the self-hosted fonts, so the display type works offline too.
+        globPatterns: ['**/*.{js,css,html,svg,png,webmanifest,woff2}'],
+        // The vision models are about 10 MB and only needed by Practice, and the es/vi city
+        // translation memories (about 600 KB each) only by people reading in that language,
+        // so they are fetched on first use and then kept, rather than precached for everyone.
+        globIgnores: ['models/**', '**/assets/es-*.js', '**/assets/vi-*.js', '**/assets/vision_bundle-*.js'],
         navigateFallback: `${base}index.html`,
+        // API URLs opened directly (for example /api/health) must reach the server, not the app.
+        navigateFallbackDenylist: [/\/api\//],
         runtimeCaching: [
           {
             urlPattern: ({ url }) => url.pathname.includes('/models/'),
             handler: 'CacheFirst',
             options: { cacheName: 'vision-models', cacheableResponse: { statuses: [0, 200] }, expiration: { maxEntries: 12, maxAgeSeconds: 60 * 60 * 24 * 30 } },
           },
+          // No OpenStreetMap tile caching: the OSM tile usage policy forbids offline tile caches.
           {
-            urlPattern: /^https:\/\/[abc]\.tile\.openstreetmap\.org\/.*/i,
+            urlPattern: ({ url }) => /\/assets\/(es|vi|vision_bundle)-[\w-]+\.js$/.test(url.pathname),
             handler: 'CacheFirst',
-            options: { cacheName: 'osm-tiles', cacheableResponse: { statuses: [0, 200] }, expiration: { maxEntries: 400, maxAgeSeconds: 60 * 60 * 24 * 14 } },
-          },
-          {
-            urlPattern: /^https:\/\/tile\.openstreetmap\.org\/.*/i,
-            handler: 'CacheFirst',
-            options: { cacheName: 'osm-tiles', cacheableResponse: { statuses: [0, 200] }, expiration: { maxEntries: 400, maxAgeSeconds: 60 * 60 * 24 * 14 } },
+            options: { cacheName: 'on-demand-chunks', cacheableResponse: { statuses: [0, 200] }, expiration: { maxEntries: 12, maxAgeSeconds: 60 * 60 * 24 * 30 } },
           },
           {
             // Only reference data is cached offline. Geocode, news, and AI responses can carry a
@@ -80,11 +80,12 @@ export default defineConfig({
   server: {
     port: 5173,
     fs: { allow: [repoRoot] },
-    proxy: { '/api': { target: 'http://localhost:8787', changeOrigin: true } },
+    // xfwd passes the browser's address on, so dev users are not one rate-limit bucket.
+    proxy: { '/api': { target: 'http://localhost:8787', changeOrigin: true, xfwd: true } },
   },
   preview: {
     port: 4173,
-    proxy: { '/api': { target: 'http://localhost:8787', changeOrigin: true } },
+    proxy: { '/api': { target: 'http://localhost:8787', changeOrigin: true, xfwd: true } },
   },
   build: {
     outDir: 'dist',
@@ -93,7 +94,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          react: ['react', 'react-dom', 'react-router-dom'],
+          react: ['react', 'react-dom', 'react-dom/client', 'react-router-dom'],
           leaflet: ['leaflet', 'react-leaflet'],
         },
       },

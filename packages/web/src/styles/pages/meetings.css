@@ -1,0 +1,82 @@
+/* Meetings ( /meetings, /meetings?view=map ).
+   Ported from the podium mock, section 'Meetings' (+ the Round 1 list padding fix).
+   Phones: one column, List | Map toggle, the meeting opens in a bottom sheet.
+   Desktop (>= 1024px): the list column scrolls on its own next to the map, and the meeting
+   opens in a panel over the map. The shell footer is hidden; the list column renders its own. */
+
+.mtg__list { padding-inline: var(--gutter); }
+.mtg__head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--s3); padding-top: var(--s5); }
+.mtg__head h1 { min-width: 0; }
+.mtg__tools { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s3); margin-top: var(--s4); }
+
+/* The chip row scrolls sideways on phones. Its menus hang from the row's wrapper instead of
+   from the chip, so the scrolling row never clips them. */
+.mtg__chips { position: relative; }
+.mtg__chips .menu-anchor { position: static; flex: none; }
+.mtg__chips .menu-anchor > .menu:not(.menu--up) { top: calc(100% + 2px); }
+
+.mtg__hint { margin-top: var(--s3); font-size: 14px; line-height: 20px; color: var(--slate); }
+
+.listbar { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); margin: var(--s4) 0 var(--s2); min-height: 44px; }
+.listbar .menu-anchor { min-width: 0; }
+.sortbtn { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; padding: 0 var(--s2); margin-left: calc(-1 * var(--s2)); border: 0; border-radius: var(--r-pill); background: transparent; color: var(--ink); font-weight: 700; white-space: nowrap; }
+@media (hover: hover) { .sortbtn:hover { background: var(--hover); } }
+.sortbtn[aria-expanded="true"] { background: var(--press); }
+.sortbtn[aria-expanded="true"] .icon { transform: rotate(180deg); }
+.sortbtn .icon { transition: transform var(--d2) var(--ease); }
+.listbar .count-l { font-size: 14px; line-height: 20px; color: var(--slate); white-space: nowrap; }
+.listbar--count { justify-content: flex-start; min-height: 0; margin-bottom: var(--s3); }
+
+/* Soonest: day headers between groups */
+.mtg__day .day-head { padding: var(--s5) 0 var(--s2); }
+.mtg__day:first-of-type .day-head { padding-top: var(--s1); }
+
+.mtg__more { margin-top: var(--s3); }
+.browse { margin-top: var(--s4); }
+.mtg .empty { margin-top: var(--s1); }
+
+/* Phone map view: the map takes the rest of the screen under the controls. */
+.mtg__phonemap .map { height: max(340px, calc(100dvh - var(--header-h) - var(--tabbar-h) - env(safe-area-inset-bottom) - 330px)); border-radius: var(--r-group); }
+.mtg__map { display: none; }
+
+/* Filters sheet */
+.mtg-filters { display: grid; gap: var(--s5); }
+.mtg-filters legend { display: block; margin-bottom: var(--s2); }
+.mtg-filters .help { margin-bottom: var(--s3); }
+.mtg-filters .check-row { margin-top: calc(-1 * var(--s2)); }
+.mtg-filters__foot { flex-wrap: nowrap; justify-content: space-between; }
+.mtg-filters__foot .btn--quiet { margin-left: calc(-1 * var(--s3)); padding: 0 var(--s3); }
+.mtg-filters__foot .btn--primary { flex: 1 1 auto; max-width: 320px; }
+
+/* Single-choice chips: real radio buttons drawn as chips */
+.choice { cursor: pointer; user-select: none; }
+.choice.is-on { background: var(--ink); color: var(--card); border-color: var(--ink); }
+@media (hover: hover) { .choice.is-on:hover { background: var(--ink-hover); } }
+.choice:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+@media (min-width: 1024px) {
+  #main:has(> .mtg) { padding-bottom: 0; }
+  /* The list column and the map fill the screen; nothing else should scroll the page
+     (the shell's 1px visually hidden announcer sits just below main). */
+  html:has(#main > .mtg) { overflow: hidden; }
+  .mtg { display: grid; grid-template-columns: 420px minmax(0, 1fr); height: calc(100dvh - var(--header-h) - 1px - env(safe-area-inset-top)); }
+  .mtg__list { overflow-y: auto; overscroll-behavior: contain; border-right: 1px solid var(--hairline); background: var(--floor); }
+  .mtg__view { display: none; }
+  .mtg .chipbar { flex-wrap: wrap; overflow: visible; margin: 0; padding: 0; }
+  .mtg__list .footer--inline { margin-top: var(--s7); }
+  .mtg__list .footer__in { display: block; }
+  .mtg__list .footer__links { margin: 0 calc(-1 * var(--s3)) var(--s3); }
+  /* Isolated, so the panel's z-index stays inside the map column and the header's menus
+     always open above it. */
+  .mtg__map { display: block; position: relative; min-width: 0; isolation: isolate; }
+  .mtg__map > .map { position: absolute; inset: 0; }
+  .mtg-panel { position: absolute; z-index: 600; top: var(--s4); right: var(--s4); bottom: var(--s4); width: 420px; max-width: calc(100% - 2 * var(--s4)); overflow-y: auto; overscroll-behavior: contain; }
+  /* The panel takes focus when a meeting opens so screen readers start there; it is a
+     container, so no ring (its controls draw their own). */
+  .mtg-panel:focus, .mtg-panel:focus-visible { outline: none; }
+  .mtg-panel .sheet__bar { min-height: 28px; }
+  .mtg-panel__body { margin-top: var(--s3); }
+}
+@media (min-width: 1280px) {
+  .mtg { grid-template-columns: 480px minmax(0, 1fr); }
+}

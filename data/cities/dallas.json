@@ -64,7 +64,7 @@
   "scheduleExceptions": [
     {
       "date": "2026-09-16",
-      "status": "special",
+      "status": "note",
       "note": "Council Briefing plus Budget Workshop: adopt FY 2026-27 budget on final reading, adopt tax rate, approve other budget items (9 a.m., Council Chambers).",
       "source": "https://dallascityhall.com/government/Calendar1/2026-City-Calendar.pdf"
     },
@@ -77,6 +77,7 @@
     {
       "date": "2026-11-10",
       "status": "rescheduled",
+      "movedFrom": "2026-11-11",
       "note": "The second-Wednesday voting agenda meeting is moved to Tuesday, Nov 10 at 9 a.m. because Wednesday, Nov 11 is the Veterans Day city holiday.",
       "source": "https://dallascityhall.com/government/Calendar1/2026-City-Calendar.pdf"
     },

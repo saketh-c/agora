@@ -1,11 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { matchMeetings, matchAgendaItems, buildPlan, normalizePrefs } from '../src/match.js';
-import { validateCity } from '../src/validate.js';
+import { validateCity, scheduleWarnings } from '../src/validate.js';
 import { inferTopics } from '../src/topics.js';
 import { buildComment, estimateSpeakingSeconds } from '../src/civics.js';
 import { computeStats } from '../src/stats.js';
 import { findCity, haversineMiles } from '../src/geo.js';
+import { upcomingMeetings } from '../src/schedule.js';
+import { setLocale } from '../src/i18n/index.js';
 
 const cities = [
   {
@@ -136,4 +138,173 @@ test('topic inference suffix rules', () => {
   assert.ok(inferTopics('Curbside recycling expansion').includes('environment'));
   assert.ok(inferTopics('Libraries extend weekend hours').includes('education-libraries'));
   assert.ok(inferTopics('Firefighter staffing plan').includes('public-safety'));
+});
+
+// ---------------------------------------------------------------------------------------------
+// Regression tests for ranking quality, recent agendas, stats windows, and validation.
+
+const nearPlano = { lat: 33.02, lng: -96.7 };
+
+test('reasons come strongest first, so the plan summary names what mattered', () => {
+  const prefs = { interests: ['housing'], homeCityId: 'plano', location: nearPlano };
+  const ranked = matchMeetings(cities, prefs, { today: '2026-10-10', days: 30 });
+  for (const m of ranked) {
+    for (let i = 1; i < m.reasons.length; i += 1) assert.ok(Math.abs(m.reasons[i - 1].points) >= Math.abs(m.reasons[i].points), `${m.id} reasons out of order`);
+  }
+  const plan = buildPlan(cities, prefs, { today: '2026-10-10' });
+  assert.equal(plan.meetings[0].reasons[0].kind, 'distance');
+  assert.match(plan.summary, /\(under 1 mile away; evening meeting, after school\)/);
+});
+
+test('a meeting past the user\'s own limit counts against it, even under 10 miles', () => {
+  const eightMilesNorth = { lat: 33.1356, lng: -96.6989 };
+  const ranked = matchMeetings(cities, { location: eightMilesNorth, maxMiles: 5 }, { today: '2026-10-10', days: 30 });
+  const plano = ranked.find((m) => m.cityId === 'plano');
+  const distance = plano.reasons.find((r) => r.kind === 'distance');
+  assert.equal(distance.points, -5);
+  assert.match(distance.text, /past your 5 mile limit/);
+});
+
+test('remote comment only counts at meetings where the public may comment', () => {
+  const ranked = matchMeetings(cities, { interests: ['transit'] }, { today: '2026-10-01', days: 30 });
+  const briefing = ranked.find((m) => m.cityId === 'dallas' && m.type === 'briefing');
+  const voting = ranked.find((m) => m.cityId === 'dallas' && m.type === 'regular');
+  assert.ok(!briefing.reasons.some((r) => r.text === 'Remote comment allowed'), 'watch-only meeting');
+  assert.ok(voting.reasons.some((r) => r.text === 'Remote comment allowed'));
+});
+
+test('upcoming agenda items stay the strongest topic signal; recent ones are a weak, dated hint', () => {
+  const upcoming = matchMeetings(cities, { interests: ['housing'] }, { today: '2026-09-10', days: 10 }).find((m) => m.cityId === 'plano');
+  const topic = upcoming.reasons.filter((r) => r.kind === 'topic');
+  assert.deepEqual(topic.map((r) => [r.points, r.text]), [[3, '1 agenda item on housing']]);
+
+  const later = matchMeetings(cities, { interests: ['housing'] }, { today: '2026-10-10', days: 10 }).find((m) => m.cityId === 'plano');
+  assert.deepEqual(later.reasons.filter((r) => r.kind === 'topic').map((r) => [r.points, r.text]), [[1, 'Took up housing on Sep 14']]);
+  assert.equal(later.matchedItems.length, 0, 'a past item never counts as being on an upcoming agenda');
+
+  const unrelated = matchMeetings(cities, { interests: ['technology'] }, { today: '2026-10-10', days: 10 });
+  assert.ok(unrelated.every((m) => !m.reasons.some((r) => r.kind === 'topic')), 'no generic voting-meeting reason');
+
+  // Topics now move the ranking between otherwise identical councils.
+  const twin = (cityId, topic) => ({
+    ...cities[0],
+    cityId,
+    name: cityId,
+    agendaItems: [{ title: 'Item', meetingDate: '2026-09-14', topics: [topic] }],
+  });
+  const pair = [twin('alpha', 'housing'), twin('beta', 'animal-services')];
+  assert.equal(matchMeetings(pair, { interests: ['housing'] }, { today: '2026-10-10', days: 10 })[0].cityId, 'alpha');
+  assert.equal(matchMeetings(pair, { interests: ['animal-services'] }, { today: '2026-10-10', days: 10 })[0].cityId, 'beta');
+
+  const plan = buildPlan(cities, { interests: ['housing'] }, { today: '2026-10-10' });
+  assert.deepEqual(plan.agendaItems, []);
+  assert.deepEqual(plan.recentAgendaItems.map((a) => a.title), ['Rezoning for apartments near Legacy']);
+});
+
+test('perCity caps how many meetings one council contributes; buildPlan keeps two', () => {
+  const prefs = { interests: ['housing'], homeCityId: 'plano', location: nearPlano };
+  const count = (list, id) => list.filter((m) => m.cityId === id).length;
+  assert.ok(count(matchMeetings(cities, prefs, { today: '2026-10-10', days: 45 }), 'plano') >= 3, 'no cap by default');
+  const capped = matchMeetings(cities, prefs, { today: '2026-10-10', days: 45, perCity: 1 });
+  assert.deepEqual(capped.map((m) => m.cityId).sort(), ['dallas', 'plano']);
+  const plan = buildPlan(cities, prefs, { today: '2026-10-10' });
+  assert.equal(count(plan.meetings, 'plano'), 2);
+  assert.ok(plan.meetings.every((m, i, arr) => i === 0 || arr[i - 1].score >= m.score));
+});
+
+test('a meeting that ended earlier today is not ranked or recommended once now is given', () => {
+  const prefs = { homeCityId: 'plano' };
+  const opts = { today: '2026-10-12', days: 14 };
+  assert.ok(matchMeetings(cities, prefs, opts).some((m) => m.cityId === 'plano' && m.date === '2026-10-12'));
+  const late = { ...opts, now: '2026-10-12T21:30:00-05:00' };
+  assert.ok(!matchMeetings(cities, prefs, late).some((m) => m.date === '2026-10-12'));
+  assert.notEqual(buildPlan(cities, prefs, late).meetings[0].date, '2026-10-12');
+});
+
+test('NaN or non-numeric coordinates are dropped instead of skewing every distance', () => {
+  assert.equal(normalizePrefs({ location: { lat: NaN, lng: NaN } }).location, null);
+  assert.equal(normalizePrefs({ location: { lat: '33.0', lng: -96.7 } }).location, null);
+  assert.equal(normalizePrefs({ location: { lat: Infinity, lng: -96.7 } }).location, null);
+  assert.deepEqual(normalizePrefs({ location: nearPlano }).location, nearPlano);
+  const ranked = matchMeetings(cities, { location: { lat: NaN, lng: 1 } }, { today: '2026-10-10' });
+  assert.ok(ranked.every((m) => m.distanceMiles === null && !m.reasons.some((r) => r.kind === 'distance')));
+});
+
+test('findCity ignores blank queries and understands initials', () => {
+  const list = [...cities, { cityId: 'fort-worth', name: 'Fort Worth' }, { cityId: 'north-richland-hills', name: 'North Richland Hills' }];
+  assert.equal(findCity(list, ' '), null);
+  assert.equal(findCity(list, ''), null);
+  assert.equal(findCity(list, null), null);
+  assert.equal(findCity(list, 'fw').cityId, 'fort-worth');
+  assert.equal(findCity(list, 'NRH').cityId, 'north-richland-hills');
+  assert.equal(findCity(list, 'dal').cityId, 'dallas', 'a name prefix still wins');
+});
+
+test('comment drafts keep acronyms such as DART intact in every language', () => {
+  try {
+    for (const lang of ['en', 'es', 'vi']) {
+      setLocale(lang);
+      const draft = buildComment({ name: 'Sam', cityName: 'Dallas', topicId: 'transit', position: 'support' });
+      assert.ok(draft.includes('DART'), `${lang} keeps DART`);
+      assert.ok(!draft.includes('dART'), `${lang} never writes dART`);
+    }
+  } finally {
+    setLocale('en');
+  }
+});
+
+test('stats use exact windows, real occurrences, and separate upcoming from recent agendas', () => {
+  const s = computeStats(cities, { today: '2026-10-10', days: 30 });
+  assert.equal(s.totals.meetings, upcomingMeetings(cities, { from: '2026-10-10', days: 30 }).length);
+  assert.ok(upcomingMeetings(cities, { from: '2026-10-10', days: 30 }).every((m) => m.date <= '2026-11-08'));
+  assert.equal(s.totals.agendaItems, 2, 'every item, as before');
+  assert.equal(s.totals.upcomingAgendaItems, 0);
+  assert.equal(s.totals.recentAgendaItems, 2);
+  assert.deepEqual(s.upcomingTopicCounts, []);
+  assert.deepEqual(s.recentTopicCounts.map((x) => x.topicId).sort(), ['housing', 'transit', 'zoning-development']);
+  assert.equal(s.recentAgendaSince, '2026-08-11');
+  assert.ok(s.totals.schoolHoursShare > 0 && s.totals.schoolHoursShare < 1, 'Dallas meets at 9 AM, Plano at 7 PM');
+
+  // Cancellations come off the per-month rate.
+  const cancelled = [{ ...cities[0], scheduleExceptions: [{ date: '2026-10-12', status: 'cancelled', note: 'Holiday.' }] }];
+  const plain = computeStats([cities[0]], { today: '2026-10-10' }).perCity[0].evening;
+  const fewer = computeStats(cancelled, { today: '2026-10-10' }).perCity[0].evening;
+  assert.equal(Math.round((plain - fewer) * 3), 1, 'one fewer evening meeting over 90 days');
+});
+
+test('validator accepts note exceptions and explicit fields, and checks every link', () => {
+  const good = {
+    ...cities[0],
+    scheduleExceptions: [
+      { date: '2026-11-03', status: 'note', note: 'Held as scheduled on Election Day.' },
+      { date: '2026-11-10', status: 'special', label: 'Canvass meeting', type: 'other', openToPublicComment: false, time: '18:00', note: 'Canvass.' },
+      { date: '2026-11-16', status: 'rescheduled', movedFrom: '2026-11-17', time: '19:00', note: 'Moved.' },
+    ],
+  };
+  assert.deepEqual(validateCity(good), []);
+  assert.deepEqual(scheduleWarnings(good), []);
+  const bad = {
+    ...cities[0],
+    council: { findMyDistrictUrl: 'javascript:alert(1)' },
+    sources: ['https://ok.example', 'not a url'],
+    agendaItems: [{ title: 'x', topics: ['housing'], url: 'ftp://x' }],
+    scheduleExceptions: [
+      { date: '2026-11-03', status: 'cancelled', label: 'x', time: '7pm' },
+      { date: '2026-11-04', status: 'note' },
+      { date: '2026-11-05', status: 'special', type: 'party' },
+    ],
+  };
+  const errors = validateCity(bad).join('\n');
+  for (const expected of ['council.findMyDistrictUrl is not a URL', 'sources[1] is not a URL', 'agendaItems[0].url is not a URL', 'scheduleExceptions[0].label only applies to special exceptions', 'scheduleExceptions[0].time "7pm" must be HH:MM', 'scheduleExceptions[1].note is required', 'scheduleExceptions[2].type "party" is not a known meeting type']) {
+    assert.ok(errors.includes(expected), `missing: ${expected}`);
+  }
+  const smells = scheduleWarnings({
+    cityId: 'denton',
+    meetings: [
+      { recurrence: { kind: 'custom', time: '14:00', dates: ['2026-10-13'] } },
+      { recurrence: { kind: 'custom', time: '14:00', dates: ['2026-10-13', '2026-10-27'] } },
+    ],
+    scheduleExceptions: [{ date: '2026-11-10', status: 'rescheduled', note: 'See the calendar.' }],
+  });
+  assert.equal(smells.length, 2);
 });

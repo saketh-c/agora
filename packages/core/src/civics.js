@@ -1,5 +1,5 @@
 import { getTopic } from './topics.js';
-import { t, tList } from './i18n/index.js';
+import { t, tList, lowerFirst } from './i18n/index.js';
 
 /** English glossary, kept for callers that need a stable reference. Prefer glossary() for display. */
 export const GLOSSARY = Object.freeze(tList('civics.glossary', 'en'));
@@ -41,7 +41,7 @@ export function buildComment(input = {}) {
   const city = str(input.cityName) || tr('civics.comment.thisCity');
   const topic = getTopic(input.topicId || 'other', locale);
   const generic = topic.id === 'other';
-  const topicPhrase = generic ? tr('civics.comment.genericTopic') : topic.short || topic.label.toLowerCase();
+  const topicPhrase = generic ? tr('civics.comment.genericTopic') : topic.short || lowerFirst(topic.label);
   const item = str(input.itemTitle);
   const story = str(input.story);
   const ask = str(input.ask);
@@ -50,16 +50,25 @@ export function buildComment(input = {}) {
 
   const intro = school ? tr('civics.comment.introSchool', { greeting, name, school, city }) : tr('civics.comment.introLive', { greeting, name, city });
   const subject = item ? tr('civics.comment.subjectItem', { item }) : tr('civics.comment.subjectTopic', { topic: topicPhrase });
+  // Optional keys: a dictionary without them falls back to the older wording.
+  const has = (key) => tr(key) !== key;
+  // With no agenda item there is no "this item" to vote on, so the stance names the topic.
+  const onTopic = (key) => (!item && !generic && has(`${key}Topic`) ? tr(`${key}Topic`, { topic: topicPhrase }) : tr(key));
   const stance = {
-    support: tr('civics.comment.stanceSupport'),
-    oppose: tr('civics.comment.stanceOppose'),
-    concerned: tr('civics.comment.stanceConcerned'),
+    support: onTopic('civics.comment.stanceSupport'),
+    oppose: onTopic('civics.comment.stanceOppose'),
+    concerned: onTopic('civics.comment.stanceConcerned'),
     ask: generic ? tr('civics.comment.stanceAskGeneric') : tr('civics.comment.stanceAskTopic', { topic: topicPhrase }),
   }[position];
 
-  const angle = topic.youthAngle.replace(/\.$/, '');
-  const why = story ? story : generic ? tr('civics.comment.whyGeneric') : tr('civics.comment.whyTopic', { angle: angle.charAt(0).toLowerCase() + angle.slice(1) });
-  const close = ask ? tr('civics.comment.closeAsk', { ask: ask.replace(/\.$/, '') }) : tr('civics.comment.closeDefault');
+  // The angle is spoken by the student, so it uses the first-person version when there is one
+  // (the topic's youthAngle talks to the student as "you"). It continues a sentence, so only its
+  // first letter drops to lowercase: "DART, bus routes" stays as written.
+  const angleKey = `civics.comment.angles.${topic.id}`;
+  const angle = lowerFirst((has(angleKey) ? tr(angleKey) : topic.youthAngle).replace(/\.$/, ''));
+  const why = story ? story : generic ? tr('civics.comment.whyGeneric') : tr('civics.comment.whyTopic', { angle });
+  // The ask continues "I am asking you to ...", so "Keep the bus" reads "keep the bus" (acronyms stay).
+  const close = ask ? tr('civics.comment.closeAsk', { ask: lowerFirst(ask.replace(/\.$/, '')) }) : tr('civics.comment.closeDefault');
 
   return [intro, subject, stance, why, close].join('\n\n');
 }

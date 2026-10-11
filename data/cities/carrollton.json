@@ -64,12 +64,13 @@
     {
       "date": "2026-10-06",
       "status": "rescheduled",
+      "movedTo": "2026-10-13",
       "note": "No council meeting on the first Tuesday of October; the city calendar instead lists City Council Meetings on Tuesday, Oct. 13 and Tuesday, Oct. 20, 2026 at 5:45 p.m. (reason not stated).",
       "source": "https://www.cityofcarrollton.com/about-us/calendar/-curm-10/-cury-2026"
     },
     {
       "date": "2026-10-13",
-      "status": "special",
+      "status": "note",
       "note": "City Council Meeting at 5:45 p.m. on the second Tuesday at City Hall, replacing the usual first-Tuesday date.",
       "source": "https://www.cityofcarrollton.com/Home/Components/Calendar/Event/51241/2498"
     }

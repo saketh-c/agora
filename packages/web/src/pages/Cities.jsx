@@ -1,134 +1,209 @@
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { nextMeetingFor, expandCityMeetings, addDays, formatDate, formatTime, relativeDays, describeRecurrence, haversineMiles, cityPoint, milesText, t, tn } from '@agora/core';
-import { today as todayFn } from '../lib/data.js';
+import { Link, useSearchParams } from 'react-router-dom';
+import { calendarThrough, cityPoint, describeRecurrence, haversineMiles, nextMeetingFor, normalizePrefs, t, tn } from '@agora/core';
+import { nowIso, today as todayFn } from '../lib/data.js';
 import { useCities } from '../lib/DataProvider.jsx';
 import { useStore } from '../lib/store.jsx';
-import { CadenceStrip } from '../components/viz.jsx';
 import CityEmblem from '../components/CityEmblem.jsx';
+import { Chip, distanceText, EmptyState, Icon, Menu, PageHeader, whenText } from '../components/ui/index.js';
+// The list bar and sort button are shared with Meetings, so this page loads its styles too.
+import '../styles/pages/meetings.css';
+import '../styles/pages/cities.css';
 
-const CADENCE_DAYS = 42;
+const fold = (s) =>
+  String(s || '')
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .trim();
+
+/** A city name match: the name or one of its words starts with the query, then initials, partial names and the county. */
+function matches(city, q) {
+  const name = fold(city.name);
+  const words = name.split(/[\s-]+/);
+  if (city.cityId === q || name.startsWith(q) || words.some((w) => w.startsWith(q))) return true;
+  const bare = q.replace(/\s+/g, '');
+  return (words.length > 1 && words.map((w) => w[0]).join('').startsWith(bare)) || name.includes(q) || fold(city.county).startsWith(q);
+}
+
+/** The meeting rule that produced an occurrence, so the schedule line describes the meeting shown above it. */
+function ruleFor(city, occurrence) {
+  const rules = city.meetings || [];
+  return (occurrence && rules.find((r) => r.label === occurrence.label)) || rules.find((r) => r.openToPublicComment !== false) || rules[0] || null;
+}
 
 export default function Cities() {
-  const { prefs } = useStore();
+  const { prefs, lang } = useStore();
   const { cities } = useCities();
+  const [params, setParams] = useSearchParams();
+  const [now] = useState(nowIso);
   const today = todayFn();
-  const [q, setQ] = useState('');
-  const [county, setCounty] = useState('');
-  const [sort, setSort] = useState(prefs.location ? 'distance' : 'name');
+  const P = useMemo(() => normalizePrefs(prefs), [prefs]);
 
+  const q = params.get('q') || '';
   const counties = useMemo(() => [...new Set(cities.map((c) => c.county))].sort(), [cities]);
-  const rows = useMemo(() => {
-    const horizon = addDays(today, CADENCE_DAYS);
-    let list = cities.map((city) => ({
-      city,
-      next: nextMeetingFor(city, today),
-      miles: prefs.location ? haversineMiles(prefs.location, cityPoint(city)) : null,
-      dates: new Set(
-        expandCityMeetings(city, today, horizon)
-          .filter((m) => m.status !== 'cancelled')
-          .map((m) => m.date),
-      ),
-    }));
-    if (q) list = list.filter((r) => r.city.name.toLowerCase().includes(q.toLowerCase()));
-    if (county) list = list.filter((r) => r.city.county === county);
+  const picked = (params.get('county') || '').split(',').filter((c) => counties.includes(c));
+  const sortParam = params.get('sort');
+  const sort = sortParam === 'az' || sortParam === 'soon' || (sortParam === 'near' && P.location) ? sortParam : P.location ? 'near' : 'az';
+
+  const set = (key, value) =>
+    setParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (value) next.set(key, value);
+        else next.delete(key);
+        return next;
+      },
+      { replace: true },
+    );
+
+  // Per city: the next meeting where the public can speak, the rule it comes from, and how far it is.
+  const rows = useMemo(
+    () =>
+      cities.map((city) => {
+        const next = nextMeetingFor(city, today, { publicCommentOnly: true, horizonDays: 90, now });
+        const rule = ruleFor(city, next);
+        return {
+          city,
+          next,
+          through: next ? null : calendarThrough(city),
+          schedule: rule ? describeRecurrence(rule.recurrence) : '',
+          miles: P.location ? haversineMiles(P.location, cityPoint(city)) : null,
+        };
+      }),
+    // describeRecurrence speaks the app language.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [cities, today, now, P.location, lang],
+  );
+
+  const shown = useMemo(() => {
+    const query = fold(q);
+    const list = rows.filter((r) => (!query || matches(r.city, query)) && (!picked.length || picked.includes(r.city.county)));
+    const when = (r) => (r.next ? `${r.next.date} ${r.next.time}` : '9');
     list.sort((a, b) => {
-      if (sort === 'distance' && a.miles != null && b.miles != null) return a.miles - b.miles;
-      if (sort === 'next') return (a.next ? a.next.date : '9').localeCompare(b.next ? b.next.date : '9');
+      if (sort === 'near' && a.miles != null && b.miles != null && a.miles !== b.miles) return a.miles - b.miles;
+      if (sort === 'soon' && when(a) !== when(b)) return when(a).localeCompare(when(b));
       return a.city.name.localeCompare(b.city.name);
     });
     return list;
-  }, [cities, q, county, sort, today, prefs.location]);
+    // picked is derived from the URL on every render; its string is the stable key.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rows, q, picked.join(','), sort]);
+
+  const toggleCounty = (c) => set('county', (picked.includes(c) ? picked.filter((x) => x !== c) : [...picked, c]).join(','));
+  const sortLabel = { near: t('cities.sortNear'), az: t('cities.sortAz'), soon: t('cities.sortSoon') };
+  const sortItems = [...(P.location ? ['near'] : []), 'az', 'soon'].map((key) => ({ type: 'radio', label: sortLabel[key], checked: sort === key, onSelect: () => set('sort', key) }));
 
   return (
-    <div className="container">
-      <h1>{t('cities.heading', { n: cities.length })}</h1>
+    <div className="wrap cities">
+      <PageHeader title={t('cities.title')} lead={t('cities.lead', { n: cities.length })} crumbs={[{ to: '/meetings', label: t('nav.meetings') }, { label: t('cities.title') }]} />
 
-      <div className="row" style={{ margin: '14px 0 14px' }}>
-        <div style={{ flex: '1 1 240px' }}>
-          <label htmlFor="city-search" className="visually-hidden">
-            {t('cities.search')}
-          </label>
-          <input id="city-search" type="search" placeholder={t('cities.search')} value={q} onChange={(e) => setQ(e.target.value)} />
+      <div className="cities__tools">
+        <div className={`search${q ? ' search--has-clear' : ''}`}>
+          <Icon name="search" />
+          <input type="search" value={q} onChange={(e) => set('q', e.target.value)} placeholder={t('cities.searchPlaceholder')} aria-label={t('cities.searchLabel')} enterKeyHint="search" autoComplete="off" />
+          {q && (
+            <button type="button" className="iconbtn search__clear" aria-label={t('cities.clearSearch')} onClick={() => set('q', '')}>
+              <Icon name="x" size={20} />
+            </button>
+          )}
         </div>
-        <div>
-          <label htmlFor="sort" className="visually-hidden">
-            {t('cities.sort')}
-          </label>
-          <select id="sort" value={sort} onChange={(e) => setSort(e.target.value)}>
-            <option value="name">{t('cities.sortAZ')}</option>
-            <option value="next">{t('cities.sortSoonest')}</option>
-            {prefs.location && <option value="distance">{t('cities.sortNearest')}</option>}
-          </select>
+        <div className="chipbar cities__counties" role="group" aria-label={t('cities.countyLabel')}>
+          {counties.map((c) => (
+            <Chip key={c} pressed={picked.includes(c)} onClick={() => toggleCounty(c)}>
+              {t('ui.cityPicker.county', { county: c })}
+            </Chip>
+          ))}
         </div>
       </div>
 
-      <div className="filters" role="group" aria-label={t('cities.county')}>
-        <span className="label">{t('cities.county')}</span>
-        <button type="button" className="chip small" aria-pressed={county === ''} onClick={() => setCounty('')}>
-          {t('cities.allCounties')}
-        </button>
-        {counties.map((c) => (
-          <button key={c} type="button" className="chip small" aria-pressed={county === c} onClick={() => setCounty(c)}>
-            {c}
-          </button>
-        ))}
+      <div className="listbar">
+        <Menu
+          label={`${t('cities.sort')}: ${sortLabel[sort]}`}
+          buttonClassName="sortbtn"
+          align="start"
+          button={
+            <>
+              {sortLabel[sort]}
+              <Icon name="chev-d" size={20} />
+            </>
+          }
+          items={sortItems}
+        />
+        <span className="count-l num" role="status" aria-live="polite">
+          {tn('cities.count', shown.length)}
+        </span>
       </div>
 
-      <ul className="rows">
-        {rows.map(({ city, next, miles, dates }) => {
-          const evening = city.meetings.some((m) => Number(m.recurrence.time.split(':')[0]) >= 17);
-          const isHome = prefs.homeCityId === city.cityId;
-          return (
-            <li key={city.cityId}>
-              <div className="city-row">
-                <div className="city-ident">
-                  <CityEmblem city={city} size={46} />
-                  <div style={{ minWidth: 0 }}>
-                    <h3 className="name">
-                      <Link to={`/city/${city.cityId}`}>{city.name}</Link>
-                    </h3>
-                    <p className="meta" style={{ margin: 0 }}>
-                      {t('location.countyOf', { county: city.county })}
-                      {miles != null ? ` · ${milesText(miles)}` : ''}
-                      {isHome ? ` · ${t('common.yourCity')}` : ''}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="cadence-cell">
-                  <p className="next" style={{ margin: '0 0 2px' }}>
-                    {next ? (
-                      <>
-                        <strong>{formatDate(next.date)}</strong>, {formatTime(next.time)} <span className="muted">· {relativeDays(next.date, today)}</span>
-                      </>
-                    ) : (
-                      <span className="muted">{t('common.noMeetingFound')}</span>
-                    )}
-                  </p>
-                  <p className="meta" style={{ margin: '0 0 5px' }}>
-                    {describeRecurrence(city.meetings[0].recurrence)}
-                    {city.meetings.length > 1 ? t('cities.plusMore', { n: city.meetings.length - 1 }) : ''}
-                  </p>
-                  {/* Six weeks of this council's calendar, so cadence reads at a glance down the page. */}
-                  <span className="cadence-row">
-                    <CadenceStrip dates={dates} from={today} days={CADENCE_DAYS} label={t('viz.cadenceHeading') + ': ' + tn('viz.cadenceAria', dates.size)} />
-                    <span className="axis-note">{t('viz.cadenceHeading')}</span>
+      {shown.length ? (
+        <ul className="group cities__list">
+          {shown.map(({ city, next, through, schedule, miles }) => {
+            const dist = distanceText({ cityId: city.cityId }, { homeCityId: P.homeCityId, distanceMiles: miles });
+            return (
+              <li key={city.cityId}>
+                <Link className="row crow" to={`/city/${city.cityId}`}>
+                  <CityEmblem city={city} size={44} />
+                  <span className="row__main">
+                    <span className="row__title">
+                      <span>{city.name}</span>
+                      {dist && <span className="row__dist">{dist}</span>}
+                    </span>
+                    <span className="row__meta">
+                      <span>{t('ui.cityPicker.county', { county: city.county })}</span>
+                      {schedule && <span>{schedule}</span>}
+                    </span>
+                    <span className="row__status">
+                      {next ? (
+                        <span className="st st--go">
+                          <Icon name="mic" />
+                          {t('cities.nextSpeak', { when: whenText(next.date, next.time) })}
+                        </span>
+                      ) : through ? (
+                        <span className="st st--plain">
+                          <Icon name="cal" />
+                          {t('cities.calendarNotPosted', { year: Number(through.slice(0, 4)) + 1 })}
+                        </span>
+                      ) : (
+                        <span className="st st--plain">
+                          <Icon name="eye" />
+                          {t('cities.noSpeak')}
+                        </span>
+                      )}
+                    </span>
                   </span>
-                </div>
-
-                <div className="labels">
-                  {evening && <span className="tag good">{t('common.eveningMeetings')}</span>}
-                  {city.publicComment && city.publicComment.virtualAllowed && <span className="tag brand">{t('common.remoteComment')}</span>}
-                  {(city.youthPrograms || []).length > 0 && <span className="tag">{t('common.youthPrograms')}</span>}
-                  {(city.agendaItems || []).length > 0 && <span className="tag">{tn('common.agendaItems', city.agendaItems.length)}</span>}
-                </div>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-      {rows.length === 0 && <p className="empty">{t('cities.noCitiesMatch')}</p>}
+                  <Icon name="chev-r" className="row__chev" />
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <EmptyState
+          icon="search"
+          title={t('cities.emptyTitle')}
+          actions={
+            <button
+              type="button"
+              className="btn btn--primary"
+              onClick={() =>
+                setParams(
+                  (prev) => {
+                    const next = new URLSearchParams(prev);
+                    next.delete('q');
+                    next.delete('county');
+                    return next;
+                  },
+                  { replace: true },
+                )
+              }
+            >
+              {t('cities.clearSearch')}
+            </button>
+          }
+        >
+          {t('cities.emptyBody', { n: cities.length })}
+        </EmptyState>
+      )}
     </div>
   );
 }

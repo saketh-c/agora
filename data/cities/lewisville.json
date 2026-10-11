@@ -62,6 +62,7 @@
     {
       "date": "2026-09-14",
       "status": "rescheduled",
+      "movedFrom": "2026-09-07",
       "note": "First-Monday meeting moved from Labor Day (Sept. 7) to Sept. 14: workshop 6:15 p.m., regular session 7 p.m. A 5:30 p.m. special-called joint workshop with the Youth Action Council precedes it in the City Hall lower level.",
       "source": "https://cityoflewisville.legistar.com/Calendar.aspx"
     },
@@ -73,7 +74,7 @@
     },
     {
       "date": "2026-09-21",
-      "status": "special",
+      "status": "note",
       "note": "Regular 3rd-Monday meeting; Legistar posts a 6:30 p.m. start (workshop) with agenda not yet available as of Sept. 10.",
       "source": "https://cityoflewisville.legistar.com/Calendar.aspx"
     }

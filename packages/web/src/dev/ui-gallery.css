@@ -1,0 +1,35 @@
+/* Component gallery (/__ui): layout for the specimen sheet only. Not used by any page. */
+.cs-intro { padding-top: var(--s5); }
+.cs-intro p { color: var(--slate); margin-top: var(--s2); }
+.cs-sec { margin-top: var(--s7); }
+@media (min-width: 1024px) { .cs-sec { margin-top: var(--s8); } }
+.cs-sec > h2 { margin-bottom: var(--s2); }
+.cs-lead { color: var(--slate); margin-bottom: var(--s5); }
+.cs-grid { display: grid; gap: var(--s4); }
+@media (min-width: 1024px) {
+  .cs-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cs-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .cs-grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+.cs-box { background: var(--card); border-radius: var(--r-group); padding: var(--s4); min-width: 0; }
+.cs-box--floor { background: var(--floor); box-shadow: inset 0 0 0 1px var(--hairline); }
+.cs-cap { font-size: 12px; line-height: 16px; font-weight: 600; color: var(--slate); margin-bottom: var(--s2); }
+.cs-states { display: flex; flex-wrap: wrap; gap: var(--s4) var(--s3); align-items: flex-end; }
+.cs-state { display: grid; gap: var(--s2); justify-items: start; }
+.cs-onfield { background: var(--go); border-radius: var(--r-field); padding: var(--s4); }
+.cs-onink { background: var(--ink); border-radius: var(--r-field); padding: var(--s4); }
+.swatch { border-radius: var(--r-group); overflow: hidden; background: var(--card); }
+.swatch__c { height: 64px; display: flex; align-items: flex-end; padding: var(--s2) var(--s3); font: 700 14px/20px var(--font-text); }
+.swatch__m { padding: var(--s2) var(--s3) var(--s3); font-size: 13px; line-height: 18px; color: var(--slate); }
+.swatch__m strong { color: var(--ink); display: block; font-size: 14px; }
+.typespec > div { padding: var(--s3) 0; border-top: 1px solid var(--hairline); display: grid; gap: var(--s1); }
+.typespec > div:first-child { border-top: 0; }
+.force-hover::after { background: var(--hover) !important; }
+.btn--primary.force-hover::after { background: rgb(255 255 255 / .10) !important; }
+.force-press::after { background: var(--press) !important; }
+.btn--primary.force-press::after { background: rgb(255 255 255 / .16) !important; }
+.force-focus { outline: 2px solid var(--ink) !important; outline-offset: 2px !important; }
+.cs-pins { display: flex; gap: var(--s6); align-items: center; padding: var(--s5) var(--s4) var(--s7); background: #E9EAEE; border-radius: var(--r-group); }
+.cs-pins .pin { flex: none; }
+.cs-menu-static { position: static !important; animation: none; }
+.cs-sheet-static { position: relative; border-radius: var(--r-sheet) var(--r-sheet) 0 0; }

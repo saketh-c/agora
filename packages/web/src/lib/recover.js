@@ -24,12 +24,25 @@ export function isReloadPending() {
 /** Reload, unless a reload for this reason already happened in the last minute. */
 export function reloadOnce() {
   if (pending) return true;
+  // The guard must survive the reload. sessionStorage first; when site data is blocked it
+  // throws, so fall back to window.name, which also survives a reload of the same tab.
+  // Without any guard a broken deploy would reload forever, so never reload unguarded.
+  let last = 0;
+  let store = 'session';
   try {
-    const last = Number(sessionStorage.getItem(KEY) || 0);
-    if (Date.now() - last < WINDOW_MS) return false;
-    sessionStorage.setItem(KEY, String(Date.now()));
+    last = Number(sessionStorage.getItem(KEY) || 0);
+    sessionStorage.setItem(KEY, String(last));
   } catch {
-    /* no sessionStorage: reload anyway, the window guard is a nicety */
+    const m = /(?:^|;)agora-reload=(\d+)/.exec(window.name || '');
+    last = m ? Number(m[1]) : 0;
+    store = 'name';
+  }
+  if (Date.now() - last < WINDOW_MS) return false;
+  try {
+    if (store === 'session') sessionStorage.setItem(KEY, String(Date.now()));
+    else window.name = `${String(window.name || '').replace(/(?:^|;)agora-reload=\d+/, '')};agora-reload=${Date.now()}`;
+  } catch {
+    return false;
   }
   pending = true;
   window.location.reload();

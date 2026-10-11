@@ -72,7 +72,7 @@
   "scheduleExceptions": [
     {
       "date": "2026-09-15",
-      "status": "special",
+      "status": "note",
       "note": "Budget Related Meeting: evening meeting only (no afternoon work session on the calendar). Final readings of the FY2027 operating budget (about $765.8 million), tax levy, water and wastewater rates and other ordinances given first reading on Sept 8 are expected; confirm on the posted agenda.",
       "source": "https://www.arlingtontx.gov/Government/Meetings-Agendas/City-Council-Meeting-Schedule"
     },
@@ -84,7 +84,7 @@
     },
     {
       "date": "2026-12-15",
-      "status": "special",
+      "status": "note",
       "note": "Second December meeting one week after Dec 8 (back-to-back weeks) to close out the year.",
       "source": "https://www.arlingtontx.gov/Government/Meetings-Agendas/City-Council-Meeting-Schedule"
     }

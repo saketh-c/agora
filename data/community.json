@@ -1,132 +1,193 @@
 {
-  "note": "Seed posts for the Community page. Every entry with sample: true carries a placeholder author; swap in real names, schools, and media before the team presents. Media paths are relative to packages/web/public/. Kinds are tip, toolkit, win, question.",
+  "note": "Posts for the Community page. Team posts (\"team\": true) are written by the Agora team from each city's own file in data/cities/ and say nothing that file does not: no invented students, schools, outcomes or votes. Check a post against its city file whenever that file changes. Student posts reviewed through 'Send to the Agora team' are added here with the student's consent, as written, with author.name and no school. Kinds: tip, toolkit (shown as Guide), win, question. Link types: guide (the city page), signup (the city's registration link from its file, or url), apply (url). Media paths are relative to packages/web/public/. Translations live in i18n.es and i18n.vi; media captions there follow the order of media.",
   "posts": [
     {
-      "id": "sample-plano-signup",
-      "sample": true,
+      "id": "team-plano-signup",
+      "team": true,
       "kind": "toolkit",
-      "title": "How to find the Plano speaker sign-up before the 4 PM cutoff",
-      "body": "Plano does not let you sign up at the door, and the online form closes at 4 PM on meeting day. I lost my first chance because I did not know that. I recorded a short walkthrough of where the form lives so nobody else has to hunt for it.\n\nOpen the city page here, scroll to How to speak here, and the Sign up to speak button takes you straight to the form. Register the Tuesday before if you can.",
-      "author": { "name": "Maya R.", "school": "Plano East Senior High", "cityId": "plano" },
       "cityId": "plano",
-      "postedAt": "2026-09-08",
-      "helpful": 21,
-      "media": [
-        { "type": "video", "src": "community/plano-signup-walkthrough.webm", "poster": "community/plano-signup-poster.png", "caption": "Where the Plano sign-up form lives, in under ten seconds." }
-      ],
-      "links": [{ "label": "Plano city guide", "to": "/city/plano" }]
+      "postedAt": "2026-10-10",
+      "title": "Plano: sign up online before 4 PM on meeting day",
+      "body": "Plano has no sign-up at the door. The online form opens at 5 PM the Tuesday before the meeting and closes at 4 PM on meeting day.\n\nPick the agenda item you want to speak on, or Comments of Public Interest for a topic that is not on the agenda. Those comments are heard at the end of the first regular meeting of the month. You get up to 3 minutes, in person.",
+      "links": [{ "type": "guide", "label": "Plano city guide" }, { "type": "signup", "label": "Open the sign-up form" }],
+      "i18n": {
+        "es": {
+          "title": "Plano: inscríbete en línea antes de las 4 p.m. el día de la reunión",
+          "body": "En Plano no puedes inscribirte en la puerta. El formulario en línea abre a las 5 p.m. el martes antes de la reunión y cierra a las 4 p.m. el día de la reunión.\n\nElige el punto de la agenda del que quieres hablar, o Comments of Public Interest si tu tema no está en la agenda. Esos comentarios se escuchan al final de la primera reunión regular del mes. Tienes hasta 3 minutos, en persona."
+        },
+        "vi": {
+          "title": "Plano: đăng ký trực tuyến trước 16:00 ngày họp",
+          "body": "Ở Plano, bạn không thể đăng ký tại cửa. Mẫu đăng ký trực tuyến mở lúc 17:00 thứ Ba trước buổi họp và đóng lúc 16:00 ngày họp.\n\nChọn mục trong chương trình nghị sự mà bạn muốn nói, hoặc chọn Comments of Public Interest nếu chủ đề của bạn không có trong chương trình. Phần ý kiến này diễn ra cuối buổi họp thường kỳ đầu tiên của tháng. Bạn có tối đa 3 phút và phải có mặt trực tiếp."
+        }
+      }
     },
     {
-      "id": "sample-garland-crosswalk",
-      "sample": true,
-      "kind": "win",
-      "title": "Six of us spoke about the Park Boulevard crossing. It is on the budget list.",
-      "body": "We each took one crossing and described walking it at 7:40 AM. Nobody read from a script for more than a minute. Two council members asked follow-up questions, which the clerk told us afterward almost never happens during public comment.\n\nThe item is now in the capital projects list for review. Not built yet, but it exists on paper, which it did not before. The thing that worked was six short stories about the same three blocks instead of one long speech.",
-      "author": { "name": "Jordan T.", "school": "Garland High School", "cityId": "garland" },
-      "cityId": "garland",
-      "postedAt": "2026-09-16",
-      "helpful": 34,
-      "media": [
-        { "type": "image", "src": "community/podium.svg", "alt": "Line drawing of a speaker at a lectern with a microphone and a three minute timer." }
-      ],
-      "links": []
-    },
-    {
-      "id": "sample-coppell-card",
-      "sample": true,
-      "kind": "toolkit",
-      "title": "The index card I bring to every meeting",
-      "body": "One card, four lines: who I am and my school, the item number, the one thing I am asking for, and one sentence of why it matters to people my age. If I get nervous I read the card. If I do not, I have it anyway.\n\nThe comment builder in Learn produces the same structure, so I draft there, cut it to the card, and time it against the limit with the ruler.",
-      "author": { "name": "Priya S.", "school": "Coppell High School", "cityId": "coppell" },
-      "cityId": "coppell",
-      "postedAt": "2026-09-12",
-      "helpful": 18,
-      "media": [
-        { "type": "image", "src": "community/speaker-card.svg", "alt": "Line drawing of a speaker registration card with lines for name, address, and agenda item, and a pen beside it." }
-      ],
-      "links": [{ "label": "Open the comment builder", "to": "/learn?tab=comment" }]
-    },
-    {
-      "id": "sample-fortworth-early",
-      "sample": true,
+      "id": "team-fort-worth-deadline",
+      "team": true,
       "kind": "tip",
-      "title": "Fort Worth: budget twenty minutes for the security line",
-      "body": "City Hall has a security checkpoint and on a budget night the line ran out the door. The clerk closes the speaker sign-up when the meeting is called to order, so if you are still in line at that moment you cannot speak. I now aim to be inside by 5:40 for a 6:00 start.",
-      "author": { "name": "Diego M.", "school": "Paschal High School", "cityId": "fort-worth" },
       "cityId": "fort-worth",
-      "postedAt": "2026-09-18",
-      "helpful": 12,
+      "postedAt": "2026-10-10",
+      "title": "Fort Worth: register two hours before the meeting",
+      "body": "Fort Worth closes speaker sign-up two hours before the meeting starts, for day and evening meetings alike.\n\nSign up online, call the City Secretary's Office at 817-392-6150, email csoadmin@fortworthtexas.gov, or fill out a speaker card at City Hall. You get 3 minutes, in person only. Work sessions have no public comment.",
       "media": [],
-      "links": [{ "label": "Fort Worth city guide", "to": "/city/fort-worth" }]
+      "links": [{ "type": "guide", "label": "Fort Worth city guide" }, { "type": "signup", "label": "Open the sign-up form" }],
+      "i18n": {
+        "es": {
+          "title": "Fort Worth: inscríbete dos horas antes de la reunión",
+          "body": "Fort Worth cierra la inscripción de oradores dos horas antes de que empiece la reunión, sea de día o de noche.\n\nInscríbete en línea, llama a la Secretaría Municipal al 817-392-6150, escribe a csoadmin@fortworthtexas.gov o llena una tarjeta de orador en el Ayuntamiento. Tienes 3 minutos, solo en persona. En las sesiones de trabajo no hay comentarios del público."
+        },
+        "vi": {
+          "title": "Fort Worth: đăng ký trước buổi họp hai tiếng",
+          "body": "Fort Worth đóng đăng ký phát biểu hai tiếng trước khi buổi họp bắt đầu, dù họp ban ngày hay buổi tối.\n\nBạn có thể đăng ký trực tuyến, gọi Văn phòng Thư ký Thành phố theo số 817-392-6150, gửi email đến csoadmin@fortworthtexas.gov, hoặc điền phiếu phát biểu tại Tòa thị chính. Bạn có 3 phút và chỉ được nói trực tiếp. Các buổi họp làm việc (work session) không có phần ý kiến công chúng."
+        }
+      }
     },
     {
-      "id": "sample-denton-age",
-      "sample": true,
-      "kind": "question",
-      "title": "Can you speak at public comment if you are under 18?",
-      "body": "I asked the Denton city secretary this directly because I could not find it written anywhere. The answer was yes: there is no age requirement to speak during public comment, you just fill out the same card as everyone else. Posting because I almost did not go.\n\nIf anyone has heard differently for their own city, reply with what your clerk said.",
-      "author": { "name": "Amara O.", "school": "Denton High School", "cityId": "denton" },
-      "cityId": "denton",
-      "postedAt": "2026-09-05",
-      "helpful": 27,
-      "media": [],
-      "links": []
-    },
-    {
-      "id": "sample-richardson-library",
-      "sample": true,
-      "kind": "win",
-      "title": "Teen room hours at the library extended to 8 PM",
-      "body": "This was not even an agenda item. Four of us used the Citizen Comments slot to say the teen room closes at 6, which is exactly when most of us finish practice. A council member asked the library director about it the same night. The change showed up in the next month's hours.\n\nLesson: the open comment period is for things that are not on the agenda yet. That is the point of it.",
-      "author": { "name": "Ethan K.", "school": "Richardson High School", "cityId": "richardson" },
-      "cityId": "richardson",
-      "postedAt": "2026-08-28",
-      "helpful": 40,
-      "media": [
-        { "type": "image", "src": "community/chamber.svg", "alt": "Line drawing of a council chamber: a curved dais with seven seats facing rows of audience chairs." }
-      ],
-      "links": []
-    },
-    {
-      "id": "sample-irving-spanish",
-      "sample": true,
-      "kind": "toolkit",
-      "title": "A short Spanish script for parents who want to come with you",
-      "body": "My mom wanted to come but did not want to speak in English in front of the council. Irving lets you request an interpreter in advance, so we wrote her three sentences in Spanish and asked for one. She spoke for ninety seconds and got applause.\n\nSwitch this app to Español in the top right and the city guides and the comment builder come out in Spanish, which is where we started.",
-      "author": { "name": "Sofia L.", "school": "Nimitz High School", "cityId": "irving" },
-      "cityId": "irving",
-      "postedAt": "2026-09-10",
-      "helpful": 23,
-      "media": [],
-      "links": [{ "label": "Irving city guide", "to": "/city/irving" }]
-    },
-    {
-      "id": "sample-arlington-worksession",
-      "sample": true,
+      "id": "team-dallas-deadline",
+      "team": true,
       "kind": "tip",
-      "title": "Go to the work session, not just the vote",
-      "body": "The evening meeting is where the vote happens, but the afternoon work session is where council members actually argue about the item. You usually cannot speak at a work session, but you can sit in the room, and you learn which member already agrees with you. Then your three minutes at the evening meeting can be aimed at the ones who do not.\n\nThe Map page filter for Can speak shows which meetings take comment; the ones marked Watch only are still worth attending.",
-      "author": { "name": "Marcus B.", "school": "Martin High School", "cityId": "arlington" },
-      "cityId": "arlington",
-      "postedAt": "2026-09-14",
-      "helpful": 16,
-      "media": [
-        { "type": "image", "src": "community/dais.svg", "alt": "Line drawing of a council dais with nameplates and a city seal on the front." }
-      ],
-      "links": [{ "label": "Meetings you can speak at", "to": "/map" }]
+      "cityId": "dallas",
+      "postedAt": "2026-10-10",
+      "title": "Dallas: register by 5 PM the business day before",
+      "body": "Dallas wants speakers registered by 5 PM on the last business day before the meeting. Use the online form, email secspeakerrequest@dallas.gov, call the City Secretary at 214-670-3738, or go to City Hall, Room 5D South.\n\nYou can speak in person or by WebEx video, for up to 3 minutes. Each person can use open microphone once every 30 days.",
+      "media": [],
+      "links": [{ "type": "guide", "label": "Dallas city guide" }, { "type": "signup", "label": "Open the sign-up form" }],
+      "i18n": {
+        "es": {
+          "title": "Dallas: inscríbete antes de las 5 p.m. del día hábil anterior",
+          "body": "Dallas pide que te inscribas antes de las 5 p.m. del último día hábil antes de la reunión. Usa el formulario en línea, escribe a secspeakerrequest@dallas.gov, llama a la Secretaría Municipal al 214-670-3738 o ve al Ayuntamiento, sala 5D South.\n\nPuedes hablar en persona o por video en WebEx, hasta 3 minutos. Cada persona puede usar el micrófono abierto una vez cada 30 días."
+        },
+        "vi": {
+          "title": "Dallas: đăng ký trước 17:00 ngày làm việc trước buổi họp",
+          "body": "Dallas yêu cầu đăng ký trước 17:00 của ngày làm việc cuối cùng trước buổi họp. Bạn có thể dùng mẫu trực tuyến, gửi email đến secspeakerrequest@dallas.gov, gọi Thư ký Thành phố theo số 214-670-3738, hoặc đến Tòa thị chính, phòng 5D South.\n\nBạn có thể nói trực tiếp hoặc qua video WebEx, tối đa 3 phút. Mỗi người chỉ được dùng phần micro mở (open microphone) một lần trong 30 ngày."
+        }
+      }
     },
     {
-      "id": "sample-frisco-appointed",
-      "sample": true,
-      "kind": "win",
-      "title": "Appointed to the Frisco youth advisory council after two meetings",
-      "body": "I went to two regular meetings, spoke once about the skate park hours, and introduced myself to the council liaison afterward. She told me about the youth council application, which I had never heard of. Applied, interviewed, appointed.\n\nThe For you page lists these seats under Youth councils and programs near you. Attending gets you in the room; the appointed seat gets you a vote on what the room talks about.",
-      "author": { "name": "Lin H.", "school": "Lone Star High School", "cityId": "frisco" },
-      "cityId": "frisco",
-      "postedAt": "2026-09-02",
-      "helpful": 31,
+      "id": "team-irving-in-person",
+      "team": true,
+      "kind": "tip",
+      "cityId": "irving",
+      "postedAt": "2026-10-10",
+      "title": "Irving: sign up in person between 6 and 7 PM",
+      "body": "Irving takes sign-ups only in person, in the City Council Chambers at 825 W. Irving Blvd., between 6 and 7 PM on meeting day. There is no remote option.\n\nDuring Public Comments you get 3 minutes on any city topic that is not on the agenda, with no slides or video. Need an accommodation? Call the City Secretary's Office at 972-721-2493 at least 48 hours ahead.",
       "media": [],
-      "links": [{ "label": "Youth councils near you", "to": "/for-you" }]
+      "links": [{ "type": "guide", "label": "Irving city guide" }],
+      "i18n": {
+        "es": {
+          "title": "Irving: inscríbete en persona entre las 6 y las 7 p.m.",
+          "body": "Irving solo acepta inscripciones en persona, en la Sala del Concejo Municipal, 825 W. Irving Blvd., entre las 6 y las 7 p.m. el día de la reunión. No hay opción a distancia.\n\nDurante Public Comments tienes 3 minutos para hablar de cualquier tema de la ciudad que no esté en la agenda, sin diapositivas ni video. ¿Necesitas alguna adaptación? Llama a la Secretaría Municipal al 972-721-2493 con al menos 48 horas de anticipación."
+        },
+        "vi": {
+          "title": "Irving: đăng ký trực tiếp từ 18:00 đến 19:00",
+          "body": "Irving chỉ nhận đăng ký trực tiếp tại Phòng Hội đồng Thành phố, 825 W. Irving Blvd., từ 18:00 đến 19:00 ngày họp. Không có cách phát biểu từ xa.\n\nTrong phần Public Comments, bạn có 3 phút để nói về bất kỳ vấn đề nào của thành phố không có trong chương trình nghị sự, không dùng trang chiếu hay video. Cần hỗ trợ đặc biệt? Hãy gọi Văn phòng Thư ký Thành phố theo số 972-721-2493 trước ít nhất 48 tiếng."
+        }
+      }
+    },
+    {
+      "id": "team-denton-open-mic",
+      "team": true,
+      "kind": "tip",
+      "cityId": "denton",
+      "postedAt": "2026-10-10",
+      "title": "Denton: only seven speakers get Open Microphone",
+      "body": "At Denton's regular meetings, Open Microphone comes right after the 6:30 PM start. It is for topics that are not on the agenda, and you get up to 4 minutes.\n\nOnly seven speakers are heard per meeting, counting people who pre-registered and people who turned in a card. To be safe, pre-register with the City Secretary's Office by noon the Tuesday before. Otherwise fill out a blue speaker card at the meeting, no earlier than 30 minutes before it starts.",
+      "media": [],
+      "links": [{ "type": "guide", "label": "Denton city guide" }],
+      "i18n": {
+        "es": {
+          "title": "Denton: solo siete personas hablan en Open Microphone",
+          "body": "En las reuniones regulares de Denton, Open Microphone viene justo después del inicio a las 6:30 p.m. Es para temas que no están en la agenda, y tienes hasta 4 minutos.\n\nSolo se escucha a siete oradores por reunión, contando a quienes se inscribieron antes y a quienes entregaron una tarjeta. Para asegurar tu lugar, inscríbete en la Secretaría Municipal antes del mediodía del martes anterior. Si no, llena una tarjeta azul en la reunión, no antes de 30 minutos antes de que empiece."
+        },
+        "vi": {
+          "title": "Denton: chỉ bảy người được phát biểu ở Open Microphone",
+          "body": "Ở các buổi họp thường kỳ của Denton, phần Open Microphone diễn ra ngay sau khi bắt đầu lúc 18:30. Phần này dành cho các chủ đề không có trong chương trình nghị sự, và bạn có tối đa 4 phút.\n\nMỗi buổi họp chỉ nghe bảy người, tính cả người đăng ký trước và người nộp phiếu tại chỗ. Để chắc chắn, hãy đăng ký với Văn phòng Thư ký Thành phố trước 12:00 trưa thứ Ba trước buổi họp. Nếu không, hãy điền phiếu màu xanh dương tại buổi họp, sớm nhất là 30 phút trước giờ bắt đầu."
+        }
+      }
+    },
+    {
+      "id": "team-arlington-citizen-participation",
+      "team": true,
+      "kind": "tip",
+      "cityId": "arlington",
+      "postedAt": "2026-10-10",
+      "title": "Arlington: topics not on the agenda need sign-up by 5 PM",
+      "body": "To talk about something that is not on the agenda, sign up for Citizen Participation by 5 PM on meeting day: online, by phone at 817-459-6186, or at the City Secretary's Office. You get 2 minutes, or 1 minute if 26 or more people sign up.\n\nTo speak on an agenda item instead, fill out a card with staff outside the Council Chamber, starting 30 minutes before the 6:30 PM meeting. That gets you 3 minutes. Afternoon sessions have no public comment.",
+      "media": [],
+      "links": [{ "type": "guide", "label": "Arlington city guide" }, { "type": "signup", "label": "Open the sign-up form" }],
+      "i18n": {
+        "es": {
+          "title": "Arlington: para temas fuera de la agenda, inscríbete antes de las 5 p.m.",
+          "body": "Para hablar de algo que no está en la agenda, inscríbete en Citizen Participation antes de las 5 p.m. el día de la reunión: en línea, por teléfono al 817-459-6186 o en la Secretaría Municipal. Tienes 2 minutos, o 1 minuto si se inscriben 26 personas o más.\n\nPara hablar de un punto de la agenda, llena una tarjeta con el personal afuera de la Sala del Concejo, desde 30 minutos antes de la reunión de las 6:30 p.m. Así tienes 3 minutos. En las sesiones de la tarde no hay comentarios del público."
+        },
+        "vi": {
+          "title": "Arlington: chủ đề ngoài chương trình cần đăng ký trước 17:00",
+          "body": "Muốn nói về điều không có trong chương trình nghị sự, hãy đăng ký phần Citizen Participation trước 17:00 ngày họp: trực tuyến, qua điện thoại 817-459-6186, hoặc tại Văn phòng Thư ký Thành phố. Bạn có 2 phút, hoặc 1 phút nếu có từ 26 người đăng ký trở lên.\n\nNếu muốn nói về một mục trong chương trình, hãy điền phiếu với nhân viên bên ngoài Phòng Hội đồng, bắt đầu từ 30 phút trước buổi họp lúc 18:30. Khi đó bạn có 3 phút. Các buổi họp buổi chiều không có phần ý kiến công chúng."
+        }
+      }
+    },
+    {
+      "id": "team-coppell-zoom",
+      "team": true,
+      "kind": "tip",
+      "cityId": "coppell",
+      "postedAt": "2026-10-10",
+      "title": "Coppell: you can comment over Zoom",
+      "body": "Can't get to Town Center? Email citysec@coppelltx.gov before noon on meeting day, and the City Secretary will set you up to comment over Zoom.\n\nIn person, sign the speaker list near the Council Chambers entrance before 7:20 PM. The regular session starts at 7:30 PM. You get 3 minutes during Citizens' Appearance, or 5 minutes on a public hearing item.",
+      "media": [],
+      "links": [{ "type": "guide", "label": "Coppell city guide" }],
+      "i18n": {
+        "es": {
+          "title": "Coppell: puedes comentar por Zoom",
+          "body": "¿No puedes llegar a Town Center? Escribe a citysec@coppelltx.gov antes del mediodía del día de la reunión y la Secretaría Municipal te conectará para comentar por Zoom.\n\nEn persona, firma la lista de oradores cerca de la entrada de la Sala del Concejo antes de las 7:20 p.m. La sesión regular empieza a las 7:30 p.m. Tienes 3 minutos durante Citizens' Appearance, o 5 minutos en un punto de audiencia pública."
+        },
+        "vi": {
+          "title": "Coppell: bạn có thể góp ý qua Zoom",
+          "body": "Không đến được Town Center? Hãy gửi email đến citysec@coppelltx.gov trước 12:00 trưa ngày họp, Thư ký Thành phố sẽ sắp xếp để bạn góp ý qua Zoom.\n\nNếu đến trực tiếp, hãy ký tên vào danh sách phát biểu gần cửa Phòng Hội đồng trước 19:20. Phiên họp thường kỳ bắt đầu lúc 19:30. Bạn có 3 phút trong phần Citizens' Appearance, hoặc 5 phút cho một mục điều trần công khai."
+        }
+      }
+    },
+    {
+      "id": "team-garland-citizen-comments",
+      "team": true,
+      "kind": "question",
+      "cityId": "garland",
+      "postedAt": "2026-10-10",
+      "title": "Can I bring up something that is not on Garland's agenda?",
+      "body": "Yes, during Citizen Comments near the end of a Regular Meeting. Fill out a speaker card at the Council Chambers entrance, or sign in at the electronic kiosk, and give it to the City Secretary before the comment period closes. You get 3 minutes.\n\nThe period is capped at 30 minutes, and Garland residents go first when not everyone can be heard. The council can't discuss or act on topics raised there, but it does hear them.",
+      "media": [],
+      "links": [{ "type": "guide", "label": "Garland city guide" }],
+      "i18n": {
+        "es": {
+          "title": "¿Puedo hablar de algo que no está en la agenda de Garland?",
+          "body": "Sí, durante Citizen Comments, cerca del final de una reunión regular. Llena una tarjeta de orador en la entrada de la Sala del Concejo, o regístrate en el quiosco electrónico, y entrégala a la Secretaría Municipal antes de que cierre el periodo de comentarios. Tienes 3 minutos.\n\nEse periodo dura como máximo 30 minutos, y los residentes de Garland van primero si no alcanza el tiempo para todos. El concejo no puede discutir ni decidir sobre esos temas ahí, pero sí los escucha."
+        },
+        "vi": {
+          "title": "Tôi có thể nêu chuyện không có trong chương trình nghị sự của Garland không?",
+          "body": "Có, trong phần Citizen Comments gần cuối buổi họp thường kỳ. Hãy điền phiếu phát biểu ở lối vào Phòng Hội đồng, hoặc đăng ký tại máy kiosk điện tử, rồi nộp cho Thư ký Thành phố trước khi phần góp ý kết thúc. Bạn có 3 phút.\n\nPhần này kéo dài tối đa 30 phút, và cư dân Garland được ưu tiên nếu không đủ thời gian cho tất cả mọi người. Hội đồng không thể thảo luận hay quyết định về các chủ đề nêu ra lúc đó, nhưng họ vẫn lắng nghe."
+        }
+      }
+    },
+    {
+      "id": "team-dallas-youth-commission",
+      "team": true,
+      "kind": "toolkit",
+      "cityId": "dallas",
+      "postedAt": "2026-10-10",
+      "title": "Dallas Youth Commission: how to apply",
+      "body": "The Dallas Youth Commission is for full-time students in grades 9 to 12 who have lived in Dallas for at least six months. Each seat is appointed by a council member, so you apply for the seat in your own council district.\n\nApplications are open all year, through the city's boards and commissions portal. One of the 15 seats was open as of September 2026.",
+      "media": [],
+      "links": [{ "type": "apply", "label": "Open the application", "url": "https://cityofdallas.granicus.com/boards/forms/845/apply/" }, { "type": "guide", "label": "Dallas city guide" }],
+      "i18n": {
+        "es": {
+          "title": "Comisión Juvenil de Dallas: cómo solicitar",
+          "body": "La Comisión Juvenil de Dallas (Dallas Youth Commission) es para estudiantes de tiempo completo de 9.º a 12.º grado que han vivido en Dallas al menos seis meses. Cada puesto lo nombra un miembro del concejo, así que solicitas el puesto de tu propio distrito.\n\nLas solicitudes están abiertas todo el año, en el portal de juntas y comisiones de la ciudad. Uno de los 15 puestos estaba vacante en septiembre de 2026."
+        },
+        "vi": {
+          "title": "Ủy ban Thanh niên Dallas: cách nộp đơn",
+          "body": "Ủy ban Thanh niên Dallas (Dallas Youth Commission) dành cho học sinh toàn thời gian từ lớp 9 đến lớp 12 đã sống ở Dallas ít nhất sáu tháng. Mỗi ghế do một thành viên hội đồng bổ nhiệm, nên bạn nộp đơn cho ghế thuộc khu vực hội đồng của mình.\n\nĐơn được nhận quanh năm qua cổng thông tin hội đồng và ủy ban của thành phố. Tính đến tháng 9 năm 2026, còn trống một trong 15 ghế."
+        }
+      }
     }
   ]
 }

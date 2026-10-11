@@ -1,0 +1,15 @@
+/* Cities directory ( /cities ). Not mocked: composed from the page head, search, chips, the
+   Meetings list bar and the meeting-row family (.row), with CityEmblem in place of the date tile. */
+
+.cities__tools { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s3); margin-top: var(--s4); }
+.cities .listbar { margin-top: var(--s4); }
+.cities__list .emblem { flex: none; margin-top: 2px; }
+.crow .row__meta { gap: 0 var(--s3); }
+.crow .row__status { margin-top: 4px; }
+
+@media (min-width: 1024px) {
+  /* One centered reading column, like Prepare: a directory is a list, not a dashboard. */
+  .cities { max-width: calc(840px + 2 * var(--gutter)); }
+  .cities__tools { grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--s4); }
+  .cities__counties { overflow: visible; flex-wrap: wrap; margin: 0; padding: 0; }
+}

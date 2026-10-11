@@ -11,34 +11,54 @@ const LOADERS = {
   vi: () => import('@data/i18n/vi.json'),
 };
 
-/** Provides the city records in the active language. */
+/** Memories already loaded in this tab, so switching back is instant. */
+const LOADED = new Map();
+
+/**
+ * Provides the city records in the active language.
+ *
+ * A memory is only applied to the language it belongs to: while the Vietnamese memory loads
+ * after a switch from Spanish, the cities show in English (the source) rather than in the
+ * previous language under a Vietnamese interface. `translated` is true once the data is in
+ * the interface language. `cities` changes identity on every language change, so memos that
+ * depend on it recompute with the new language's labels.
+ */
 export function DataProvider({ children }) {
   const { lang } = useStore();
-  const [strings, setStrings] = useState(null);
+  const [loaded, setLoaded] = useState(() => ({ lang, strings: LOADED.get(lang) || null }));
 
   useEffect(() => {
-    let alive = true;
     const loader = LOADERS[lang];
-    if (!loader) {
-      setStrings(null);
+    if (!loader) return undefined;
+    if (LOADED.has(lang)) {
+      setLoaded({ lang, strings: LOADED.get(lang) });
       return undefined;
     }
+    let alive = true;
     loader()
       .then((mod) => {
         const data = mod.default || mod;
-        if (alive) setStrings(data.strings || null);
+        const strings = data.strings || null;
+        LOADED.set(lang, strings);
+        if (alive) setLoaded({ lang, strings });
       })
-      .catch(() => alive && setStrings(null));
+      .catch(() => {
+        if (alive) setLoaded({ lang, strings: null });
+      });
     return () => {
       alive = false;
     };
   }, [lang]);
 
+  const strings = LOADERS[lang] && loaded.lang === lang ? loaded.strings : null;
+  const translated = !LOADERS[lang] || (loaded.lang === lang && Boolean(loaded.strings));
+
   const value = useMemo(() => {
     const cities = localizeCities(RAW_CITIES, strings);
     const byId = new Map(cities.map((c) => [c.cityId, c]));
-    return { cities, cityById: (id) => byId.get(id) || null, translated: Boolean(strings) };
-  }, [strings]);
+    return { cities, cityById: (id) => byId.get(id) || null, translated, lang };
+    // lang is a dependency on purpose: dictionary labels inside localized data change with it.
+  }, [strings, translated, lang]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

@@ -1,4 +1,5 @@
 import { createApp } from './app.js';
+import { aiAvailable } from './ai.js';
 import { loadCities, loadNews } from '@agora/core/node';
 import { BRAND } from '@agora/core';
 
@@ -8,5 +9,6 @@ const news = loadNews();
 const app = createApp({ cities, news });
 
 app.listen(port, () => {
-  console.log(`${BRAND.name} API listening on http://localhost:${port}  (${cities.length} cities, AI ${process.env.ANTHROPIC_API_KEY ? 'on' : 'off: set ANTHROPIC_API_KEY to enable'})`);
+  // aiAvailable() also accepts ANTHROPIC_AUTH_TOKEN, so ask it rather than checking one variable.
+  console.log(`${BRAND.name} API listening on http://localhost:${port}  (${cities.length} cities, AI ${aiAvailable() ? 'on' : 'off: set ANTHROPIC_API_KEY to enable'})`);
 });

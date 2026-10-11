@@ -91,12 +91,13 @@
     {
       "date": "2026-10-06",
       "status": "rescheduled",
+      "time": "17:00",
       "note": "Regular meeting starts at 5:00 p.m. instead of 7:00 p.m. (Oct. 6 is National Night Out in Texas).",
       "source": "https://www.rowletttx.gov/calendar.aspx?CID=25&Keywords=&startDate=10%2F01%2F2026&endDate=11%2F30%2F2026"
     },
     {
       "date": "2026-11-03",
-      "status": "special",
+      "status": "note",
       "note": "Regular meeting is held as scheduled at 7 p.m. even though it is Election Day (listed on both the city calendar and CivicClerk).",
       "source": "https://rowletttx.portal.civicclerk.com/"
     }

@@ -1,0 +1,21 @@
+export default {
+  title: 'Ciudades',
+  lead: 'Cómo hablar en cada uno de los {n} concejos municipales que cubre Agora.',
+  searchLabel: 'Buscar ciudades',
+  searchPlaceholder: 'Busca una ciudad o un condado',
+  clearSearch: 'Borrar búsqueda',
+  countyLabel: 'Condado',
+  count: {
+    one: '{n} ciudad',
+    other: '{n} ciudades',
+  },
+  sort: 'Ordenar',
+  sortNear: 'Más cerca',
+  sortAz: 'De la A a la Z',
+  sortSoon: 'Para hablar más pronto',
+  nextSpeak: 'Puedes hablar el {when}',
+  calendarNotPosted: 'El calendario de {year} aún no se publica',
+  noSpeak: 'Sin comentarios públicos en los próximos 90 días',
+  emptyTitle: 'Ninguna ciudad coincide',
+  emptyBody: 'Agora cubre {n} ciudades de Dallas-Fort Worth. Prueba otro nombre o condado.',
+};

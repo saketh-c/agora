@@ -4,10 +4,45 @@ import { isTopicId } from './topics.js';
 
 const KINDS = new Set(['nth-weekday', 'weekly', 'biweekly', 'custom']);
 const MEETING_TYPES = new Set(['regular', 'work-session', 'briefing', 'town-hall', 'committee', 'other']);
-const EXCEPTION_STATUS = new Set(['cancelled', 'rescheduled', 'special', 'recess']);
+/**
+ * Exception statuses (see expandCityMeetings): cancelled and recess cancel a date's meetings,
+ * rescheduled moves or retimes them, special marks or adds a special session, and note only
+ * attaches information without changing the meeting.
+ */
+const EXCEPTION_STATUS = new Set(['cancelled', 'rescheduled', 'special', 'recess', 'note']);
+/** Fields that describe the separate meeting a special exception adds. */
+const SPECIAL_ONLY = ['label', 'type', 'openToPublicComment'];
 
-function isUrl(u) {
+export function isUrl(u) {
   return typeof u === 'string' && /^https?:\/\/\S+$/i.test(u);
+}
+
+/**
+ * Visit every URL-bearing field of a city record as fn(value, path, owner, key), skipping empty
+ * ones. Pages render all of these as links, so each must be http(s); build-data uses this to
+ * drop any that is not.
+ */
+export function forEachCityUrl(city, fn) {
+  if (!city || typeof city !== 'object') return;
+  const visit = (owner, key, path) => {
+    const v = owner[key];
+    if (v !== undefined && v !== null && v !== '') fn(v, path, owner, key);
+  };
+  visit(city, 'website', 'website');
+  visit(city, 'councilPageUrl', 'councilPageUrl');
+  const nested = { council: ['findMyDistrictUrl', 'districtMapUrl'], publicComment: ['registrationUrl', 'source'], agendaPortal: ['url', 'source'], liveStream: ['url', 'source'] };
+  for (const [obj, keys] of Object.entries(nested)) {
+    const owner = city[obj];
+    if (owner && typeof owner === 'object') for (const k of keys) visit(owner, k, `${obj}.${k}`);
+  }
+  const arrays = { meetings: ['virtualUrl', 'source'], scheduleExceptions: ['source'], youthPrograms: ['url', 'source'], agendaItems: ['url'] };
+  for (const [arr, keys] of Object.entries(arrays)) {
+    if (!Array.isArray(city[arr])) continue;
+    city[arr].forEach((item, i) => {
+      if (item && typeof item === 'object') for (const k of keys) visit(item, k, `${arr}[${i}].${k}`);
+    });
+  }
+  if (Array.isArray(city.sources)) city.sources.forEach((_, i) => visit(city.sources, i, `sources[${i}]`));
 }
 
 /** Returns a list of human-readable problems; empty means the city record is usable. */
@@ -54,7 +89,6 @@ export function validateCity(city) {
         if (!Array.isArray(r.dates) || !r.dates.length) err(`${tag}.recurrence.dates is required for custom`);
         else if (r.dates.some((d) => !isDateStr(d))) err(`${tag}.recurrence.dates must all be YYYY-MM-DD`);
       }
-      if (m.virtualUrl && !isUrl(m.virtualUrl)) err(`${tag}.virtualUrl is not a URL`);
     });
   }
 
@@ -64,12 +98,19 @@ export function validateCity(city) {
   const arr = (key) => (Array.isArray(city[key]) ? city[key] : []);
 
   arr('scheduleExceptions').forEach((ex, i) => {
-    if (!isDateStr(ex.date)) err(`scheduleExceptions[${i}].date must be YYYY-MM-DD`);
-    if (!EXCEPTION_STATUS.has(ex.status)) err(`scheduleExceptions[${i}].status "${ex.status}" is not valid`);
+    const tag = `scheduleExceptions[${i}]`;
+    if (!isDateStr(ex.date)) err(`${tag}.date must be YYYY-MM-DD`);
+    if (!EXCEPTION_STATUS.has(ex.status)) err(`${tag}.status "${ex.status}" is not valid`);
     for (const f of ['movedFrom', 'movedTo']) {
-      if (ex[f] !== undefined && !isDateStr(ex[f])) err(`scheduleExceptions[${i}].${f} must be YYYY-MM-DD`);
-      if (ex[f] && ex.status !== 'rescheduled') err(`scheduleExceptions[${i}].${f} only applies to rescheduled exceptions`);
+      if (ex[f] !== undefined && !isDateStr(ex[f])) err(`${tag}.${f} must be YYYY-MM-DD`);
+      if (ex[f] && ex.status !== 'rescheduled') err(`${tag}.${f} only applies to rescheduled exceptions`);
     }
+    if (ex.time !== undefined && !isTimeStr(ex.time)) err(`${tag}.time "${ex.time}" must be HH:MM (24-hour)`);
+    for (const f of SPECIAL_ONLY) if (ex[f] !== undefined && ex.status !== 'special') err(`${tag}.${f} only applies to special exceptions`);
+    if (ex.label !== undefined && (typeof ex.label !== 'string' || !ex.label.trim())) err(`${tag}.label must be a non-empty string`);
+    if (ex.type !== undefined && !MEETING_TYPES.has(ex.type)) err(`${tag}.type "${ex.type}" is not a known meeting type`);
+    if (ex.openToPublicComment !== undefined && typeof ex.openToPublicComment !== 'boolean') err(`${tag}.openToPublicComment must be true or false`);
+    if (ex.status === 'note' && !ex.note) err(`${tag}.note is required for a note exception`);
   });
 
   const pc = city.publicComment;
@@ -77,16 +118,14 @@ export function validateCity(city) {
   else {
     if (!pc.summary) err('publicComment.summary is required');
     if (!pc.howToRegister) err('publicComment.howToRegister is required');
-    if (pc.registrationUrl && !isUrl(pc.registrationUrl)) err('publicComment.registrationUrl is not a URL');
   }
 
-  for (const key of ['councilPageUrl']) if (city[key] && !isUrl(city[key])) err(`${key} is not a URL`);
-  if (city.agendaPortal && city.agendaPortal.url && !isUrl(city.agendaPortal.url)) err('agendaPortal.url is not a URL');
-  if (city.liveStream && city.liveStream.url && !isUrl(city.liveStream.url)) err('liveStream.url is not a URL');
+  forEachCityUrl(city, (value, path) => {
+    if (path !== 'website' && !isUrl(value)) err(`${path} is not a URL`);
+  });
 
   arr('youthPrograms').forEach((p, i) => {
     if (!p.name) err(`youthPrograms[${i}].name is required`);
-    if (p.url && !isUrl(p.url)) err(`youthPrograms[${i}].url is not a URL`);
   });
 
   arr('agendaItems').forEach((a, i) => {
@@ -111,4 +150,32 @@ export function validateCities(cities) {
     }
   }
   return errors;
+}
+
+/**
+ * Schedule smells that still produce a usable city, reported by build-data as warnings:
+ *  - a rescheduled exception with no movedFrom, movedTo or time, which the engine can only
+ *    resolve by reading its English note;
+ *  - the same date listed by two published-date rules at the same time, which shows one
+ *    meeting twice.
+ */
+export function scheduleWarnings(city) {
+  const out = [];
+  const where = (city && city.cityId) || 'unknown city';
+  (Array.isArray(city && city.scheduleExceptions) ? city.scheduleExceptions : []).forEach((ex, i) => {
+    if (ex.status === 'rescheduled' && !ex.movedFrom && !ex.movedTo && !ex.time) {
+      out.push(`${where}: scheduleExceptions[${i}] (${ex.date}) is rescheduled without movedFrom, movedTo or time, so only its note says what changed`);
+    }
+  });
+  const listed = new Map();
+  (Array.isArray(city && city.meetings) ? city.meetings : []).forEach((m, i) => {
+    const r = m && m.recurrence;
+    if (!r || r.kind !== 'custom') return;
+    for (const d of r.dates || []) {
+      const key = `${d} ${r.time}`;
+      if (listed.has(key)) out.push(`${where}: ${d} at ${r.time} is listed by both meetings[${listed.get(key)}] and meetings[${i}]`);
+      else listed.set(key, i);
+    }
+  });
+  return out;
 }
