@@ -76,7 +76,7 @@
   "agendaPortal": {
     "url": "https://colleyvilletx.portal.civicclerk.com/",
     "platform": "CivicClerk",
-    "notes": "Agendas and packets are posted on the CivicClerk public portal at least 72 hours before each meeting; the September 15, 2026 agenda was posted September 9. The city's index page at https://www.colleyville.com/government/meeting-agendas-packets-and-minutes links to CivicClerk for agendas and packets and to a Laserfiche WebLink archive (http://documents.colleyville.com/weblink/0/fol/135023/Row1.aspx, requires browser cookies) for approved minutes."
+    "notes": "Agendas and packets are posted on the CivicClerk public portal at least 72 hours before each meeting; the September 15, 2026 agenda was posted September 9. The city's index page at https://www.colleyville.com/government/meeting-agendas-packets-and-minutes links to CivicClerk for agendas and packets and to a Laserfiche WebLink archive (https://documents.colleyville.com/weblink/0/fol/135023/Row1.aspx, requires browser cookies) for approved minutes."
   },
   "liveStream": {
     "url": "https://www.colleyville.com/government/webcasts-and-live-streaming",

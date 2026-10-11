@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-11T01:32:07.703Z",
+  "generatedAt": "2026-10-11T07:38:40.898Z",
   "cityCount": 39,
   "cities": [
     {
@@ -334,7 +334,7 @@
         "virtualAllowed": false,
         "writtenCommentMethod": "No written-comment channel is listed in the rules; contact council members directly through the City Council office (817-459-6122) or the council members page",
         "notes": "Zoning public hearings: applicant 5 minutes plus 3-minute rebuttal, all other speakers 3 minutes. Speakers must address the Council from the podium and may not use music, video, other media, signs or props; a translator doubles the time. Speakers with the same message may designate one person to speak for the group. The presiding officer may shorten time limits when many speakers are present. Afternoon sessions have no public comment.",
-        "source": "https://www.arlingtontx.gov/files/assets/city/v/3/city-council/documents/city-council-rules-for-public-comment.pdf"
+        "source": "https://www.arlingtontx.gov/Government/Meetings-Agendas/City-Council-Meeting-Process"
       },
       "youthPrograms": [
         {
@@ -362,7 +362,6 @@
         "https://www.arlingtontx.gov/Government/Meetings-Agendas/City-Council-Meeting-Schedule",
         "https://www.arlingtontx.gov/Government/Meetings-Agendas/City-Council-Meeting-Schedule/City-Council-Calendar",
         "https://www.arlingtontx.gov/Government/Meetings-Agendas/City-Council-Meeting-Process",
-        "https://www.arlingtontx.gov/files/assets/city/v/3/city-council/documents/city-council-rules-for-public-comment.pdf",
         "https://www.arlingtontx.gov/Government/Meetings-Agendas/City-Council-Meeting-Agendas",
         "https://www.arlingtontx.gov/Government/City-Government/City-Secretary/Posted-Meetings",
         "https://www.arlingtontx.gov/Government/Meetings-Agendas/Watch-Meetings/City-Council-Meetings",
@@ -969,7 +968,7 @@
       "agendaPortal": {
         "url": "https://colleyvilletx.portal.civicclerk.com/",
         "platform": "CivicClerk",
-        "notes": "Agendas and packets are posted on the CivicClerk public portal at least 72 hours before each meeting; the September 15, 2026 agenda was posted September 9. The city's index page at https://www.colleyville.com/government/meeting-agendas-packets-and-minutes links to CivicClerk for agendas and packets and to a Laserfiche WebLink archive (http://documents.colleyville.com/weblink/0/fol/135023/Row1.aspx, requires browser cookies) for approved minutes."
+        "notes": "Agendas and packets are posted on the CivicClerk public portal at least 72 hours before each meeting; the September 15, 2026 agenda was posted September 9. The city's index page at https://www.colleyville.com/government/meeting-agendas-packets-and-minutes links to CivicClerk for agendas and packets and to a Laserfiche WebLink archive (https://documents.colleyville.com/weblink/0/fol/135023/Row1.aspx, requires browser cookies) for approved minutes."
       },
       "liveStream": {
         "url": "https://www.colleyville.com/government/webcasts-and-live-streaming",
@@ -2214,12 +2213,12 @@
         "lng": -96.9065
       },
       "website": "https://www.duncanvilletx.gov/",
-      "councilPageUrl": "https://www.duncanvilletx.gov/city_hall/government/duncanville_city_council",
+      "councilPageUrl": "https://www.duncanvilletx.gov/416/Duncanville-City-Council",
       "council": {
         "size": 7,
         "structure": "Mayor elected at large + 1 at-large council member + 5 council members from single-member districts",
         "districtCount": 5,
-        "findMyDistrictUrl": "https://www.duncanvilletx.gov/city_hall/government/interactive_city_maps",
+        "findMyDistrictUrl": "https://www.duncanvilletx.gov/474/Interactive-City-Maps",
         "districtMapUrl": "https://duncanville.maps.arcgis.com/apps/instant/basic/index.html?appid=185c997a3fa64bafbb370a4b8f8ccf41",
         "mayorName": "Greg Contreras",
         "termNote": "Two-year staggered terms: the Mayor, District 2 and District 4 seats expire in even-numbered years; Districts 1, 3 and 5 expire in odd-numbered years (council page). Current members: DeMonica Gooden (At-Large, Mayor Pro Tem), Joe Veracruz (District 1), Don McBurnett (District 2), Jeremy Koontz (District 3), Jarred D. Davis (District 4), Kyle Pennebaker (District 5). Council-manager form of government."
@@ -2242,7 +2241,7 @@
           "virtualUrl": "https://duncanvilletx.new.swagit.com/views/454/",
           "openToPublicComment": true,
           "notes": "Citizens' Input is a standing item early in the regular session (after reports and proclamations). Public hearings are also held here. Meetings are in person and broadcast on the website and social media; a council member may join by videoconference but the presiding officer and a quorum must be physically present.",
-          "source": "https://www.duncanvilletx.gov/city_hall/government/duncanville_city_council"
+          "source": "https://www.duncanvilletx.gov/416/Duncanville-City-Council"
         },
         {
           "type": "work-session",
@@ -2297,7 +2296,7 @@
       "liveStream": {
         "url": "https://duncanvilletx.new.swagit.com/views/454/",
         "platform": "Swagit",
-        "notes": "This link is printed on every council agenda. The Swagit archive holds City Council, Planning and Zoning, Arts Commission and other recordings back to about 2022, each linked to its agenda. Recordings are also posted to the city's YouTube channel (linked from the Live and Archived Videos page at https://www.duncanvilletx.gov/city_hall/live_and_archived_videos)."
+        "notes": "This link is printed on every council agenda. The Swagit archive holds City Council, Planning and Zoning, Arts Commission and other recordings back to about 2022, each linked to its agenda. Recordings are also posted to the city's YouTube channel (linked from the Live and Archived Videos page at https://www.duncanvilletx.gov/430/Live-Archived-Videos)."
       },
       "publicComment": {
         "summary": "Fill out a comment card and hand it to the receptionist at City Hall before the 7 p.m. regular session starts, and you get two minutes at the microphone during Citizens' Input on any topic. If you cannot attend, email your comment to city.secretary@duncanvilletx.gov by 4 p.m. on meeting day; it is given to the council in writing but is not read aloud.",
@@ -2312,11 +2311,11 @@
       "youthPrograms": [
         {
           "name": "Teen Advisory Guild (Duncanville Public Library)",
-          "url": "https://www.duncanvilletx.gov/news/weekly_update/weekly_update_june_18_2026",
+          "url": "https://www.duncanvilletx.gov/CivicAlerts.aspx?AID=21",
           "ages": "14 to 18",
           "description": "Library-based teen group where members share ideas, plan events for teens and earn volunteer hours. Sessions have run on Wednesdays from 5 to 6 p.m. at the Duncanville Public Library, 201 James Collins Blvd (for example June 10 and 24, 2026); the library does not keep a permanent web page for the group, so check the city's weekly updates or call for the next dates.",
           "applyWindow": "Ongoing; contact the library at 972-780-5050",
-          "source": "https://www.duncanvilletx.gov/news/weekly_update/weekly_update_june_18_2026"
+          "source": "https://www.duncanvilletx.gov/CivicAlerts.aspx?AID=21"
         },
         {
           "name": "Duncanville Teen Council (proposed)",
@@ -2459,10 +2458,10 @@
       "confidence": "high",
       "lastVerified": "2026-09-10",
       "sources": [
-        "https://www.duncanvilletx.gov/city_hall/government/duncanville_city_council",
-        "https://www.duncanvilletx.gov/city_hall/government/agendas_minutes",
-        "https://www.duncanvilletx.gov/city_hall/live_and_archived_videos",
-        "https://www.duncanvilletx.gov/city_hall/government/interactive_city_maps",
+        "https://www.duncanvilletx.gov/416/Duncanville-City-Council",
+        "https://www.duncanvilletx.gov/310/Agendas-Minutes",
+        "https://www.duncanvilletx.gov/430/Live-Archived-Videos",
+        "https://www.duncanvilletx.gov/474/Interactive-City-Maps",
         "https://duncanvilletx.portal.civicclerk.com/",
         "https://duncanvilletx.api.civicclerk.com/v1/Events?$filter=startDateTime%20ge%202026-09-01T00:00:00Z&$orderby=startDateTime",
         "https://duncanvilletx.api.civicclerk.com/v1/Events?$filter=startDateTime%20ge%202026-11-10T00:00:00Z&$orderby=startDateTime",
@@ -2472,8 +2471,8 @@
         "https://duncanville.civicweb.net/portal/",
         "https://duncanvilletx.new.swagit.com/views/454/",
         "https://events.duncanvilletx.gov/duncanvilletx/260129468",
-        "https://www.duncanvilletx.gov/news/weekly_update/weekly_update_june_18_2026",
-        "https://www.duncanvilletx.gov/residents/education/duncanville_public_library",
+        "https://www.duncanvilletx.gov/CivicAlerts.aspx?AID=21",
+        "https://www.duncanvilletx.gov/513/Duncanville-Public-Library",
         "https://censusreporter.org/profiles/16000US4821628-duncanville-tx/",
         "https://nominatim.openstreetmap.org/search?format=json&q=203+E+Wheatland+Rd,+Duncanville,+TX+75116"
       ],
@@ -5589,7 +5588,7 @@
         "https://cityoflewisville.legistar.com/View.ashx?M=A&ID=1440623&GUID=09C0A6DB-AFBF-4EF9-9DC8-EDD1F84E0BE0",
         "https://webapi.legistar.com/v1/cityoflewisville/events",
         "https://cityoflewisville.granicusideas.com/meetings",
-        "https://lewisvilletx.new.swagit.com/",
+        "https://lewisvilletx.new.swagit.com/views/760/city-council",
         "https://www.lewisvillecourt.com/court-appearance/juvenile-teen-court/volunteer-for-teen-court",
         "https://volunteer.cityoflewisville.com/agency/detail/?agency_id=179338",
         "https://www.flowermound.gov/461/Youth-Services",
@@ -6713,7 +6712,7 @@
         "https://www.murphytx.org/1961/City-Council",
         "https://murphytx.org/1969/Meeting-Regulations",
         "https://www.murphytx.org/586/Council-Meeting-Video",
-        "https://www.murphytx.org/280/City-Manager",
+        "https://www.murphytx.org/1955/City-Managers-Office",
         "https://murphytx.civicweb.net/Portal/",
         "https://murphytx.civicweb.net/Portal/MeetingTypeList.aspx",
         "https://murphytx.civicweb.net/Portal/MeetingInformation.aspx?Id=11101",
