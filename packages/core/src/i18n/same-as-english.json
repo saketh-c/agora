@@ -1,3 +1,7 @@
 {
-  "*": ["prepare.write.schoolPlaceholder", "cli.demoSchool"]
+  "*": ["prepare.write.schoolPlaceholder", "cli.demoSchool"],
+  "zh": ["brand.region"],
+  "hi": ["brand.region", "cli.cityHeading", "cli.usageLine", "format.labelValue", "format.sep", "rehearse.keys.space", "rehearse.quoted", "ui.calendar.google"],
+  "te": ["brand.region", "format.fullStop", "format.labelValue", "format.sep", "rehearse.quoted", "ui.calendar.google"],
+  "ar": ["brand.region", "format.fullStop", "format.labelValue"]
 }

@@ -1,7 +1,7 @@
 export default {
-  tagline: 'Your turn to speak at city hall.',
-  shortDescription: 'Find city council meetings across Dallas-Fort Worth, learn exactly how to sign up to speak, and get matched to the issues you care about.',
-  nonpartisanNote: 'Texas city councils are nonpartisan. This app is about showing up and being heard, not about picking a side.',
-  builtFor: 'Built by students for the Congressional App Challenge.',
+  tagline: 'సిటీ హాల్‌లో మాట్లాడే వంతు మీదే.',
+  shortDescription: 'Dallas-Fort Worth అంతటా సిటీ కౌన్సిల్ సమావేశాలను కనుగొనండి, మాట్లాడటానికి ఎలా నమోదు చేసుకోవాలో సరిగ్గా తెలుసుకోండి, మీరు పట్టించుకునే సమస్యలకు సరిపోయే సూచనలు పొందండి.',
+  nonpartisanNote: 'టెక్సాస్ సిటీ కౌన్సిల్‌లు పార్టీలకు అతీతం. ఈ యాప్ ఉద్దేశం ఒక పక్షాన్ని ఎంచుకోవడం కాదు, హాజరై మీ మాట వినిపించడం.',
+  builtFor: 'Congressional App Challenge కోసం విద్యార్థులు రూపొందించారు.',
   region: 'Dallas-Fort Worth',
 };

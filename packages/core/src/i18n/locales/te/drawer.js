@@ -3,11 +3,11 @@
  * src/ai.js) uses howToSpeakHere, itemAbout, itemOnAgenda and whyMatters too.
  */
 export default {
-  howToSpeakHere: 'How to speak here',
-  explainThis: 'Explain this',
-  explaining: 'Getting a plain-language explanation',
-  hide: 'Hide',
-  itemAbout: 'This item is about {topic} in {city}.',
-  itemOnAgenda: 'This item is on the {city} council agenda.',
-  whyMatters: 'Why it might matter to you: {angle}',
+  howToSpeakHere: 'ఇక్కడ ఎలా మాట్లాడాలి',
+  explainThis: 'దీన్ని వివరించండి',
+  explaining: 'సులభమైన భాషలో వివరణ తెస్తున్నాం',
+  hide: 'దాచండి',
+  itemAbout: 'ఈ అంశం {city} లోని {topic} అనే విషయానికి సంబంధించినది.',
+  itemOnAgenda: 'ఈ అంశం {city} కౌన్సిల్ అజెండాలో ఉంది.',
+  whyMatters: 'ఇది మీకు ఎందుకు ముఖ్యం కావచ్చు: {angle}',
 };

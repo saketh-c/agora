@@ -1,10 +1,10 @@
 /** Meetings and agendas read from each city's own agenda site (see core/src/agendas.js). */
 export default {
-  agendaPosted: 'Agenda posted {date}',
-  agendaPostedUndated: 'Agenda posted',
-  checked: 'Checked {date}. Confirm on the city site before you go.',
-  cancelledNote: "The city's online meeting list shows this meeting as cancelled. Confirm on the city site.",
-  addedNote: "Listed on the city's online meeting list. Confirm on the city site.",
-  reinstatedNote: "Listed again on the city's online meeting list. Confirm on the city site.",
-  englishNote: "Items from the city's agenda site appear in English, as the city posted them.",
+  agendaPosted: 'అజెండా {date} నాడు పోస్ట్ అయింది',
+  agendaPostedUndated: 'అజెండా పోస్ట్ అయింది',
+  checked: '{date} నాడు సరిచూశాం. వెళ్లే ముందు నగర సైట్‌లో నిర్ధారించుకోండి.',
+  cancelledNote: "నగరం ఆన్‌లైన్ సమావేశాల జాబితాలో ఈ సమావేశం రద్దయినట్టు ఉంది. నగర సైట్‌లో నిర్ధారించుకోండి.",
+  addedNote: "నగరం ఆన్‌లైన్ సమావేశాల జాబితాలో ఉంది. నగర సైట్‌లో నిర్ధారించుకోండి.",
+  reinstatedNote: "నగరం ఆన్‌లైన్ సమావేశాల జాబితాలో మళ్లీ కనిపిస్తోంది. నగర సైట్‌లో నిర్ధారించుకోండి.",
+  englishNote: "నగర అజెండా సైట్ నుంచి వచ్చిన అంశాలు, నగరం పోస్ట్ చేసినట్టే ఇంగ్లీష్‌లో కనిపిస్తాయి.",
 };

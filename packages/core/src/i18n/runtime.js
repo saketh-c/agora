@@ -56,10 +56,10 @@ export const LOCALES = Object.freeze(
     { code: 'en', name: 'English', nativeName: 'English', tag: 'en', dir: 'ltr', intl: 'en-US', speech: 'en-US', formats: 'dictionary', aliases: [], ready: true },
     { code: 'es', name: 'Spanish', nativeName: 'Español', tag: 'es', dir: 'ltr', intl: 'es-US', speech: 'es-US', formats: 'dictionary', aliases: ['Espanol', 'Castellano'], ready: true },
     { code: 'vi', name: 'Vietnamese', nativeName: 'Tiếng Việt', tag: 'vi', dir: 'ltr', intl: 'vi-VN', speech: 'vi-VN', formats: 'dictionary', aliases: [], ready: true },
-    { code: 'zh', name: 'Chinese', nativeName: '中文', tag: 'zh-Hans', dir: 'ltr', intl: 'zh-Hans-CN-u-nu-latn', speech: 'zh-CN', formats: 'intl', aliases: ['Simplified Chinese', 'Mandarin', '简体中文', '汉语', '普通话'], ready: false },
-    { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी', tag: 'hi', dir: 'ltr', intl: 'hi-IN-u-nu-latn', speech: 'hi-IN', formats: 'intl', aliases: ['हिंदी'], ready: false },
-    { code: 'te', name: 'Telugu', nativeName: 'తెలుగు', tag: 'te', dir: 'ltr', intl: 'te-IN-u-nu-latn', speech: 'te-IN', formats: 'intl', aliases: [], ready: false },
-    { code: 'ar', name: 'Arabic', nativeName: 'العربية', tag: 'ar', dir: 'rtl', intl: 'ar-u-ca-gregory-nu-latn', speech: 'ar-SA', formats: 'intl', aliases: ['عربي'], ready: false },
+    { code: 'zh', name: 'Chinese', nativeName: '中文', tag: 'zh-Hans', dir: 'ltr', intl: 'zh-Hans-CN-u-nu-latn', speech: 'zh-CN', formats: 'intl', aliases: ['Simplified Chinese', 'Mandarin', '简体中文', '汉语', '普通话'], ready: true },
+    { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी', tag: 'hi', dir: 'ltr', intl: 'hi-IN-u-nu-latn', speech: 'hi-IN', formats: 'intl', aliases: ['हिंदी'], ready: true },
+    { code: 'te', name: 'Telugu', nativeName: 'తెలుగు', tag: 'te', dir: 'ltr', intl: 'te-IN-u-nu-latn', speech: 'te-IN', formats: 'intl', aliases: [], ready: true },
+    { code: 'ar', name: 'Arabic', nativeName: 'العربية', tag: 'ar', dir: 'rtl', intl: 'ar-u-ca-gregory-nu-latn', speech: 'ar-SA', formats: 'intl', aliases: ['عربي'], ready: true },
   ].map((l) => Object.freeze({ ...l, aliases: Object.freeze(l.aliases) })),
 );
 

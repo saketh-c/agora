@@ -3,11 +3,11 @@
  * src/ai.js) uses howToSpeakHere, itemAbout, itemOnAgenda and whyMatters too.
  */
 export default {
-  howToSpeakHere: 'How to speak here',
-  explainThis: 'Explain this',
-  explaining: 'Getting a plain-language explanation',
-  hide: 'Hide',
-  itemAbout: 'This item is about {topic} in {city}.',
-  itemOnAgenda: 'This item is on the {city} council agenda.',
-  whyMatters: 'Why it might matter to you: {angle}',
+  howToSpeakHere: 'यहाँ कैसे बोलें',
+  explainThis: 'इसे आसान भाषा में समझाएँ',
+  explaining: 'आसान भाषा में समझाया जा रहा है',
+  hide: 'छिपाएँ',
+  itemAbout: 'यह आइटम {city} में {topic} के बारे में है।',
+  itemOnAgenda: 'यह आइटम {city} की काउंसिल के एजेंडे में है।',
+  whyMatters: 'यह आपके लिए क्यों मायने रख सकता है: {angle}',
 };
