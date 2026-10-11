@@ -62,6 +62,9 @@ export default {
   usually: ' (normalmente en {day})',
   at: ', {time}',
   and: 'y',
+  sep: ', ',
+  labelValue: '{label}: {value}',
+  fullStop: '.',
   am: 'a.m.',
   pm: 'p.m.',
 };

@@ -123,7 +123,7 @@ export default {
       day: 'Ngày họp',
       after: 'Sau đó: kể lại buổi họp',
     },
-    progress: 'Đã xong {done}/{total} bước chuẩn bị',
+    progress: 'Đã xong {done}/{n} bước chuẩn bị',
     progressLabel: 'Tiến độ chuẩn bị',
     continue: 'Tiếp tục: {step}',
     done: 'Xong',

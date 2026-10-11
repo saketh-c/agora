@@ -1,0 +1,40 @@
+/* Script fonts for Arabic, Hindi and Telugu, self-hosted from Fontsource (no CDN at runtime).
+   Only each font's own script subset is declared (the packages' CSS also declares Latin,
+   math and symbol subsets, which would replace color emoji and download for everyone).
+   unicode-range keeps every file from downloading until a character of that script is on the
+   screen; the service worker then keeps it (vite.config.js, "script-fonts"). Chinese uses the
+   system's fonts (see tokens.css).
+   The ranges are the packages' own (unicode.json) minus the characters other text uses too:
+   the zero-width joiners and marks (U+200C-200E), hyphens (U+2010-2011), the dotted circle
+   (U+25CC), currency and combining signs (U+20A8, U+20B9, U+20F0) and Arabic punctuation
+   outside its block (U+204F, U+2E41). The font stack is the same on every page, so any of
+   those would download all three files on an English page: every emoji written with a
+   zero-width joiner (a family, a flag, a job) has one. Shaping does not need them in the
+   font: the shaper reads joiners from the text, and a font without them hides them. */
+
+@font-face {
+  font-family: 'Noto Sans Arabic Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('@fontsource-variable/noto-sans-arabic/files/noto-sans-arabic-arabic-wght-normal.woff2') format('woff2-variations'), url('@fontsource-variable/noto-sans-arabic/files/noto-sans-arabic-arabic-wght-normal.woff2') format('woff2');
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
+}
+
+@font-face {
+  font-family: 'Noto Sans Devanagari Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('@fontsource-variable/noto-sans-devanagari/files/noto-sans-devanagari-devanagari-wght-normal.woff2') format('woff2-variations'), url('@fontsource-variable/noto-sans-devanagari/files/noto-sans-devanagari-devanagari-wght-normal.woff2') format('woff2');
+  unicode-range: U+0900-097F, U+1CD0-1CF9, U+A830-A839, U+A8E0-A8FF, U+11B00-11B09;
+}
+
+@font-face {
+  font-family: 'Noto Sans Telugu Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('@fontsource-variable/noto-sans-telugu/files/noto-sans-telugu-telugu-wght-normal.woff2') format('woff2-variations'), url('@fontsource-variable/noto-sans-telugu/files/noto-sans-telugu-telugu-wght-normal.woff2') format('woff2');
+  unicode-range: U+0951-0952, U+0964-0965, U+0C00-0C7F, U+1CDA, U+1CF2;
+}

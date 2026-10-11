@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { BRAND, t, tn, tList } from '@agora/core';
+import { BRAND, formatMonthDay, isDateStr, t, tn, compareText, formatNumber } from '@agora/core';
 import seed from '@data/community.json';
 import { useCities } from '../lib/DataProvider.jsx';
 import { useStore } from '../lib/store.jsx';
 import { copyText } from '../lib/clipboard.js';
 import { communityFilterCount, readCommunityFilters, writeCommunityFilters } from '../lib/communityFilters.js';
+import { inputDir, postTextProps } from '../lib/textDir.js';
 import useClock from '../components/home/useClock.js';
 import { useSkipLink } from '../components/shell/PageMeta.jsx';
-import { KINDS, KIND_ICON, MAX_BODY, MAX_NAME, MAX_TITLE, buildIssueUrl, filterPosts, localizePost, newPostId, normalizePost, paragraphs, parseVideoUrl, postDate, sortPosts } from '../lib/community.js';
+import { KINDS, KIND_ICON, MAX_BODY, MAX_NAME, MAX_TITLE, buildIssueUrl, feedCountText, filterPosts, localizePost, newPostId, normalizePost, paragraphs, parseVideoUrl, postDate, sortPosts } from '../lib/community.js';
 import { PHOTO_TYPES, downscaleImage, getMedia, isQuotaError, listPosts, removePost, savePost, storageMode } from '../lib/communityDb.js';
 import { Avatar, Badge, Chip, EmptyState, Icon, Notice, PageHeader, Section, Segmented, Sheet } from '../components/ui/index.js';
 import { BrandMark } from '../components/shell/Brand.jsx';
@@ -22,10 +23,8 @@ const PROVIDER = { youtube: 'YouTube', vimeo: 'Vimeo' };
 
 /** "Oct 10", or "Oct 10, 2025" in another year, in the app language. */
 function shortDate(dateStr, today) {
-  const [y, m, d] = String(dateStr).split('-').map(Number);
-  if (!y || !m || !d) return '';
-  const month = tList('format.monthsShort')[m - 1];
-  return String(y) === String(today).slice(0, 4) ? t('ui.monthDay', { month, day: d }) : t('ui.monthDayYear', { month, day: d, year: y });
+  if (!isDateStr(String(dateStr || ''))) return '';
+  return formatMonthDay(dateStr, { withYear: String(dateStr).slice(0, 4) !== String(today).slice(0, 4) });
 }
 
 function readDraft(profileId) {
@@ -164,7 +163,7 @@ export default function Community() {
     for (const p of all) if (p.cityId && cityById(p.cityId)) counts.set(p.cityId, (counts.get(p.cityId) || 0) + 1);
     // A city from a link that has no posts yet still shows as the choice in use.
     if (cityFilter && !counts.has(cityFilter)) counts.set(cityFilter, 0);
-    return [...counts.entries()].map(([id, n]) => ({ city: cityById(id), n })).sort((a, b) => a.city.name.localeCompare(b.city.name, lang));
+    return [...counts.entries()].map(([id, n]) => ({ city: cityById(id), n })).sort((a, b) => compareText(a.city.name, b.city.name, lang));
   }, [all, cityById, lang, cityFilter]);
 
   const helpful = useMemo(() => new Set(Array.isArray(ui.helpful) ? ui.helpful : []), [ui.helpful]);
@@ -180,9 +179,8 @@ export default function Community() {
   const clearFilters = () => setFilters({ kind: '', city: '' });
   const filterCity = cityFilter ? cityById(cityFilter) : null;
   const homeCity = homeCityId ? cityById(homeCityId) : null;
-  const countText = filterCity ? tn('community.countIn', shown.length, { city: filterCity.name }) : tn('community.count', shown.length);
   // Say why the order is not by date: "9 posts, Plano first".
-  const listCount = sortBy === 'city' && homeCity && !filterCity && shown.length > 1 ? t('community.countFirst', { count: countText, city: homeCity.name }) : countText;
+  const listCount = feedCountText(shown.length, { filterCity, firstCity: sortBy === 'city' ? homeCity : null });
 
   const onPosted = (post, mediaUrls) => {
     for (const [id, u] of Object.entries(mediaUrls)) adoptUrl(id, null, u);
@@ -274,6 +272,7 @@ export default function Community() {
                 <li key={post.id}>
                   <PostCard
                     post={post}
+                    lang={lang}
                     city={post.cityId ? cityById(post.cityId) : null}
                     urls={urls}
                     today={today}
@@ -403,10 +402,13 @@ export default function Community() {
 
 /* ---------- One post ---------- */
 
-function PostCard({ post, city, urls, today, kindLabel, voted, onHelpful, onSend, onDelete }) {
+function PostCard({ post, lang, city, urls, today, kindLabel, voted, onHelpful, onSend, onDelete }) {
   const titleId = `post-${post.id}`;
   const author = post.team ? t('community.team') : post.author.name || t('community.you');
   const sub = post.team ? '' : t('community.onThisDevice');
+  // A post reads as one block in its own language and direction (lib/textDir.js): a team
+  // post in the page's language follows the page, even when it starts with "Plano:".
+  const textProps = postTextProps(post, lang);
   return (
     <article className="post cm-post" aria-labelledby={titleId}>
       <div className="cm-post__top">
@@ -420,10 +422,10 @@ function PostCard({ post, city, urls, today, kindLabel, voted, onHelpful, onSend
           </Badge>
         )}
       </div>
-      <h3 className="post__t" id={titleId} tabIndex={-1}>
+      <h3 className="post__t" id={titleId} tabIndex={-1} {...textProps}>
         {post.title}
       </h3>
-      <div className="post__b cm-post__b">
+      <div className="post__b cm-post__b" {...textProps}>
         {paragraphs(post.body).map((para, i) => (
           <p key={i}>{para}</p>
         ))}
@@ -845,7 +847,7 @@ function Composer({ open, onClose, profile, prefs, cities, mode, onPosted }) {
           <label className="label" htmlFor="cm-title">
             {t('community.titleLabel')}
           </label>
-          <input id="cm-title" name="title" className="input" value={draft.title} onChange={set('title')} maxLength={MAX_TITLE} placeholder={t('community.titlePlaceholder')} aria-invalid={Boolean(errors.title)} aria-describedby={described('title')} />
+          <input id="cm-title" name="title" className="input" dir={inputDir(draft.title)} value={draft.title} onChange={set('title')} maxLength={MAX_TITLE} placeholder={t('community.titlePlaceholder')} aria-invalid={Boolean(errors.title)} aria-describedby={described('title')} />
           {err('title')}
         </div>
 
@@ -853,7 +855,7 @@ function Composer({ open, onClose, profile, prefs, cities, mode, onPosted }) {
           <label className="label" htmlFor="cm-body">
             {t('community.bodyLabel')}
           </label>
-          <textarea id="cm-body" name="body" className="textarea" rows={5} value={draft.body} onChange={set('body')} maxLength={MAX_BODY} placeholder={t('community.bodyPlaceholder')} aria-invalid={Boolean(errors.body)} aria-describedby={described('body')} />
+          <textarea id="cm-body" name="body" className="textarea" dir={inputDir(draft.body)} rows={5} value={draft.body} onChange={set('body')} maxLength={MAX_BODY} placeholder={t('community.bodyPlaceholder')} aria-invalid={Boolean(errors.body)} aria-describedby={described('body')} />
           {err('body')}
         </div>
 
@@ -875,7 +877,7 @@ function Composer({ open, onClose, profile, prefs, cities, mode, onPosted }) {
             <label className="label" htmlFor="cm-name">
               {t('community.nameLabel')} <span className="opt">{t('community.optional')}</span>
             </label>
-            <input id="cm-name" className="input" value={draft.name} onChange={set('name')} maxLength={MAX_NAME} autoComplete="given-name" aria-describedby="cm-name-help" />
+            <input id="cm-name" className="input" dir={inputDir(draft.name)} value={draft.name} onChange={set('name')} maxLength={MAX_NAME} autoComplete="given-name" aria-describedby="cm-name-help" />
             <p className="help" id="cm-name-help">
               {t('community.nameHelp')}
             </p>
@@ -908,7 +910,7 @@ function Composer({ open, onClose, profile, prefs, cities, mode, onPosted }) {
                     <label className="vh" htmlFor={`cm-alt-${i}`}>
                       {t('community.media.altLabel', { n: i + 1 })}
                     </label>
-                    <input id={`cm-alt-${i}`} className="input" value={p.alt} maxLength={160} placeholder={t('community.media.altPlaceholder')} onChange={(e) => setPhotos((prev) => prev.map((x, j) => (j === i ? { ...x, alt: e.target.value } : x)))} />
+                    <input id={`cm-alt-${i}`} className="input" dir={inputDir(p.alt)} value={p.alt} maxLength={160} placeholder={t('community.media.altPlaceholder')} onChange={(e) => setPhotos((prev) => prev.map((x, j) => (j === i ? { ...x, alt: e.target.value } : x)))} />
                     <button type="button" className="btn btn--quiet btn--sm" onClick={() => removePhoto(i)} aria-label={t('community.media.removePhoto', { n: i + 1 })}>
                       {t('community.media.remove')}
                     </button>
@@ -920,7 +922,7 @@ function Composer({ open, onClose, profile, prefs, cities, mode, onPosted }) {
           {video && (
             <div className="cm-file">
               <Icon name="video" />
-              <span className="cm-file__name">{t('community.media.videoAttached', { name: video.name, mb: (video.size / 1024 / 1024).toLocaleString(undefined, { maximumFractionDigits: 1 }) })}</span>
+              <span className="cm-file__name">{t('community.media.videoAttached', { name: video.name, mb: formatNumber(video.size / 1024 / 1024, undefined, { maximumFractionDigits: 1 }) })}</span>
               <button type="button" className="btn btn--quiet btn--sm" onClick={removeVideo}>
                 {t('community.media.remove')}
               </button>
@@ -932,7 +934,7 @@ function Composer({ open, onClose, profile, prefs, cities, mode, onPosted }) {
           <label className="label" htmlFor="cm-video-url">
             {t('community.videoUrlLabel')} <span className="opt">{t('community.optional')}</span>
           </label>
-          <input id="cm-video-url" name="videoUrl" className="input" value={draft.videoUrl} onChange={set('videoUrl')} inputMode="url" placeholder="https://youtu.be/" aria-invalid={Boolean(errors.videoUrl)} aria-describedby={described('videoUrl', 'cm-video-help')} />
+          <input id="cm-video-url" name="videoUrl" className="input" dir="ltr" value={draft.videoUrl} onChange={set('videoUrl')} inputMode="url" placeholder="https://youtu.be/" aria-invalid={Boolean(errors.videoUrl)} aria-describedby={described('videoUrl', 'cm-video-help')} />
           <p className="help" id="cm-video-help">
             {t('community.videoUrlHelp')}
           </p>

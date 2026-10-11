@@ -21,9 +21,10 @@ export function BrandMark({ className = 'brand__mark', title }) {
 /** Mark + lowercase wordmark, linking home. */
 export default function Brand({ className = '' }) {
   return (
-    <Link className={`brand ${className}`.trim()} to="/" aria-label={t('shell.brandHome', { app: BRAND.name })}>
+    // The lockup is a logo: mark then wordmark, in Latin type, in every language.
+    <Link className={`brand ${className}`.trim()} to="/" aria-label={t('shell.brandHome', { app: BRAND.name })} dir="ltr">
       <BrandMark />
-      <span className="brand__word" aria-hidden="true">
+      <span className="brand__word" aria-hidden="true" lang="en">
         {BRAND.name.toLowerCase()}
       </span>
     </Link>

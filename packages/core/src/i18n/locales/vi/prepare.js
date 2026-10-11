@@ -159,9 +159,9 @@ export default {
     lightAmber: 'Đèn vàng: sắp hết giờ',
     lightStop: 'Đèn đỏ: quá giới hạn',
     aria: 'Bản nháp dài {used} so với giới hạn {limit}.',
-    noteCity: 'Tính theo tốc độ đều 130 từ mỗi phút. {city} cho mỗi người phát biểu {minutes}.',
-    noteNoLimit: 'Tính theo tốc độ đều 130 từ mỗi phút. {city} không công bố giới hạn, nên ở đây dùng 3 phút.',
-    notePractice: 'Tính theo tốc độ đều 130 từ mỗi phút, với 3 phút là giới hạn phổ biến nhất.',
+    noteCity: 'Tính theo tốc độ đều {n} từ mỗi phút. {city} cho mỗi người phát biểu {minutes}.',
+    noteNoLimit: 'Tính theo tốc độ đều {n} từ mỗi phút. {city} không công bố giới hạn, nên ở đây dùng 3 phút.',
+    notePractice: 'Tính theo tốc độ đều {n} từ mỗi phút, với 3 phút là giới hạn phổ biến nhất.',
   },
   practice: {
     sub: 'Tự bấm giờ và nhận góp ý. Video của bạn không bao giờ rời khỏi thiết bị này.',

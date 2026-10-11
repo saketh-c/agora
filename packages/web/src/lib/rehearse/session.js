@@ -10,13 +10,19 @@
  * so a second run opens straight into the device check.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { speechLang } from '@agora/core';
 import { startAudioCapture, levelShare } from './audio.js';
+import { countUnits } from './speech.js';
 import { getVision, analyzeFrame } from './vision.js';
 
 const SR = typeof window !== 'undefined' ? window.SpeechRecognition || window.webkitSpeechRecognition : null;
-/** This browser can give a live transcript (Chrome, Edge, Safari). */
+/**
+ * This browser can give a live transcript (Chrome, Edge, Safari). Whether it can for a given
+ * language is only known when it tries: a 'language-not-supported' error (or a service that
+ * never answers) turns the transcript off for that take, and pace then comes from the voice.
+ * The recognizer gets each language's tag from core (zh-CN, hi-IN, te-IN, ar-SA).
+ */
 export const SPEECH_SUPPORTED = Boolean(SR);
-const SR_LANG = { en: 'en-US', es: 'es-US', vi: 'vi-VN' };
 const SR_FATAL = new Set(['not-allowed', 'service-not-allowed', 'network', 'audio-capture', 'language-not-supported', 'bad-grammar']);
 /** No words from the speech service after this long means it is probably not coming. */
 const SR_STALL_MS = 6000;
@@ -28,8 +34,9 @@ const QUIET_MS = 5000;
 
 const SR_OFF = Object.freeze({ state: 'off', words: 0, final: '', interim: '' });
 
-function countWords(text) {
-  return String(text || '').split(/\s+/).filter(Boolean).length;
+/** Words (characters in Chinese) in the live transcript, in the language's pace unit. */
+function countWords(text, lang) {
+  return countUnits(text, lang);
 }
 
 /** Why the camera and mic cannot be requested at all, before trying: a key of rehearse.errors, or null. */
@@ -287,8 +294,8 @@ export function useRehearsalSession({ lang, visionAvailable, modelBase, onTake }
     let transcript = finalRef.current.trim();
     const tail = interimRef.current.trim();
     if (tail) {
-      transcript = `${transcript} ${tail}`.trim();
-      wordsRef.current.push({ t: durationSec, words: countWords(transcript) });
+      transcript = (langRef.current === 'zh' ? `${transcript}${tail}` : `${transcript} ${tail}`).trim();
+      wordsRef.current.push({ t: durationSec, words: countWords(transcript, langRef.current) });
     }
     const usedCamera = cameraRef.current;
     const srState = srStateRef.current;
@@ -324,7 +331,7 @@ export function useRehearsalSession({ lang, visionAvailable, modelBase, onTake }
 
   const startRecognizer = useCallback(() => {
     const rec = new SR();
-    rec.lang = SR_LANG[langRef.current] || 'en-US';
+    rec.lang = speechLang(langRef.current);
     rec.continuous = true;
     rec.interimResults = true;
     let fatal = false;
@@ -339,12 +346,14 @@ export function useRehearsalSession({ lang, visionAvailable, modelBase, onTake }
       for (let i = e.resultIndex; i < e.results.length; i += 1) {
         const text = e.results[i][0].transcript;
         if (e.results[i].isFinal) {
-          finalRef.current = `${finalRef.current} ${text}`.trim();
-          wordsRef.current.push({ t: (performance.now() - startRef.current) / 1000, words: countWords(finalRef.current) });
+          // Chinese results come without spaces; joining them with one would split no words but
+          // reads oddly in the transcript, so they are joined directly.
+          finalRef.current = langRef.current === 'zh' ? `${finalRef.current}${text}`.trim() : `${finalRef.current} ${text}`.trim();
+          wordsRef.current.push({ t: (performance.now() - startRef.current) / 1000, words: countWords(finalRef.current, langRef.current) });
         } else interim += text;
       }
       interimRef.current = interim;
-      setSrState({ state: 'listening', words: countWords(finalRef.current), final: finalRef.current, interim });
+      setSrState({ state: 'listening', words: countWords(finalRef.current, langRef.current), final: finalRef.current, interim });
     };
     rec.onerror = (e) => {
       if (e && SR_FATAL.has(e.error)) {

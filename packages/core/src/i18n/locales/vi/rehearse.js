@@ -7,6 +7,10 @@ export default {
     one: '{n} giây',
     other: '{n} giây',
   },
+  wordsN: {
+    one: '{n} từ',
+    other: '{n} từ',
+  },
   setup: {
     title: 'Chuẩn bị buổi tập',
     city: 'Hội đồng nào?',
@@ -185,12 +189,13 @@ export default {
     other: '{n} câu trong bài viết chưa được nói',
   },
   skippedMore: 'và {n} câu nữa',
+  quoted: '"{word}"',
   charts: {
     time: 'Thời gian',
     showTable: 'Xem dạng bảng',
     showChart: 'Xem biểu đồ',
     seconds: '{n} giây',
-    stripAria: 'Nhìn về phía hội đồng {on} trên {known} giây thấy được khuôn mặt, trong tổng số {total} giây.',
+    stripAria: 'Nhìn về phía hội đồng {on} trên {n} giây thấy được khuôn mặt, trong tổng số {total} giây.',
     pace: 'Tốc độ',
     paceNote: 'Số từ mỗi phút, tính mỗi 15 giây.',
     paceEstNote: 'Ước tính từ giọng nói, mỗi 15 giây.',
@@ -267,12 +272,12 @@ export default {
       drill: 'Thêm một câu về chuyện này trên con đường nhà bạn, rồi bấm giờ lại.',
     },
     pace_fast: {
-      title: 'Bạn nói {wpm} từ mỗi phút',
+      title: 'Bạn nói {n} từ mỗi phút',
       detail: 'Nhanh hơn khoảng {hi}, người nghe sẽ ngừng ghi chép và chỉ chờ bạn nói xong.',
       drill: 'Đọc to lời đề nghị và ngừng hẳn sau mỗi câu.',
     },
     pace_slow: {
-      title: 'Bạn nói {wpm} từ mỗi phút',
+      title: 'Bạn nói {n} từ mỗi phút',
       detail: 'Chậm hơn khoảng {lo}, nghe như bạn đang tìm từ.',
       drill: 'Tập hai câu đầu đến khi nói trôi chảy. Phần còn lại sẽ theo sau.',
     },
@@ -282,7 +287,7 @@ export default {
       drill: 'Tập lại và thay mỗi từ đệm bằng một lần ngừng.',
     },
     long_sentences: {
-      title: '{n} câu dài hơn 30 từ',
+      title: '{n} câu dài hơn {length}',
       detail: 'Câu dài là lúc bạn hết hơi và ý chính bị lạc.',
       drill: 'Tách mỗi câu ở chữ "và" đầu tiên.',
     },
@@ -302,7 +307,7 @@ export default {
       drill: 'Mở đầu bằng tên và trường, nêu mục nghị sự, kết thúc bằng lời đề nghị. Luôn theo thứ tự đó.',
     },
     long_pauses: {
-      title: '{n} lần ngừng lâu hơn {sec} giây',
+      title: '{n} lần ngừng lâu hơn {duration}',
       detail: 'Một lần ngừng trước lời đề nghị rất có sức nặng. Ngừng nhiều lần giữa câu nghe như đang tìm từ.',
       drill: 'Tìm chỗ bạn bị khựng và rút ngắn những câu đó.',
     },
@@ -359,9 +364,9 @@ export default {
   },
   strengths: {
     on_time: 'Đúng giờ, còn dư {left}.',
-    pace_good: 'Tốc độ đều: {wpm} từ mỗi phút.',
+    pace_good: 'Tốc độ đều: {n} từ mỗi phút.',
     no_fillers: 'Không có từ đệm nào.',
-    few_fillers: 'Ít từ đệm: {total} trên {words} từ.',
+    few_fillers: 'Ít từ đệm: {total} trên {words}.',
     script_covered: 'Bạn đã nói {pct}% bài viết của mình.',
     elements_landed: 'Hội đồng đã nghe {landed}.',
     steady_volume: 'Âm lượng đều từ đầu đến cuối.',

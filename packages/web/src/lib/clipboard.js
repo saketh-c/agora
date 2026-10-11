@@ -1,9 +1,13 @@
+import { stripIsolates } from '@agora/core';
+
 /**
  * Copy text to the clipboard. The Clipboard API needs a secure page (https or localhost) and
  * can be refused; plain http on a school network or an older browser falls back to a hidden
- * text area and the copy command. Resolves true when the text was copied.
+ * text area and the copy command. Resolves true when the text was copied. Copied text leaves
+ * the app, so it never carries the bidi isolates right-to-left messages use on screen.
  */
-export async function copyText(text) {
+export async function copyText(value) {
+  const text = stripIsolates(value);
   try {
     if (typeof navigator !== 'undefined' && navigator.clipboard && window.isSecureContext) {
       await navigator.clipboard.writeText(text);

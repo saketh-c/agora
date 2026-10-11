@@ -11,7 +11,7 @@ export default {
   duringSchoolStream: 'Trong giờ học, nhưng bạn có thể xem phát trực tiếp',
   daytimeMeeting: 'Họp ban ngày',
   away: 'Cách {distance}',
-  awayPastLimit: 'Cách {distance}, vượt giới hạn {max} dặm của bạn',
+  awayPastLimit: 'Cách {distance}, vượt giới hạn {n} dặm của bạn',
   yourCity: 'Thành phố của bạn',
   canSignUp: 'Bạn có thể đăng ký phát biểu',
   remoteAllowed: 'Nhận ý kiến từ xa',

@@ -159,9 +159,9 @@ export default {
     lightAmber: 'Luz ámbar: casi se acaba el tiempo',
     lightStop: 'Luz roja: te pasaste del límite',
     aria: 'Tu borrador dura {used} con un límite de {limit}.',
-    noteCity: 'Calculado a un ritmo de 130 palabras por minuto. {city} le da a cada persona {minutes}.',
-    noteNoLimit: 'Calculado a un ritmo de 130 palabras por minuto. {city} no publica un límite, así que se usan 3 minutos.',
-    notePractice: 'Calculado a un ritmo de 130 palabras por minuto con 3 minutos, el límite más común.',
+    noteCity: 'Calculado a un ritmo de {n} palabras por minuto. {city} le da a cada persona {minutes}.',
+    noteNoLimit: 'Calculado a un ritmo de {n} palabras por minuto. {city} no publica un límite, así que se usan 3 minutos.',
+    notePractice: 'Calculado a un ritmo de {n} palabras por minuto con 3 minutos, el límite más común.',
   },
   practice: {
     sub: 'Mide tu tiempo y recibe consejos. Tu video nunca sale de este dispositivo.',

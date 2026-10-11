@@ -1,17 +1,17 @@
 /** Los datos ( /insights ): cuándo y cómo se reúnen los concejos, en gráficas con títulos que dicen la conclusión. */
 export default {
   heading: 'Los datos',
-  lead: 'Cómo se reúnen los {n} concejos de Dallas-Fort Worth, según sus calendarios oficiales. Las cifras cubren los próximos {days} días.',
+  lead: 'Cómo se reúnen los {n} concejos de Dallas-Fort Worth, según sus calendarios oficiales. Las cifras cubren los próximos {days}.',
   inTen: '{n} de cada 10',
-  statMeetings: 'reuniones del concejo en los próximos {days} días',
+  statMeetings: 'reuniones del concejo en los próximos {n} días',
   statEvening: 'empiezan a las {time} o más tarde',
   statSpeak: 'dejan hablar al público',
   schoolTitle: {
-    one: '{n} de {total} concejos se reúne en horario de clases',
-    other: '{n} de {total} concejos se reúnen en horario de clases',
+    one: '{n} de {councils} se reúne en horario de clases',
+    other: '{n} de {councils} se reúnen en horario de clases',
   },
   schoolNone: 'Ningún concejo se reúne en horario de clases',
-  schoolSub: 'Reuniones de los próximos {days} días que empiezan en horario de clases',
+  schoolSub: 'Reuniones de los próximos {n} días que empiezan en horario de clases',
   schoolRest: {
     one: '{n} concejo más se reúne fuera del horario de clases.',
     other: 'Los otros {n} concejos se reúnen fuera del horario de clases.',
@@ -23,7 +23,7 @@ export default {
   schoolDef: 'Aquí, horario de clases significa de {from} a {to}, de lunes a viernes.',
   heatTitle: 'El {day} a las {time} es el momento con más reuniones',
   heatEmpty: 'No hay reuniones en este periodo',
-  heatSub: 'Reuniones de los próximos {days} días, por hora de inicio y día de la semana',
+  heatSub: 'Reuniones de los próximos {n} días, por hora de inicio y día de la semana',
   heatNone: 'Ninguna reunión cae en {days}.',
   limitTitle: {
     one: 'La mayoría de los concejos te da {n} minuto para hablar',

@@ -27,7 +27,11 @@ export default function MapStrip({ meetings, renderRow, activeCity, onActive, la
     if (r.left >= box.left - 2 && r.right <= box.right + 2) return;
     steering.current = Date.now();
     const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    root.scrollTo({ left: root.scrollLeft + (r.left - box.left) - 16, behavior: reduce ? 'auto' : 'smooth' });
+    // The card's start edge lands 16px in from the row's start edge: its left edge, or right to
+    // left (Arabic, where scrollLeft runs from 0 into negative numbers) its right edge.
+    const rtl = getComputedStyle(root).direction === 'rtl';
+    const delta = rtl ? r.right - box.right + 16 : r.left - box.left - 16;
+    root.scrollTo({ left: root.scrollLeft + delta, behavior: reduce ? 'auto' : 'smooth' });
   }, [activeCity]);
 
   // Swiping: the card most in view becomes the active city.

@@ -10,7 +10,7 @@
 .mtg__head h1 { min-width: 0; }
 .mtg__tools { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s3); margin-top: var(--s4); }
 
-/* The chip row scrolls sideways on phones, with a fade on the right while more chips are
+/* The chip row scrolls sideways on phones, with a fade at its end while more chips are
    hidden. Its menus hang from the row's wrapper instead of from the chip, so the scrolling row
    never clips them. */
 .mtg__chips { position: relative; }
@@ -18,8 +18,10 @@
 .mtg__chips .menu-anchor > .menu:not(.menu--up) { top: calc(100% + 2px); }
 .mtg__chips .menu { max-height: min(480px, calc(100dvh - var(--header-h) - var(--tabbar-h) - 220px)); overflow-y: auto; overscroll-behavior: contain; }
 /* A fade over the right edge (not a mask: a mask would clip the menus that open from the row). */
-.mtg__chips::after { content: ""; position: absolute; z-index: 1; top: 0; bottom: 0; right: calc(-1 * var(--gutter)); width: 48px; background: linear-gradient(to right, rgb(242 243 246 / 0), var(--floor) 85%); pointer-events: none; transition: opacity var(--d2) var(--ease); }
+.mtg__chips::after { content: ""; position: absolute; z-index: 1; top: 0; bottom: 0; inset-inline-end: calc(-1 * var(--gutter)); width: 48px; background: linear-gradient(to right, rgb(242 243 246 / 0), var(--floor) 85%); pointer-events: none; transition: opacity var(--d2) var(--ease); }
 .mtg__chips.is-end::after { opacity: 0; }
+/* Right to left, the row starts on the right and more chips hide on the left. */
+[dir="rtl"] .mtg__chips::after { background: linear-gradient(to left, rgb(242 243 246 / 0), var(--floor) 85%); }
 .chip.is-open { background: var(--ink-tint); border-color: var(--ink); }
 .chip--menu.is-on .icon--20:last-child { color: var(--card); }
 
@@ -27,9 +29,9 @@
    wraps (it never scrolls sideways), so every chip and "Clear all" stay in sight on a phone. */
 .mtg__active { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; }
 .mtg__active > li { flex: none; max-width: 100%; }
-.chip.mtg-x { gap: 4px; padding-right: 10px; max-width: 100%; }
+.chip.mtg-x { gap: 4px; padding-inline-end: 10px; max-width: 100%; }
 .mtg-x__t { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.chip.mtg-x .icon:last-child { margin-left: 2px; }
+.chip.mtg-x .icon:last-child { margin-inline-start: 2px; }
 .mtg__clearall { margin: 0; }
 
 .mtg__hint { display: flex; gap: var(--s2); align-items: flex-start; margin-top: var(--s3); font-size: 14px; line-height: 20px; color: var(--slate); }
@@ -42,7 +44,7 @@
 
 .listbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 var(--s3); margin: var(--s4) 0 var(--s2); min-height: 44px; }
 .listbar .menu-anchor { min-width: 0; }
-.sortbtn { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; padding: 0 var(--s2); margin-left: calc(-1 * var(--s2)); border: 0; border-radius: var(--r-pill); background: transparent; color: var(--ink); font-weight: 700; white-space: nowrap; }
+.sortbtn { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; padding: 0 var(--s2); margin-inline-start: calc(-1 * var(--s2)); border: 0; border-radius: var(--r-pill); background: transparent; color: var(--ink); font-weight: 700; white-space: nowrap; }
 @media (hover: hover) { .sortbtn:hover { background: var(--hover); } }
 .sortbtn[aria-expanded="true"] { background: var(--press); }
 .sortbtn[aria-expanded="true"] .icon { transform: rotate(180deg); }
@@ -65,7 +67,7 @@
 .mtg-fixes li { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--s2) var(--s3); padding: var(--s2) 0; border-top: 1px solid var(--hairline); color: var(--ink); font-size: 14px; line-height: 20px; }
 .mtg-fixes li:first-child { border-top: 0; padding-top: 0; }
 .mtg-fixes li > span { min-width: 0; flex: 1 1 180px; }
-.mtg-empty__clear { margin-left: calc(-1 * var(--s4)); }
+.mtg-empty__clear { margin-inline-start: calc(-1 * var(--s4)); }
 
 /* Phone map view: the map, then a strip of meeting cards that scrolls sideways. */
 .mtg__phonemap .map { height: max(300px, calc(100dvh - var(--header-h) - var(--tabbar-h) - env(safe-area-inset-bottom) - 470px)); border-radius: var(--r-group); }
@@ -82,7 +84,7 @@
 .mtg-filters__group { min-width: 0; }
 /* A floated legend is laid out like any block (not on the fieldset's border line), so a
    hairline between groups never runs through a title. */
-.mtg-filters legend { float: left; width: 100%; margin-bottom: var(--s3); }
+.mtg-filters legend { float: inline-start; width: 100%; margin-bottom: var(--s3); }
 .mtg-filters legend + * { clear: both; }
 .mtg-filters .help { margin-top: var(--s2); }
 .mtg-filters .chipwrap + .help { margin-top: var(--s3); }
@@ -91,7 +93,7 @@
 .mtg-filters .err { margin-top: var(--s2); }
 .mtg-filters__status { display: flex; align-items: center; gap: var(--s2); }
 .mtg-filters__foot { flex-wrap: nowrap; justify-content: space-between; }
-.mtg-filters__foot .btn--quiet { margin-left: calc(-1 * var(--s3)); padding: 0 var(--s3); }
+.mtg-filters__foot .btn--quiet { margin-inline-start: calc(-1 * var(--s3)); padding: 0 var(--s3); }
 .mtg-filters__foot .btn--primary { flex: 1 1 auto; max-width: 320px; }
 .mtg-dates { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s2) var(--s3); margin-top: var(--s4); }
 .mtg-dates .field + .field { margin-top: 0; }
@@ -114,9 +116,9 @@
 .mtg-fpanel h2[tabindex="-1"]:focus { outline: none; }
 .mtg-fpanel { margin-top: var(--s4); background: var(--card); border-radius: var(--r-group); padding: var(--s4) var(--s5) 0; box-shadow: inset 0 0 0 1px var(--hairline); }
 .mtg-fpanel__bar { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); margin-bottom: var(--s4); }
-.mtg-fpanel__bar .iconbtn { margin-right: calc(-1 * var(--s2)); }
+.mtg-fpanel__bar .iconbtn { margin-inline-end: calc(-1 * var(--s2)); }
 .mtg-fpanel__foot { position: sticky; bottom: 0; z-index: 2; display: flex; align-items: center; gap: var(--s2); margin: var(--s5) calc(-1 * var(--s5)) 0; padding: var(--s3) var(--s5); background: var(--card); border-top: 1px solid var(--hairline); border-radius: 0 0 var(--r-group) var(--r-group); }
-.mtg-fpanel__foot .count-l { margin-right: auto; font-size: 14px; line-height: 20px; color: var(--slate); }
+.mtg-fpanel__foot .count-l { margin-inline-end: auto; font-size: 14px; line-height: 20px; color: var(--slate); }
 .mtg-fpanel__foot .btn { min-height: 44px; }
 
 @media (max-width: 1023.98px) {
@@ -130,7 +132,7 @@
      (the shell's 1px visually hidden announcer sits just below main). */
   html:has(#main > .mtg) { overflow: hidden; }
   .mtg { display: grid; grid-template-columns: 420px minmax(0, 1fr); height: calc(100dvh - var(--header-h) - 1px - env(safe-area-inset-top)); }
-  .mtg__list { overflow-y: auto; overscroll-behavior: contain; border-right: 1px solid var(--hairline); background: var(--floor); }
+  .mtg__list { overflow-y: auto; overscroll-behavior: contain; border-inline-end: 1px solid var(--hairline); background: var(--floor); }
   .mtg__view { display: none; }
   .mtg .chipbar { flex-wrap: wrap; gap: 6px; overflow: visible; margin: 0; padding: 0; }
   .mtg__chips::after { display: none; }
@@ -141,7 +143,7 @@
      always open above it. */
   .mtg__map { display: block; position: relative; min-width: 0; isolation: isolate; }
   .mtg__map > .map { position: absolute; inset: 0; }
-  .mtg-panel { position: absolute; z-index: 600; top: var(--s4); right: var(--s4); bottom: var(--s4); width: 420px; max-width: calc(100% - 2 * var(--s4)); overflow-y: auto; overscroll-behavior: contain; }
+  .mtg-panel { position: absolute; z-index: 600; top: var(--s4); inset-inline-end: var(--s4); bottom: var(--s4); width: 420px; max-width: calc(100% - 2 * var(--s4)); overflow-y: auto; overscroll-behavior: contain; }
   /* The panel takes focus when a meeting opens so screen readers start there; it is a
      container, so no ring (its controls draw their own). */
   .mtg-panel:focus, .mtg-panel:focus-visible { outline: none; }

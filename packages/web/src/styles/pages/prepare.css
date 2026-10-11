@@ -7,18 +7,18 @@
 .prep .page-head__extra { margin-top: var(--s3); }
 
 /* "Getting ready for" */
-.forline { display: flex; align-items: center; gap: var(--s2) var(--s3); padding: var(--s3) var(--s3) var(--s3) var(--s4); background: var(--card); border-radius: var(--r-group); }
+.forline { display: flex; align-items: center; gap: var(--s2) var(--s3); padding-block: var(--s3); padding-inline: var(--s4) var(--s3); background: var(--card); border-radius: var(--r-group); }
 .forline__t { flex: 1 1 0; min-width: 0; max-width: none; }
 .forline .btn { flex: none; }
 .forline__t span { display: block; font-size: 14px; line-height: 20px; color: var(--slate); }
 .forline__t strong { display: block; font-weight: 700; overflow-wrap: anywhere; }
-.forline .btn--quiet { margin-right: calc(-1 * var(--s1)); }
+.forline .btn--quiet { margin-inline-end: calc(-1 * var(--s1)); }
 .forline__t .forline__finding { display: flex; align-items: center; gap: var(--s2); color: var(--slate); }
 .forline__finding .spinner { width: 16px; height: 16px; border-width: 2px; flex: none; color: var(--slate); vertical-align: 0; }
 .prep-loading { padding-top: var(--s5); }
 .prep-notice { margin-top: var(--s3); }
-.prep-notice .act > .btn--quiet:first-child { margin-left: calc(-1 * var(--s3)); }
-.prep-notice .act .btn { text-align: left; justify-content: flex-start; height: auto; padding-block: var(--s2); }
+.prep-notice .act > .btn--quiet:first-child { margin-inline-start: calc(-1 * var(--s3)); }
+.prep-notice .act .btn { text-align: start; justify-content: flex-start; height: auto; padding-block: var(--s2); }
 
 /* Progress */
 .prep-prog { margin: var(--s5) 0 var(--s3); }
@@ -66,7 +66,7 @@
 .builder__group > .field + .field { margin-top: 0; }
 .builder__gh { font: 700 16px/24px var(--font-text); margin-bottom: var(--s3); }
 .bopen { margin-top: var(--s3); }
-.bsum { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--s3); align-items: center; padding: var(--s3) var(--s2) var(--s3) var(--s3); border-radius: var(--r-tile); background: var(--floor); }
+.bsum { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--s3); align-items: center; padding-block: var(--s3); padding-inline: var(--s3) var(--s2); border-radius: var(--r-tile); background: var(--floor); }
 .bsum__ic { width: 28px; height: 28px; border-radius: 50%; background: var(--ink); color: var(--card); display: grid; place-items: center; }
 .bsum__ic .icon { width: 16px; height: 16px; stroke-width: 3; }
 .bsum__txt { min-width: 0; }
@@ -81,13 +81,13 @@
 /* A narrow ruler drops the amber tick so the last minute marks never touch. */
 @container (max-width: 340px) { .draft .ruler__ticks .is-warn { display: none; } }
 .draft__ai { margin-top: var(--s4); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s2); }
-.draft__ai .btn--quiet { margin-right: calc(-1 * var(--s3)); }
+.draft__ai .btn--quiet { margin-inline-end: calc(-1 * var(--s3)); }
 .draft__card { margin-top: var(--s4); background: var(--card); border-radius: var(--r-tile); padding: var(--s4) var(--s4) var(--s2); }
 .draft__text { font-size: 16px; line-height: 26px; overflow-wrap: anywhere; }
 .draft__text p { max-width: none; }
 .draft__text p + p { margin-top: var(--s3); }
 :lang(vi) .draft__text, :lang(vi) .draft__edit { line-height: 28px; }
-.draft__editbtn { margin: var(--s2) 0 0 calc(-1 * var(--s3)); }
+.draft__editbtn { margin-block: var(--s2) 0; margin-inline: calc(-1 * var(--s3)) 0; }
 /* Edited by hand: the same card, now a field that grows with the text. */
 .draft__edit { display: block; width: 100%; margin-top: var(--s4); padding: var(--s4); min-height: 160px; font-size: 16px; line-height: 26px; resize: none; overflow: hidden; overflow-wrap: anywhere; background: var(--card); }
 .draft__mode { margin-top: var(--s3); }
@@ -105,9 +105,9 @@
    at the end of the form with no height of its own, so it never adds space to the page. */
 .draft-bar-anchor { position: sticky; bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + var(--s3)); height: 0; z-index: 4; }
 .draft-bar {
-  position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: var(--s3);
-  min-height: 48px; padding: 0 var(--s2) 0 var(--s4); border: 0; border-radius: var(--r-pill);
-  background: var(--ink); color: var(--card); box-shadow: var(--lift); font: 600 14px/20px var(--font-text); text-align: left;
+  position: absolute; inset-inline-start: 0; inset-inline-end: 0; bottom: 0; display: flex; align-items: center; gap: var(--s3);
+  min-height: 48px; padding-block: 0; padding-inline: var(--s4) var(--s2); border: 0; border-radius: var(--r-pill);
+  background: var(--ink); color: var(--card); box-shadow: var(--lift); font: 600 14px/20px var(--font-text); text-align: start;
   transition: opacity var(--d2) var(--ease), transform var(--d2) var(--ease), visibility 0s;
 }
 .draft-bar.is-away { opacity: 0; transform: translateY(8px); visibility: hidden; pointer-events: none; transition: opacity var(--d2) var(--ease), transform var(--d2) var(--ease), visibility 0s var(--d2); }
@@ -116,7 +116,7 @@
 .draft-bar__dot--amber { background: var(--amber); }
 .draft-bar__dot--stop { background: var(--stop); }
 .draft-bar__t { flex: 1 1 auto; min-width: 0; font-size: 16px; line-height: 24px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.draft-bar__go { display: inline-flex; align-items: center; gap: 2px; flex: none; padding: 0 var(--s2) 0 var(--s3); min-height: 36px; border-radius: var(--r-pill); background: rgb(255 255 255 / .12); }
+.draft-bar__go { display: inline-flex; align-items: center; gap: 2px; flex: none; padding-block: 0; padding-inline: var(--s3) var(--s2); min-height: 36px; border-radius: var(--r-pill); background: rgb(255 255 255 / .12); }
 /* No room for "See draft" beside the time: the pill keeps only its arrow (the words stay for screen readers). */
 .draft-bar.is-compact .draft-bar__go { justify-content: center; min-width: 36px; padding: 0 var(--s2); }
 /* A focused field never hides under the bar: focus scrolls stop above it (and above the tab bar). */
@@ -138,7 +138,7 @@
 .prep-pick__search { margin-bottom: var(--s2); }
 .prep-pick-sheet .day-head:first-of-type { padding-top: var(--s3); }
 .prep-pick + .prep-pick { margin-top: var(--s3); }
-.prep-pick__more-btn { margin-top: var(--s2); margin-left: calc(-1 * var(--s3)); }
+.prep-pick__more-btn { margin-top: var(--s2); margin-inline-start: calc(-1 * var(--s3)); }
 .prep-pick-sheet .empty { margin-top: var(--s3); }
 .prep-pick__row { align-items: center; }
 .prep-pick__row .row__main { padding-top: 0; }

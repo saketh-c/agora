@@ -62,6 +62,9 @@ export default {
   usually: ' (thường vào {day})',
   at: ' lúc {time}',
   and: 'và',
+  sep: ', ',
+  labelValue: '{label}: {value}',
+  fullStop: '.',
   am: 'SA',
   pm: 'CH',
 };

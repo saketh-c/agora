@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { calendarThrough, cityPoint, describeRecurrence, haversineMiles, nextMeetingFor, normalizePrefs, t, tn } from '@agora/core';
+import { calendarThrough, cityPoint, describeRecurrence, haversineMiles, labelValue, nextMeetingFor, normalizePrefs, t, tn, compareText } from '@agora/core';
 import { cityMatches, fold } from '../lib/cityMatch.js';
 import useClock from '../components/home/useClock.js';
 import { useSkipLink } from '../components/shell/PageMeta.jsx';
@@ -70,7 +70,7 @@ export default function Cities() {
     list.sort((a, b) => {
       if (sort === 'near' && a.miles != null && b.miles != null && a.miles !== b.miles) return a.miles - b.miles;
       if (sort === 'soon' && when(a) !== when(b)) return when(a).localeCompare(when(b));
-      return a.city.name.localeCompare(b.city.name);
+      return compareText(a.city.name, b.city.name, lang);
     });
     return list;
     // picked is derived from the URL on every render; its string is the stable key.
@@ -106,7 +106,7 @@ export default function Cities() {
 
       <div className="listbar">
         <Menu
-          label={`${t('cities.sort')}: ${sortLabel[sort]}`}
+          label={labelValue(t('cities.sort'), sortLabel[sort])}
           buttonClassName="sortbtn"
           align="start"
           button={

@@ -41,7 +41,7 @@ export default {
     one: '{n} post about {city}',
     other: '{n} posts about {city}',
   },
-  countFirst: '{count}, {city} first',
+  countFirst: '{posts}, {city} first',
   postsHeading: 'Posts',
   emptyTitle: 'Nothing here yet',
   emptyBody: 'No posts match these filters. Try all cities or another kind.',

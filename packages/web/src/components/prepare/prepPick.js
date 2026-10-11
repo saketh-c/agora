@@ -10,7 +10,7 @@
  *     marked on either page count for the same meeting. With no place set it is "Just practicing".
  * The page saves the meeting to ui.prepMeeting the first time the student acts on it.
  */
-import { addDays, cityPoint, haversineMiles, nextMeetingFor, normalizePrefs, upcomingMeetings } from '@agora/core';
+import { addDays, cityPoint, haversineMiles, nextMeetingFor, normalizePrefs, searchFold, upcomingMeetings } from '@agora/core';
 import { findMeeting, fitsTimes, pickNextMeeting } from '../home/homeData.js';
 import { PRACTICE_ONLY } from '../../lib/prep.js';
 
@@ -71,13 +71,8 @@ export function resolvePrepMeeting({ cities, cityById, prefs = {}, today, now, u
   return { meeting, practicing, problem, askedId, source, pending };
 }
 
-const fold = (s) =>
-  String(s || '')
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .replace(/\s+/g, ' ')
-    .trim();
+/** Case, accents and width never stop a match; Devanagari, Telugu and Arabic marks are kept (core's searchFold). */
+const fold = (s) => searchFold(s);
 
 /**
  * How well a typed search names this meeting's city: 0 by name (or initials like "fw"),

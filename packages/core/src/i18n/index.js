@@ -5,9 +5,17 @@
  */
 import es from './locales/es/index.js';
 import vi from './locales/vi/index.js';
+import zh from './locales/zh/index.js';
+import hi from './locales/hi/index.js';
+import te from './locales/te/index.js';
+import ar from './locales/ar/index.js';
 import { registerLocale } from './runtime.js';
 
 registerLocale('es', es);
 registerLocale('vi', vi);
+registerLocale('zh', zh);
+registerLocale('hi', hi);
+registerLocale('te', te);
+registerLocale('ar', ar);
 
 export * from './runtime.js';

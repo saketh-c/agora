@@ -41,7 +41,7 @@ export default {
     one: '{n} bài về {city}',
     other: '{n} bài về {city}',
   },
-  countFirst: '{count}, {city} trước',
+  countFirst: '{posts}, {city} trước',
   postsHeading: 'Bài viết',
   emptyTitle: 'Chưa có gì ở đây',
   emptyBody: 'Không có bài nào khớp với bộ lọc này. Hãy thử mọi thành phố hoặc loại bài khác.',

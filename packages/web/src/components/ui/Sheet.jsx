@@ -24,19 +24,24 @@ const stack = [];
 let scrollLocks = 0;
 let savedScroll = null;
 
+/**
+ * Hide the page scrollbar under a sheet, and pad the page where the scrollbar was so nothing
+ * shifts: the inline end (the right; the left in a right-to-left page, where browsers draw the
+ * page scrollbar).
+ */
 function lockScroll() {
   if (scrollLocks++ > 0) return;
   const html = document.documentElement;
   const gap = window.innerWidth - html.clientWidth;
-  savedScroll = { overflow: html.style.overflow, paddingRight: document.body.style.paddingRight };
+  savedScroll = { overflow: html.style.overflow, padding: document.body.style.paddingInlineEnd };
   html.style.overflow = 'hidden';
-  if (gap > 0) document.body.style.paddingRight = `${gap}px`;
+  if (gap > 0) document.body.style.paddingInlineEnd = `${gap}px`;
 }
 
 function unlockScroll() {
   if (--scrollLocks > 0 || !savedScroll) return;
   document.documentElement.style.overflow = savedScroll.overflow;
-  document.body.style.paddingRight = savedScroll.paddingRight;
+  document.body.style.paddingInlineEnd = savedScroll.padding;
   savedScroll = null;
 }
 

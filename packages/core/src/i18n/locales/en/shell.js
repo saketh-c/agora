@@ -40,4 +40,5 @@ export default {
     refresh: 'Refresh',
     later: 'Not now',
   },
+  langOffline: "{language} can't load without an internet connection. Connect, then choose it again.",
 };

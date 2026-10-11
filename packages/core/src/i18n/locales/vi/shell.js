@@ -40,4 +40,5 @@ export default {
     refresh: 'Tải lại',
     later: 'Để sau',
   },
+  langOffline: 'Không thể tải {language} khi không có kết nối Internet. Hãy kết nối rồi chọn lại.',
 };

@@ -11,6 +11,8 @@ import {
   getTopic,
   hasEnded,
   inferTopics,
+  joinSentences,
+  labelValue,
   lowerFirst,
   nextMeetingFor,
   relativeDays,
@@ -23,12 +25,12 @@ import { parseDeadlineRule } from '../lib/deadline.js';
 import { useCities } from '../lib/DataProvider.jsx';
 import { useStore } from '../lib/store.jsx';
 import { api } from '../lib/api.js';
+import { englishOriginalProps, isEnglishOriginal } from '../lib/textDir.js';
 import { directionsUrl } from '../lib/ics.js';
 import { usePageTitle } from '../components/shell/PageMeta.jsx';
 import useClock from '../components/home/useClock.js';
 import {
   AddToCalendar,
-  asSentence,
   Badge,
   DateTile,
   deadlineText,
@@ -69,11 +71,15 @@ const hostOf = (url) => {
   }
 };
 
-/** The first sentence of a longer data paragraph. */
+/**
+ * The first sentence of a longer data paragraph: up to a full stop followed by a capital, a
+ * digit, a quote or a letter of a script without capitals (a translation into Arabic, Hindi,
+ * Telugu or Chinese), or up to "。", "？", "।" or "؟".
+ */
 function firstSentence(text) {
   const s = String(text || '').trim();
-  const cut = s.search(/[.!?](\s+)(?=[A-ZÁÉÍÓÚÑĐ0-9"(])/u);
-  return cut > 0 ? s.slice(0, cut + 1) : s;
+  const m = /[.!?](?=\s+[A-ZÁÉÍÓÚÑĐ0-9"(\p{Lo}])|[\u3002\uff01\uff1f\u0964\u061f](?=\s*\S)/u.exec(s);
+  return m ? s.slice(0, m.index + 1) : s;
 }
 
 /** One agenda item with "Explain this": AI when the server has it, a topic guide otherwise. */
@@ -446,7 +452,7 @@ function CityView({ id }) {
                 {deadline && (
                   <p className={`deadline st st--${deadline.passed ? 'stop' : 'amber'}`}>
                     <Icon name="clock" />
-                    {deadline.passed ? t('ui.signupClosed') : `${asSentence(deadlineText(deadline, 'closes'))} ${t('ui.noDoorSignup')}`}
+                    {deadline.passed ? t('ui.signupClosed') : joinSentences([deadlineText(deadline, 'closes'), t('ui.noDoorSignup')])}
                   </p>
                 )}
                 <div className="btn-row">
@@ -549,7 +555,7 @@ function CityView({ id }) {
                 {pc.source && (
                   <p>
                     <a className="link" href={pc.source} target="_blank" rel="noopener noreferrer">
-                      {`${t('city.source')}: ${hostOf(pc.source)}`}
+                      {labelValue(t('city.source'), hostOf(pc.source))}
                       <span className="vh"> {t('ui.opensNewTab')}</span>
                     </a>
                   </p>
@@ -610,7 +616,8 @@ function CityView({ id }) {
                 <ul className="youth">
                   {youth.map((p, i) => (
                     <li key={i}>
-                      <p className="youth__t">
+                      {/* Program names stay in English in every language. */}
+                      <p className="youth__t" lang={lang !== 'en' ? 'en' : undefined}>
                         {p.url ? (
                           <a href={p.url} target="_blank" rel="noopener noreferrer">
                             {String(p.name).split(' ').slice(0, -1).join(' ')}{' '}
@@ -624,7 +631,15 @@ function CityView({ id }) {
                           p.name
                         )}
                       </p>
-                      <p className="youth__m">{tidyTimes([p.ages ? String(p.ages).replace(/\.$/, '') : '', firstSentence(p.description)].filter(Boolean).join('. '))}</p>
+                      {(() => {
+                        // The city's words: still English until they are translated, then in the page's language.
+                        const text = tidyTimes(joinSentences([p.ages ? String(p.ages).replace(/\.$/, '') : '', firstSentence(p.description)]));
+                        return (
+                          <p className="youth__m" {...englishOriginalProps(isEnglishOriginal(text, lang), lang)}>
+                            {text}
+                          </p>
+                        );
+                      })()}
                       {p.applyWindow && (
                         <p className="st st--plain">
                           <Icon name="cal" />

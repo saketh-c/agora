@@ -132,7 +132,7 @@ test('i18n-extract counts what the app shows: built labels in, raw long labels o
 test('i18n-extract --check is read-only and its exit code reports untranslated strings', () => {
   const sourceFile = path.join(REPO_ROOT, 'data', 'i18n', 'source-strings.json');
   const before = existsSync(sourceFile) ? readFileSync(sourceFile, 'utf8') : null;
-  const run = spawnSync(process.execPath, [path.join(REPO_ROOT, 'scripts', 'i18n-extract.mjs'), '--check', '--json'], { encoding: 'utf8' });
+  const run = spawnSync(process.execPath, [path.join(REPO_ROOT, 'scripts', 'i18n-extract.mjs'), '--check', '--json'], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
   const report = JSON.parse(run.stdout);
   assert.equal(report.source, 'data/cities.json');
   const incomplete = Object.values(report.locales).some((l) => l.missing.length);

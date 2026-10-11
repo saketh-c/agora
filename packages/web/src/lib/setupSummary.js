@@ -2,7 +2,7 @@
  * A profile's setup in words, for the Profile page: where distances are measured from, how
  * far, which times, which topics. Pure (no React), so the Node tests can run it.
  */
-import { getTopic, joinList, lowerFirst, t, tn } from '@agora/core';
+import { getTopic, joinItems, joinList, lowerFirst, t, tn } from '@agora/core';
 
 const TIMES = ['evenings', 'daytime', 'weekends'];
 const TOPICS_SHOWN = 3;
@@ -36,7 +36,7 @@ export function topicsSummary(prefs) {
   });
   names[0] = upperFirst(names[0]);
   if (names.length <= TOPICS_SHOWN + 1) return joinList(names);
-  return tn('profile.setup.topicsMore', names.length - TOPICS_SHOWN, { list: names.slice(0, TOPICS_SHOWN).join(', ') });
+  return tn('profile.setup.topicsMore', names.length - TOPICS_SHOWN, { list: joinItems(names.slice(0, TOPICS_SHOWN)) });
 }
 
 function upperFirst(s) {

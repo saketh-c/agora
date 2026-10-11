@@ -4,7 +4,50 @@
  */
 export { BRAND } from './brand.js';
 export { TOPICS, TOPIC_IDS, getTopic, topicList, topicLabel, isTopicId, inferTopics } from './topics.js';
-export { LOCALES, DICTIONARIES, t, tn, tList, joinList, lowerFirst, setLocale, getLocale, isLocale, hasLocale, loadLocale, registerLocale, detectLocale, onLocaleChange, dictionaryKeys } from './i18n/runtime.js';
+export {
+  LOCALES,
+  DICTIONARIES,
+  INTL_SUPPLIED_KEYS,
+  PLURAL_CATEGORIES,
+  FSI,
+  RLI,
+  PDI,
+  t,
+  tn,
+  tList,
+  joinList,
+  joinItems,
+  labelValue,
+  asSentence,
+  joinSentences,
+  lowerFirst,
+  setLocale,
+  getLocale,
+  isLocale,
+  isLocaleReady,
+  offeredLocales,
+  hasLocale,
+  loadLocale,
+  registerLocale,
+  detectLocale,
+  localeFromTag,
+  setI18nWarnings,
+  onLocaleChange,
+  dictionaryKeys,
+  localeInfo,
+  localeDir,
+  isRtl,
+  htmlLang,
+  intlLocale,
+  speechLang,
+  usesIntlFormats,
+  pluralCategory,
+  pluralCategoriesFor,
+  exactPluralCategories,
+  isPluralForms,
+  setBidiIsolation,
+  stripIsolates,
+} from './i18n/runtime.js';
 export { CITY_TEXT_FIELDS, CITY_ARRAY_FIELDS, CITY_SOURCE_FIELDS, collectCityStrings, localizeCity, localizeCities, translationCoverage } from './i18n/data.js';
 export {
   isDateStr,
@@ -38,11 +81,31 @@ export {
   timesFromNote,
   dateFromNote,
 } from './schedule.js';
-export { WEEKDAY_NAMES, WEEKDAY_SHORT, weekdayNames, weekdayShortNames, formatTime, formatDate, relativeDays, milesText, describeRecurrence, ordinalWord, pluralize } from './format.js';
+export {
+  WEEKDAY_NAMES,
+  WEEKDAY_SHORT,
+  weekdayNames,
+  weekdayShortNames,
+  weekdayName,
+  monthNames,
+  monthShortNames,
+  formatNumber,
+  usesDayPeriods,
+  formatTime,
+  formatDate,
+  formatMonthDay,
+  relativeDays,
+  formatMiles,
+  milesText,
+  describeRecurrence,
+  ordinalWord,
+  pluralize,
+} from './format.js';
+export { SPEECH_PACE, speechPace, speechUnits, wordsOf, graphemes, firstGrapheme, hasHan, searchFold, textCollator, compareText } from './text.js';
 export { DFW_BOUNDS, DFW_CENTER, haversineMiles, isInDfw, cityPoint, nearestCity, citiesWithin, cardinal, findCity } from './geo.js';
 export { PLACE_QUERY_MAX, DFW_ZIP_PREFIXES, DFW_VIEWBOX, NOMINATIM_SEARCH_URL, normalizePlaceQuery, zipOf, isDfwZip, localCityFor, nominatimRequest, judgeNominatim, resolveLocally, placeLabel, round3 } from './place.js';
 export { defaultPrefs, normalizePrefs, scoreMeeting, matchMeetings, matchAgendaItems, matchYouthPrograms, buildPlan } from './match.js';
-export { GLOSSARY, FIRST_MEETING_CHECKLIST, SPEAKING_TIPS, glossary, checklist, speakingTips, buildComment, estimateSpeakingSeconds, timeOfDayFor } from './civics.js';
+export { GLOSSARY, FIRST_MEETING_CHECKLIST, SPEAKING_TIPS, glossary, checklist, speakingTips, buildComment, estimateSpeakingSeconds, speakingRate, timeOfDayFor } from './civics.js';
 export { validateCity, validateCities, scheduleWarnings, isUrl, forEachCityUrl } from './validate.js';
 export { computeStats } from './stats.js';
 export { APPLY_STATUSES, CLOSING_SOON_DAYS, youthApplyState, youthApplyRank } from './youth.js';

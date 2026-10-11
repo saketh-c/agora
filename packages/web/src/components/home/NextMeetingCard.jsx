@@ -109,7 +109,7 @@ export default function NextMeetingCard({ meeting, city, today, now, prep, onCon
           {where && (
             <p className="next__where">
               <Icon name="pin" size={20} />
-              <span>{where}</span>
+              <bdi>{where}</bdi>
             </p>
           )}
           {(onDetails || onPick) && (
@@ -139,7 +139,7 @@ export default function NextMeetingCard({ meeting, city, today, now, prep, onCon
         </div>
       </div>
       <div className="next__do">
-        <p className="next__prephead">{allDone ? t('home.next.ready') : t('ui.prep.progress', { done: prep.done, total: prep.total })}</p>
+        <p className="next__prephead">{allDone ? t('home.next.ready') : t('ui.prep.progress', { done: prep.done, n: prep.total })}</p>
         <ProgressLights steps={steps} label={t('ui.prep.progressLabel')} />
         <div className="next__actions">
           <Link className="btn btn--primary" to={prepRoute(prep.next, meeting.id)} onClick={onContinue}>

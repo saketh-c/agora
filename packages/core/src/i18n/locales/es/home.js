@@ -45,7 +45,7 @@ export default {
   },
   stat: {
     n: '{n} de cada 10',
-    text: 'reuniones del concejo en los próximos {days} días empiezan a las {time} o más tarde.',
+    text: 'reuniones del concejo en los próximos {n} días empiezan a las {time} o más tarde.',
     see: 'Ver los datos',
   },
   languages: 'Otros idiomas',

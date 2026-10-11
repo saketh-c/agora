@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LOCALES, t, tn } from '@agora/core';
+import { LOCALES, offeredLocales, t, tn } from '@agora/core';
 import { useStore, displayName } from '../lib/store.jsx';
 import { useCities } from '../lib/DataProvider.jsx';
 import { cleanEmail, NAME_MAX } from '../lib/profiles.js';
@@ -10,6 +10,7 @@ import { Avatar, Badge, Disclosure, Icon, Menu, PageHeader, Section, Sheet } fro
 import { SETUP_STATE, setupTo } from '../components/shell/SetupHost.jsx';
 import { originText } from '../components/home/SetupSheet.jsx';
 import { placeName, placesOf } from '../lib/places.js';
+import { inputDir } from '../lib/textDir.js';
 import '../styles/pages/profile.css';
 
 const TOAST_MS = 5000;
@@ -301,7 +302,7 @@ function ProfileSheet({ open, profile, onClose, onSave }) {
           <label className="label" htmlFor="pf-name">
             {t('profile.nameLabel')}
           </label>
-          <input ref={nameRef} id="pf-name" className="input" value={values.name} onChange={set('name')} maxLength={NAME_MAX} placeholder={t('profile.namePlaceholder')} autoComplete="off" aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? 'pf-name-err' : undefined} />
+          <input ref={nameRef} id="pf-name" className="input" dir={inputDir(values.name)} value={values.name} onChange={set('name')} maxLength={NAME_MAX} placeholder={t('profile.namePlaceholder')} autoComplete="off" aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? 'pf-name-err' : undefined} />
           {errors.name && (
             <p className="err" id="pf-name-err">
               <Icon name="alert" />
@@ -313,7 +314,7 @@ function ProfileSheet({ open, profile, onClose, onSave }) {
           <label className="label" htmlFor="pf-email">
             {t('profile.emailLabel')} <span className="opt">{t('profile.optional')}</span>
           </label>
-          <input id="pf-email" type="email" className="input" value={values.email} onChange={set('email')} placeholder={t('profile.emailPlaceholder')} autoComplete="email" inputMode="email" aria-invalid={Boolean(errors.email)} aria-describedby={`pf-email-help${errors.email ? ' pf-email-err' : ''}`} />
+          <input id="pf-email" type="email" className="input" dir="ltr" value={values.email} onChange={set('email')} placeholder={t('profile.emailPlaceholder')} autoComplete="email" inputMode="email" aria-invalid={Boolean(errors.email)} aria-describedby={`pf-email-help${errors.email ? ' pf-email-err' : ''}`} />
           <p className="help" id="pf-email-help">
             {t('profile.emailHelp')}
           </p>
@@ -391,11 +392,13 @@ function SetupSummary({ prefs, complete, name, city, places, lang, setLang, setu
               buttonClassName="chip chip--menu pf-set__lang"
               button={
                 <>
-                  <span lang={current.code}>{current.nativeName}</span>
+                  <span className="langname" lang={current.tag} dir={current.dir}>
+                    {current.nativeName}
+                  </span>
                   <Icon name="chev-d" size={20} />
                 </>
               }
-              items={LOCALES.map((l) => ({ type: 'radio', key: l.code, label: l.nativeName, lang: l.code, checked: l.code === lang, onSelect: () => setLang(l.code) }))}
+              items={offeredLocales(lang).map((l) => ({ type: 'radio', key: l.code, label: l.nativeName, lang: l.tag, dir: l.dir, checked: l.code === lang, onSelect: () => setLang(l.code) }))}
             />
           </dd>
         </div>

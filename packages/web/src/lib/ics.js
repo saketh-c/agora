@@ -7,7 +7,7 @@
  * when the city closes speaker sign-up ahead of time, a second event at that deadline with
  * its own reminder, because the deadline decides whether you get to speak at all.
  */
-import { BRAND, formatDate, formatTime, t, toISO } from '@agora/core';
+import { BRAND, formatDate, formatTime, stripIsolates, t, toISO } from '@agora/core';
 import { downloadBlob } from './download.js';
 
 /**
@@ -34,8 +34,12 @@ export function stamp(date) {
   return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
 }
 
+/**
+ * Text for a calendar file, which is UTF-8 in every language. The bidi isolates the app puts
+ * around values in Arabic sentences are left out: a calendar app lays the text out itself.
+ */
 function escapeText(s) {
-  return String(s || '')
+  return stripIsolates(s)
     .replace(/\\/g, '\\\\')
     .replace(/\r\n?|\n/g, '\\n')
     .replace(/,/g, '\\,')
@@ -173,7 +177,7 @@ export function googleCalendarUrl(meeting, city, opts = {}) {
     action: 'TEMPLATE',
     text: titleOf(meeting),
     dates: `${stamp(start)}/${stamp(end)}`,
-    details: eventDetails(meeting, city, opts),
+    details: stripIsolates(eventDetails(meeting, city, opts)),
     location: meeting.location || '',
     ctz: 'America/Chicago',
   });
@@ -193,7 +197,7 @@ export function outlookUrl(meeting, city, opts = {}) {
     subject: titleOf(meeting),
     startdt: iso(start),
     enddt: iso(end),
-    body: eventDetails(meeting, city, opts),
+    body: stripIsolates(eventDetails(meeting, city, opts)),
     location: meeting.location || '',
   });
   return `https://outlook.${opts.work ? 'office' : 'live'}.com/calendar/0/action/compose?${params}`;

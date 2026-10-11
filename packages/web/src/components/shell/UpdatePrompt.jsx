@@ -58,20 +58,18 @@ export default function UpdatePrompt() {
     };
   }, []);
 
+  // The shell's status region (App.jsx) holds this toast, so it is announced when it appears.
+  if (!ready) return null;
   return (
-    <div className="update" role="status" aria-live="polite">
-      {ready && (
-        <div className="toast update__toast">
-          <Icon name="refresh" size={20} />
-          <span className="update__text">{t('shell.update.ready')}</span>
-          <button type="button" className="btn btn--text btn--sm" onClick={() => window.location.reload()}>
-            {t('shell.update.refresh')}
-          </button>
-          <button type="button" className="iconbtn update__x" aria-label={t('shell.update.later')} onClick={() => setReady(false)}>
-            <Icon name="x" size={20} />
-          </button>
-        </div>
-      )}
+    <div className="toast update__toast">
+      <Icon name="refresh" size={20} />
+      <span className="update__text">{t('shell.update.ready')}</span>
+      <button type="button" className="btn btn--text btn--sm" onClick={() => window.location.reload()}>
+        {t('shell.update.refresh')}
+      </button>
+      <button type="button" className="iconbtn update__x" aria-label={t('shell.update.later')} onClick={() => setReady(false)}>
+        <Icon name="x" size={20} />
+      </button>
     </div>
   );
 }

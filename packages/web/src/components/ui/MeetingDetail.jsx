@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { formatDate, getLocale, liveMeetingFor, relativeDays, t, todayStr } from '@agora/core';
+import { formatDate, getLocale, joinItems, joinSentences, labelValue, liveMeetingFor, relativeDays, stripIsolates, t, todayStr } from '@agora/core';
 import Icon from './Icon.jsx';
 import Badge from './Badge.jsx';
 import Notice from './Notice.jsx';
@@ -63,8 +63,9 @@ export function MeetingShare({ meeting }) {
   };
   const share = async () => {
     const url = meetingLink(meeting);
-    const title = councilName(meeting);
-    const text = `${councilName(meeting)}: ${meetingTitle(meeting)}, ${whenText(meeting.date, meeting.time)}`;
+    // Shared text leaves the app: plain text, without the bidi isolates the screen uses.
+    const title = stripIsolates(councilName(meeting));
+    const text = stripIsolates(labelValue(councilName(meeting), joinItems([meetingTitle(meeting), whenText(meeting.date, meeting.time)])));
     if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
       try {
         await navigator.share({ title, text, url });
@@ -158,8 +159,9 @@ export default function MeetingDetail({ meeting, city, today, now, headingId = '
         {today && <span className="slate">{relativeDays(meeting.date, today)}</span>}
       </p>
       {meeting.location && (
-        <p className="md__where" lang={lang !== 'en' ? 'en' : undefined}>
-          {meeting.location}
+        // The address is English in every language; <bdi> keeps its own order in right-to-left text.
+        <p className="md__where">
+          <bdi lang={lang !== 'en' ? 'en' : undefined}>{meeting.location}</bdi>
         </p>
       )}
       {away && distance.from ? (
@@ -172,7 +174,7 @@ export default function MeetingDetail({ meeting, city, today, now, headingId = '
       {moved ? (
         <Notice tone="amber" icon="moved" className="md__notice">
           {/* "Moved from Tue, Oct 6." ends its sentence before the city's own note. */}
-          {kind === 'date' ? `${asSentence(meeting.movedFrom ? t('ui.movedFrom', { date: formatDate(meeting.movedFrom) }) : t('ui.rescheduled'))} ${meeting.note}` : meeting.movedFrom ? t('ui.movedFrom', { date: formatDate(meeting.movedFrom) }) : t('ui.rescheduled')}
+          {kind === 'date' ? joinSentences([meeting.movedFrom ? t('ui.movedFrom', { date: formatDate(meeting.movedFrom) }) : t('ui.rescheduled'), meeting.note]) : meeting.movedFrom ? t('ui.movedFrom', { date: formatDate(meeting.movedFrom) }) : t('ui.rescheduled')}
         </Notice>
       ) : null}
 

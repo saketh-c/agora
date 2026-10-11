@@ -4,6 +4,7 @@ import Icon from './Icon.jsx';
 /**
  * A segmented control (radio group): one of 2 to 4 options, such as List | Map.
  * Arrow keys move and select, like native radios; only the checked option is in the tab order.
+ * Left and Right follow what is on screen, so right to left (Arabic) Left moves to the next one.
  *
  *   <Segmented label="View" value={view} onChange={setView}
  *              options={[{ value: 'list', label: 'List', icon: 'list' }, { value: 'map', label: 'Map', icon: 'map' }]} />
@@ -13,7 +14,8 @@ export default function Segmented({ label, options, value, onChange, block = fal
   const index = Math.max(0, options.findIndex((o) => o.value === value));
 
   const onKeyDown = (e) => {
-    const dir = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+    const rtl = getComputedStyle(e.currentTarget).direction === 'rtl';
+    const dir = { ArrowRight: rtl ? -1 : 1, ArrowDown: 1, ArrowLeft: rtl ? 1 : -1, ArrowUp: -1 }[e.key];
     let next = null;
     if (dir) next = (index + dir + options.length) % options.length;
     if (e.key === 'Home') next = 0;

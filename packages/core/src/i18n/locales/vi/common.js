@@ -7,7 +7,10 @@ export default {
   setAsMyCity: 'Đặt làm thành phố của tôi',
   today: 'Hôm nay',
   tomorrow: 'Ngày mai',
-  inDays: 'Còn {n} ngày',
+  inDays: {
+    one: 'Còn {n} ngày',
+    other: 'Còn {n} ngày',
+  },
   nextWeek: 'Tuần sau',
   inWeeks: {
     one: 'Còn {n} tuần',
@@ -16,6 +19,10 @@ export default {
   daysAgo: {
     one: '{n} ngày trước',
     other: '{n} ngày trước',
+  },
+  days: {
+    one: '{n} ngày',
+    other: '{n} ngày',
   },
   under1Mile: 'dưới 1 dặm',
   miles: '{n} dặm',

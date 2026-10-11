@@ -26,8 +26,11 @@ import {
   inferTopics,
   t,
   LOCALES,
-  isLocale,
   setLocale,
+  htmlLang,
+  detectLocale,
+  localeFromTag,
+  setBidiIsolation,
   localizeCities,
   planLiveAgendas,
   applyLivePlans,
@@ -39,6 +42,11 @@ import { explainAgendaItem, draftComment, aiAvailable } from './ai.js';
 import { apiMessage } from './messages.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+
+// Everything the server writes leaves the process (JSON, headers, AI prompts), so its text
+// carries no bidi isolates: the web app isolates what it shows itself, and any other client
+// would get invisible control characters in a string such as 'The field "name" must be text.'
+setBidiIsolation(false);
 
 const CSP = [
   "default-src 'self'",
@@ -131,23 +139,20 @@ function trustProxySetting(value) {
 /**
  * The response language: an explicit lang from the app (query string, then JSON body) wins
  * over the browser's Accept-Language, so the server answers in the language the student
- * picked in Agora rather than the one their device is set to.
+ * picked in Agora rather than the one their device is set to. An explicit lang may be any
+ * language the app has (one still being translated is chosen on purpose); Accept-Language
+ * only finds the ready ones, like the web app's own detection. Only the language subtag
+ * counts: zh-TW, zh-Hant-HK, hi-IN, te_IN and ar-EG find their language.
  */
 export function requestLang(req) {
   const query = req.query && typeof req.query.lang === 'string' ? req.query.lang : '';
   const body = req.body && typeof req.body === 'object' && !Array.isArray(req.body) && typeof req.body.lang === 'string' ? req.body.lang : '';
+  const explicit = [query, body].map(localeFromTag).find(Boolean);
+  if (explicit) return explicit;
   const header = String(req.headers['accept-language'] || '')
     .split(',')
     .map((part) => part.split(';')[0].trim());
-  return (
-    [query, body, ...header]
-      .map((x) =>
-        String(x || '')
-          .toLowerCase()
-          .split(/[-_]/)[0],
-      )
-      .find(isLocale) || 'en'
-  );
+  return detectLocale(header);
 }
 
 const clientKey = (req) => req.ip || (req.socket && req.socket.remoteAddress) || 'unknown';
@@ -176,7 +181,7 @@ function limiter(max, windowMs = 60000) {
       hits.set(key, times);
       const retryAfter = Math.max(1, Math.ceil((times[0] + windowMs - now) / 1000));
       res.setHeader('Retry-After', String(retryAfter));
-      return res.status(429).json({ error: apiMessage('rateLimited', { seconds: retryAfter }, req.lang || requestLang(req)), code: 'rate_limited', retryAfter });
+      return res.status(429).json({ error: apiMessage('rateLimited', { n: retryAfter }, req.lang || requestLang(req)), code: 'rate_limited', retryAfter });
     }
     times.push(now);
     hits.set(key, times);
@@ -314,7 +319,7 @@ export function createApp({ cities, news, agendas = null, webDist, now = () => n
   app.use('/api', (req, res, next) => {
     req.lang = requestLang(req);
     setLocale(req.lang);
-    res.setHeader('Content-Language', req.lang);
+    res.setHeader('Content-Language', htmlLang(req.lang));
     res.setHeader('Vary', [res.getHeader('Vary'), 'Accept-Language'].filter(Boolean).join(', '));
     next();
   });
@@ -494,14 +499,14 @@ export function createApp({ cities, news, agendas = null, webDist, now = () => n
       else if (!allowance.take(clientKey(req)).ok) aiError = 'rate_limited';
       else {
         const result = await draftComment(input, draft, { cityName: city ? city.name : undefined });
-        if (result.source === 'claude') ai = { source: result.source, model: result.model, text: result.text, seconds: estimateSpeakingSeconds(result.text) };
+        if (result.source === 'claude') ai = { source: result.source, model: result.model, text: result.text, seconds: estimateSpeakingSeconds(result.text, lang) };
         else {
           aiError = result.aiError || 'unavailable';
           if (result.fallbackReason) console.warn(`AI comment rewrite fell back to the template: ${result.fallbackReason}`);
         }
       }
     }
-    res.json({ draft, seconds: estimateSpeakingSeconds(draft), ai, ...(aiError ? { aiError } : {}), lang });
+    res.json({ draft, seconds: estimateSpeakingSeconds(draft, lang), ai, ...(aiError ? { aiError } : {}), lang });
   });
 
   /**

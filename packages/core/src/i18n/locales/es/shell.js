@@ -40,4 +40,5 @@ export default {
     refresh: 'Actualizar',
     later: 'Ahora no',
   },
+  langOffline: '{language} no se puede cargar sin conexión a internet. Conéctate y vuelve a elegirlo.',
 };

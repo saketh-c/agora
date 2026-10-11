@@ -123,7 +123,7 @@ export default {
       day: 'On the day',
       after: 'After: share how it went',
     },
-    progress: '{done} of {total} prep steps done',
+    progress: '{done} of {n} prep steps done',
     progressLabel: 'Prep progress',
     continue: 'Continue: {step}',
     done: 'Done',

@@ -3,10 +3,13 @@
  * same thing: can I speak and for how long, does it clash with school, is there a sign-up
  * deadline, what kind of meeting is it. Strings come from the `ui` dictionary namespace.
  */
-import { formatDate, formatTime, getLocale, tList, t, tn, parseDate } from '@agora/core';
+import { formatDate, formatMiles, formatMonthDay, formatTime, t, tn, weekdayName } from '@agora/core';
 import { rawCity } from '../../lib/data.js';
 import { signupDeadline } from '../../lib/deadline.js';
 import { setDeadlineResolver } from '../../lib/ics.js';
+import { keepUnit, meetingTitle } from './meetingText.js';
+
+export { keepUnit, meetingTitle };
 
 /** 'weekend' | 'during' (a weekday, 7:30 to 16:00) | 'before' (weekday morning) | 'after'. */
 export function schoolTiming(meeting) {
@@ -44,29 +47,6 @@ export function typeLabel(meeting) {
   return label === key ? t('ui.meetingType.regular') : label;
 }
 
-// Generic words in English meeting labels. A label made only of these is sentence-cased;
-// anything else (a person, a commission, "Fourth-Tuesday") is left exactly as the city wrote it.
-const GENERIC = new Set('a and as afternoon agenda briefing called city council day evening executive joint meeting meetings needed of open pre-council pre-meeting preliminary regular session sessions special study the town voting with work workshop worksession'.split(' '));
-
-/**
- * The meeting's own name for a title under the council name: "City Council Regular Meeting"
- * becomes "Regular meeting" (sentence case, no repeated "City Council"). Translated labels
- * are already in sentence case and are only trimmed of the city's name.
- */
-export function meetingTitle(meeting, lang = getLocale()) {
-  if (!meeting) return '';
-  let label = String(meeting.label || '').trim();
-  if (meeting.cityName && label.toLowerCase().startsWith(`${meeting.cityName.toLowerCase()} `)) label = label.slice(meeting.cityName.length + 1);
-  if (lang !== 'en') return label.charAt(0).toLocaleUpperCase(lang) + label.slice(1);
-  const stripped = label.replace(/^(?:city |town )?council /i, '');
-  if (stripped && stripped !== label && /\S/.test(stripped)) label = stripped;
-  const words = label.split(/([\s/()]+)/);
-  const generic = words.every((w) => !/[A-Za-z]/.test(w) || GENERIC.has(w.toLowerCase()));
-  if (!generic) return label.charAt(0).toUpperCase() + label.slice(1);
-  const lower = words.map((w) => (/[A-Za-z]/.test(w) ? w.toLowerCase() : w)).join('');
-  return lower.charAt(0).toUpperCase() + lower.slice(1);
-}
-
 /** A clock time that never breaks between its digits and AM/PM. */
 export function timeText(time) {
   return formatTime(time).replace(/ /g, '\u00a0');
@@ -91,16 +71,12 @@ export function whenLong(date, time) {
 
 /** "Oct 12" or, with a year, "Oct 12, 2026": a date without its weekday, in the app language. */
 export function monthDay(date, { withYear = false } = {}) {
-  const { y, m, d } = parseDate(date);
-  const month = tList('format.monthsShort')[m - 1];
-  return t(withYear ? 'ui.monthDayYear' : 'ui.monthDay', { month, day: d, year: y });
+  return formatMonthDay(date, { withYear });
 }
 
 /** "Mon, 4:00 PM": weekday and time, for deadlines that are days away at most. */
 export function dayTimeText(date, time) {
-  const { y, m, d } = parseDate(date);
-  const weekday = tList('format.weekdaysShort')[new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
-  return t('ui.dayTime', { day: weekday, time: timeText(time) });
+  return t('ui.dayTime', { day: weekdayName(date, { short: true }), time: timeText(time) });
 }
 
 /**
@@ -117,11 +93,12 @@ export function meetingDeadline(meeting, now = new Date().toISOString()) {
 // Calendar files add the sign-up deadline as its own event, wherever they are made.
 setDeadlineResolver((meeting) => meetingDeadline(meeting));
 
-/** A phrase as a sentence: one closing period, even after a Spanish "4:00 p.m.". */
-export function asSentence(text) {
-  const s = String(text || '').trim();
-  return !s || /[.!?]$/.test(s) ? s : `${s}.`;
-}
+/**
+ * A phrase as a sentence: one closing mark in the language's own style (core's asSentence:
+ * "." in English, "。" in Chinese, "।" in Hindi), never a second one after a Spanish
+ * "4:00 p.m.", a "？" or a "।".
+ */
+export { asSentence, joinSentences } from '@agora/core';
 
 /** "Sign up by Mon, 4:00 PM" / "Sign-up closes Mon, 4:00 PM" / "Sign-up closed". */
 export function deadlineText(deadline, form = 'by') {
@@ -130,9 +107,6 @@ export function deadlineText(deadline, form = 'by') {
   const when = dayTimeText(deadline.date, deadline.time);
   return form === 'closes' ? t('ui.signupCloses', { when }) : t('ui.signupBy', { when });
 }
-
-/** A number never wraps away from its unit ("3 min", "3 phút", "2.7 mi"). */
-const keepUnit = (text) => String(text).replace(/(\d)\s+(?=\S)/g, '$1\u00a0');
 
 /** "Can speak, 3 min" or "Can speak". */
 export function canSpeakText(city) {
@@ -151,5 +125,5 @@ export function distanceText(meeting, { homeCityId, distanceMiles } = {}) {
   if (meeting && homeCityId && meeting.cityId === homeCityId) return t('ui.yourCity');
   const miles = distanceMiles != null ? distanceMiles : meeting && meeting.distanceMiles;
   if (miles == null || Number.isNaN(Number(miles))) return '';
-  return keepUnit(t('ui.milesShort', { n: Number(miles) < 10 ? Number(miles).toFixed(1) : Math.round(Number(miles)) }));
+  return keepUnit(t('ui.milesShort', { n: formatMiles(Number(miles)) }));
 }

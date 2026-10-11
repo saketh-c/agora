@@ -159,9 +159,9 @@ export default {
     lightAmber: 'Amber light: almost out of time',
     lightStop: 'Red light: over the limit',
     aria: 'Your draft runs {used} against a {limit} limit.',
-    noteCity: 'Timed at a steady 130 words a minute. {city} gives each speaker {minutes}.',
-    noteNoLimit: 'Timed at a steady 130 words a minute. {city} does not publish a limit, so this uses 3 minutes.',
-    notePractice: 'Timed at a steady 130 words a minute against 3 minutes, the most common limit.',
+    noteCity: 'Timed at a steady {n} words a minute. {city} gives each speaker {minutes}.',
+    noteNoLimit: 'Timed at a steady {n} words a minute. {city} does not publish a limit, so this uses 3 minutes.',
+    notePractice: 'Timed at a steady {n} words a minute against 3 minutes, the most common limit.',
   },
   practice: {
     sub: 'Time yourself and get feedback. Your video never leaves this device.',

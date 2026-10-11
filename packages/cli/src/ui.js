@@ -58,18 +58,73 @@ export function safe(text, { multiline = false } = {}) {
     .replace(/\x1b[PX^_][^\x07\x1b]*(?:\x07|\x1b\\)?/g, '')
     .replace(/\x1b\[[0-?]*[ -/]*[@-~]?/g, '')
     .replace(/\x1b[\s\S]?/g, '')
-    .replace(/[‪-‮⁦-⁩]/g, '');
+    .replace(/[\u202a-\u202e\u2066-\u2069]/g, '');
   s = multiline ? s.replace(/\r\n?/g, '\n') : s.replace(/[\t\r\n]+/g, ' ');
   return s.replace(/[\x00-\x08\x0b-\x1f\x7f-\x9f]/g, '');
 }
 
 /**
- * Columns a string takes on screen: color codes take none, and neither do combining marks,
- * so accented Spanish and Vietnamese text lines up the same whether or not it is precomposed.
+ * East Asian Wide and Fullwidth characters (Unicode EastAsianWidth W and F), which take two
+ * columns in a terminal: Han, kana, Hangul, full-width forms, CJK punctuation and wide emoji.
+ */
+const WIDE = [
+  [0x1100, 0x115f], [0x231a, 0x231b], [0x2329, 0x232a], [0x23e9, 0x23ec], [0x23f0, 0x23f0], [0x23f3, 0x23f3],
+  [0x25fd, 0x25fe], [0x2614, 0x2615], [0x2648, 0x2653], [0x267f, 0x267f], [0x2693, 0x2693], [0x26a1, 0x26a1],
+  [0x26aa, 0x26ab], [0x26bd, 0x26be], [0x26c4, 0x26c5], [0x26ce, 0x26ce], [0x26d4, 0x26d4], [0x26ea, 0x26ea],
+  [0x26f2, 0x26f3], [0x26f5, 0x26f5], [0x26fa, 0x26fa], [0x26fd, 0x26fd], [0x2705, 0x2705], [0x270a, 0x270b],
+  [0x2728, 0x2728], [0x274c, 0x274c], [0x274e, 0x274e], [0x2753, 0x2755], [0x2757, 0x2757], [0x2795, 0x2797],
+  [0x27b0, 0x27b0], [0x27bf, 0x27bf], [0x2b1b, 0x2b1c], [0x2b50, 0x2b50], [0x2b55, 0x2b55], [0x2e80, 0x303e],
+  [0x3041, 0x33ff], [0x3400, 0x4dbf], [0x4e00, 0x9fff], [0xa000, 0xa4cf], [0xa960, 0xa97f], [0xac00, 0xd7a3],
+  [0xf900, 0xfaff], [0xfe10, 0xfe19], [0xfe30, 0xfe6f], [0xff00, 0xff60], [0xffe0, 0xffe6], [0x16fe0, 0x16fe4],
+  [0x17000, 0x18cff], [0x1b000, 0x1b2ff], [0x1f004, 0x1f004], [0x1f0cf, 0x1f0cf], [0x1f18e, 0x1f18e],
+  [0x1f191, 0x1f19a], [0x1f200, 0x1f202], [0x1f210, 0x1f23b], [0x1f240, 0x1f248], [0x1f250, 0x1f251],
+  [0x1f260, 0x1f265], [0x1f300, 0x1f320], [0x1f32d, 0x1f335], [0x1f337, 0x1f37c], [0x1f37e, 0x1f393],
+  [0x1f3a0, 0x1f3ca], [0x1f3cf, 0x1f3d3], [0x1f3e0, 0x1f3f0], [0x1f3f4, 0x1f3f4], [0x1f3f8, 0x1f43e],
+  [0x1f440, 0x1f440], [0x1f442, 0x1f4fc], [0x1f4ff, 0x1f53d], [0x1f54b, 0x1f54e], [0x1f550, 0x1f567],
+  [0x1f57a, 0x1f57a], [0x1f595, 0x1f596], [0x1f5a4, 0x1f5a4], [0x1f5fb, 0x1f64f], [0x1f680, 0x1f6c5],
+  [0x1f6cc, 0x1f6cc], [0x1f6d0, 0x1f6d2], [0x1f6d5, 0x1f6d7], [0x1f6eb, 0x1f6ec], [0x1f6f4, 0x1f6fc],
+  [0x1f7e0, 0x1f7eb], [0x1f90c, 0x1f93a], [0x1f93c, 0x1f945], [0x1f947, 0x1f9ff], [0x1fa70, 0x1faff],
+  [0x20000, 0x2fffd], [0x30000, 0x3fffd],
+];
+
+function isWide(cp) {
+  let lo = 0;
+  let hi = WIDE.length - 1;
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1;
+    if (cp < WIDE[mid][0]) hi = mid - 1;
+    else if (cp > WIDE[mid][1]) lo = mid + 1;
+    else return true;
+  }
+  return false;
+}
+
+/** Columns one code point takes, as terminals count them (wcwidth). */
+function charWidth(ch) {
+  const cp = ch.codePointAt(0);
+  if (cp < 0x20 || (cp >= 0x7f && cp < 0xa0)) return 0;
+  // Nonspacing and enclosing marks, format controls (joiners, bidi isolates), variation selectors.
+  // Skin-tone modifiers join the emoji before them.
+  if (/[\p{Mn}\p{Me}\p{Cf}]/u.test(ch) || (cp >= 0xfe00 && cp <= 0xfe0f) || (cp >= 0xe0100 && cp <= 0xe01ef) || (cp >= 0x1f3fb && cp <= 0x1f3ff)) return 0;
+  return isWide(cp) ? 2 : 1;
+}
+
+const graphemeSegmenter = typeof Intl.Segmenter === 'function' ? new Intl.Segmenter('en', { granularity: 'grapheme' }) : null;
+
+/** User-perceived characters, so a cut never splits a conjunct, an accent or an emoji. */
+function graphemes(s) {
+  if (graphemeSegmenter) return [...graphemeSegmenter.segment(s)].map((x) => x.segment);
+  return s.match(/\P{M}\p{M}*/gu) || [];
+}
+
+/**
+ * Columns a string takes on screen: color codes take none, and neither do combining marks
+ * or format controls, so accented Spanish and Vietnamese text lines up the same whether or not
+ * it is precomposed. Chinese characters and other East Asian wide characters take two.
  */
 export function visibleLength(s) {
   let n = 0;
-  for (const ch of String(s).replace(SGR, '')) if (!/\p{M}/u.test(ch)) n += 1;
+  for (const ch of String(s).replace(SGR, '')) n += charWidth(ch);
   return n;
 }
 
@@ -162,8 +217,15 @@ export function table(rows, columns, { empty, maxWidth = outputWidth() } = {}) {
 
 export function truncate(s, width) {
   if (visibleLength(s) <= width) return s;
-  const chars = [...String(s).replace(SGR, '')];
-  return `${chars.slice(0, Math.max(0, width - 1)).join('')}…`;
+  let out = '';
+  let used = 0;
+  for (const g of graphemes(String(s).replace(SGR, ''))) {
+    const w = visibleLength(g);
+    if (used + w > Math.max(0, width - 1)) break;
+    out += g;
+    used += w;
+  }
+  return `${out}…`;
 }
 
 /** Simple horizontal bar for text charts. */
@@ -172,17 +234,68 @@ export function bar(value, max, width = 24) {
   return c.blue('█'.repeat(n)) + c.gray('░'.repeat(Math.max(0, width - n)));
 }
 
-/** Word-wrap one paragraph to `width` columns, indenting every line by `indent` spaces. */
+/** Closing punctuation never starts a line, and opening punctuation never ends one (CJK rules). */
+const CLOSING = /^[，。、；：？！）」』】》〉,.;:?!)\]}%]$/u;
+const OPENING = /^[（「『【《〈(\[{]$/u;
+
+/**
+ * Break a whitespace-free run into the pieces a line may end between. Chinese has no spaces,
+ * so a line may break between any two characters, except before closing punctuation or after
+ * opening punctuation; a Latin word or a number inside stays whole.
+ */
+function breakUnits(word) {
+  if (![...word].some((ch) => isWide(ch.codePointAt(0)))) return [word];
+  const units = [];
+  let run = '';
+  let pendingOpen = '';
+  for (const g of graphemes(word)) {
+    const wide = isWide(g.codePointAt(0));
+    if (OPENING.test(g)) {
+      if (run) units.push(run);
+      run = '';
+      pendingOpen += g;
+      continue;
+    }
+    if (CLOSING.test(g)) {
+      if (run) run += g;
+      else if (units.length) units[units.length - 1] += g;
+      else run = pendingOpen + g;
+      continue;
+    }
+    if (wide) {
+      if (run) units.push(run);
+      run = pendingOpen + g;
+      pendingOpen = '';
+      units.push(run);
+      run = '';
+    } else {
+      run += pendingOpen + g;
+      pendingOpen = '';
+    }
+  }
+  if (run || pendingOpen) units.push(run + pendingOpen);
+  // A closing mark pushed onto a unit that was already emitted stays attached to it.
+  return units.filter(Boolean);
+}
+
+/**
+ * Word-wrap one paragraph to `width` columns, indenting every line by `indent` spaces. Lines
+ * break at spaces, and in Chinese between characters, measured in terminal columns.
+ */
 export function wrapText(text, width = 76, indent = 0) {
   const pad = ' '.repeat(indent);
-  const words = String(text).split(/\s+/).filter(Boolean);
+  const pieces = [];
+  for (const word of String(text).split(/\s+/).filter(Boolean)) {
+    breakUnits(word).forEach((unit, i) => pieces.push({ text: unit, space: i === 0 }));
+  }
   const lines = [];
   let line = '';
-  for (const w of words) {
-    if (line && visibleLength(`${line} ${w}`) > width) {
+  for (const p of pieces) {
+    const next = line ? `${line}${p.space ? ' ' : ''}${p.text}` : p.text;
+    if (line && visibleLength(next) > width) {
       lines.push(pad + line);
-      line = w;
-    } else line = line ? `${line} ${w}` : w;
+      line = p.text;
+    } else line = next;
   }
   if (line) lines.push(pad + line);
   return lines.join('\n');

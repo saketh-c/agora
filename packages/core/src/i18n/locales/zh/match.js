@@ -1,0 +1,23 @@
+export default {
+  itemsOn: {
+    other: '{n} agenda items on {topics}',
+  },
+  recentAgenda: 'Took up {topics} on {month} {day}',
+  weekendMeeting: 'Weekend meeting',
+  eveningAfterSchool: 'Evening meeting, after school',
+  eveningMeeting: 'Evening meeting',
+  duringSchool: 'During school hours',
+  duringSchoolStream: 'During school hours, but you can watch the live stream',
+  daytimeMeeting: 'Daytime meeting',
+  away: '{distance} away',
+  awayPastLimit: '{distance} away, past your {n} mile limit',
+  yourCity: 'Your city',
+  canSignUp: 'You can sign up to speak',
+  remoteAllowed: 'Remote comment allowed',
+  thisWeek: 'In the next 3 days',
+  withinWeek: 'Within a week',
+  youthPrograms: 'City has youth programs you can join',
+  scheduleChange: 'Schedule change: confirm on the city site',
+  summary: 'Your best next step: {city}, {label}, {date} at {time}{why}.',
+  noMatches: 'No upcoming meetings match yet. Widen your distance or add more interests.',
+};

@@ -9,6 +9,8 @@ import Icon from './Icon.jsx';
  *         items={[{ type: 'radio', label: 'English', lang: 'en', checked: true, onSelect }, { type: 'separator' },
  *                 { type: 'link', to: '/profile', label: 'Profiles and backup', icon: 'user' }]} />
  *
+ * An item may carry `lang` (a BCP 47 tag, set on the item) and `dir` (an isolate around its
+ * label), for a language listed in its own name.
  * Item types: 'item' (onSelect), 'link' (to, a router path or location, with optional history
  * `state`, and `refocus` to give focus back to the button, for a link that opens a sheet over
  * the current page; or href for an external page),
@@ -179,7 +181,15 @@ export default function Menu({ label, button, buttonClassName = 'tool', items, h
                 <>
                   {it.icon && <Icon name={it.icon} />}
                   <span className="menu__label">
-                    {it.label}
+                    {/* A language's own name keeps its own direction (العربية reads right to left)
+                        inside an isolate, so every row still lines up with the page. */}
+                    {it.dir ? (
+                      <span className="langname" dir={it.dir}>
+                        {it.label}
+                      </span>
+                    ) : (
+                      it.label
+                    )}
                     {it.sub && <span className="menu__sub">{it.sub}</span>}
                   </span>
                   {it.type === 'radio' && it.checked && <Icon name="check" className="check" />}

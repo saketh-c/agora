@@ -1,6 +1,6 @@
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { LOCALES, formatTime, t } from '@agora/core';
+import { formatTime, offeredLocales, t } from '@agora/core';
 import { useCities } from '../../lib/DataProvider.jsx';
 import { useStore } from '../../lib/store.jsx';
 import { EmptyState, MeetingRow, Section, meetingDeadline } from '../ui/index.js';
@@ -71,7 +71,8 @@ export default function HomeFirst({ onDone, onOpenMeeting, focusPlace = false })
     setSortedNote(interests.length ? t('home.topics.sorted') : t('home.topics.cleared'));
   };
 
-  const otherLanguages = LOCALES.filter((l) => l.code !== lang);
+  // The other languages the app offers (completely translated ones, LOCALES[].ready).
+  const otherLanguages = offeredLocales(lang).filter((l) => l.code !== lang);
 
   return (
     <>
@@ -128,7 +129,7 @@ export default function HomeFirst({ onDone, onOpenMeeting, focusPlace = false })
               <div className="statline">
                 <span className="statline__n num">{t('home.stat.n', { n: stat.inTen })}</span>
                 <p>
-                  {t('home.stat.text', { days: stat.days, time: formatTime('17:00', undefined, { compact: true }) })}{' '}
+                  {t('home.stat.text', { n: stat.days, time: formatTime('17:00', undefined, { compact: true }) })}{' '}
                   <Link className="link" to="/insights">
                     {t('home.stat.see')}
                   </Link>
@@ -138,7 +139,7 @@ export default function HomeFirst({ onDone, onOpenMeeting, focusPlace = false })
 
             <div className="langs" role="group" aria-label={t('home.languages')}>
               {otherLanguages.map((l) => (
-                <button key={l.code} type="button" lang={l.code} onClick={() => setLang(l.code)}>
+                <button key={l.code} type="button" className="langname" lang={l.tag} dir={l.dir} onClick={() => setLang(l.code)}>
                   {l.nativeName}
                 </button>
               ))}

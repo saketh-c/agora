@@ -7,3 +7,5 @@
 @import './shell.css';
 @import './charts.css';
 @import './map.css';
+/* Other scripts and right to left, last so its per-language rules win. */
+@import './i18n.css';

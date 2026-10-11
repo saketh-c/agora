@@ -41,12 +41,13 @@ export default function TimeRuler({ seconds, limitSeconds = 180, note, className
         : t('prepare.ruler.ofSpare', { limit: mmss(limit), left: mmss(limit - used) });
   const light = { go: t('prepare.ruler.lightGo'), amber: t('prepare.ruler.lightAmber'), stop: t('prepare.ruler.lightStop') }[tone];
 
-  // The fill is Ink up to the amber zone, then takes the color of the zone it runs into.
-  let fill = 'var(--ink)';
+  // The fill is Ink up to the amber zone, then takes the color of the zone it runs into. The
+  // stops run from the start of the track; components.css draws them toward the line's end.
+  let stops = null;
   if (used > amberAt && used > 0) {
     const a = ((amberAt / used) * 100).toFixed(2);
     const b = ((Math.min(limit, used) / used) * 100).toFixed(2);
-    fill = `linear-gradient(90deg, var(--ink) 0 ${a}%, var(--amber) ${a}% ${b}%, var(--stop) ${b}%)`;
+    stops = `var(--ink) 0 ${a}%, var(--amber) ${a}% ${b}%, var(--stop) ${b}%`;
   }
 
   // Minute ticks, plus the amber line and the limit; a minute tick that would crowd them is dropped.
@@ -72,18 +73,20 @@ export default function TimeRuler({ seconds, limitSeconds = 180, note, className
           {light}
         </span>
       </div>
+      {/* A gauge of the time used, like a progress bar: it fills from the start of the line, so
+          from the right in Arabic, under a readout that reads the same way. */}
       <div className="ruler__track" role="img" aria-label={t('prepare.ruler.aria', { used: mmss(used), limit: mmss(limit) })}>
         <div className="ruler__zones" aria-hidden="true">
           <span style={{ flex: `0 0 ${pct(amberAt)}` }} />
           <span style={{ flex: `0 0 ${(at(limit) - at(amberAt)).toFixed(2)}%` }} />
           <span />
         </div>
-        <div className="ruler__fill" style={{ width: pct(used), background: fill }} />
-        <div className="ruler__limit" style={{ left: `calc(${pct(limit)} - 1.5px)` }} aria-hidden="true" />
+        <div className={`ruler__fill${stops ? ' ruler__fill--zones' : ''}`} style={{ width: pct(used), ...(stops ? { '--fill-stops': stops } : {}) }} />
+        <div className="ruler__limit" style={{ insetInlineStart: `calc(${pct(limit)} - 1.5px)` }} aria-hidden="true" />
       </div>
       <div className="ruler__ticks num" aria-hidden="true">
         {ticks.map((v) => (
-          <span key={v} style={{ left: pct(v) }} className={v === amberAt && v !== limit ? 'is-warn' : undefined}>
+          <span key={v} style={{ insetInlineStart: pct(v) }} className={v === amberAt && v !== limit ? 'is-warn' : undefined}>
             {mmss(v)}
           </span>
         ))}

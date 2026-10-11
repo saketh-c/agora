@@ -11,7 +11,7 @@ export default {
   duringSchoolStream: 'During school hours, but you can watch the live stream',
   daytimeMeeting: 'Daytime meeting',
   away: '{distance} away',
-  awayPastLimit: '{distance} away, past your {max} mile limit',
+  awayPastLimit: '{distance} away, past your {n} mile limit',
   yourCity: 'Your city',
   canSignUp: 'You can sign up to speak',
   remoteAllowed: 'Remote comment allowed',

@@ -2,13 +2,13 @@
  * One way to write practice times, numbers and dates, in the app's language. Pure, so the
  * report, the timer, the charts and the history can never disagree about a number.
  */
-import { formatDate, formatTime, t, tn, joinList } from '@agora/core';
+import { formatDate, formatTime, t, tn, joinItems, joinList, intlLocale, isLocale, usesIntlFormats } from '@agora/core';
 
-const LOCALE_TAG = { en: 'en-US', es: 'es-US', vi: 'vi-VN' };
 const ZONE = 'America/Chicago';
 
+/** The locale Intl formats a language's numbers with ('en-US', 'es-US', 'vi-VN', 'ar-u-...-nu-latn'). */
 export function localeTag(lang) {
-  return LOCALE_TAG[lang] || 'en-US';
+  return isLocale(lang) ? intlLocale(lang) : 'en-US';
 }
 
 /** Whole seconds as m:ss ("2:05"). Callers pass the seconds they mean; this never re-rounds differently. */
@@ -59,6 +59,9 @@ export function megabytes(bytes, lang) {
 /**
  * A coaching entry's parameters, ready for its sentence: seconds become words, decimals get
  * the right mark, and element keys become a spoken list ("your school and your ask").
+ * A sentence counts one thing with {n}; a second counted thing arrives as its own phrase made
+ * by its own plural message, so its noun agrees with its number in every language:
+ * {duration} ("2 seconds", from sec), {length} ("30 words", from max), {words} ("120 words").
  */
 export function coachParams(params = {}, lang = 'en') {
   const out = { ...params };
@@ -67,8 +70,15 @@ export function coachParams(params = {}, lang = 'en') {
   if (typeof params.left === 'number') out.left = secondsPhrase(params.left);
   if (typeof params.limit === 'number') out.limit = limitPhrase(params.limit);
   for (const k of ['sec', 'rate', 'semis']) if (typeof params[k] === 'number') out[k] = numberText(params[k], lang);
+  if (typeof params.sec === 'number') out.duration = tn('rehearse.secondsN', params.sec, { n: numberText(params.sec, lang) }, lang);
+  if (typeof params.max === 'number') out.length = tn('rehearse.wordsN', params.max, { n: numberText(params.max, lang) }, lang);
+  if (typeof params.words === 'number') out.words = tn('rehearse.wordsN', params.words, { n: numberText(params.words, lang) }, lang);
   if (Array.isArray(params.missing)) out.missing = joinList(params.missing.map((k) => t(`rehearse.elements.${k}`)), lang);
   if (Array.isArray(params.landed)) out.landed = joinList(params.landed.map((k) => t(`rehearse.elements.${k}`)), lang);
-  if (Array.isArray(params.list)) out.list = params.list.map((w) => `"${w}"`).join(', ');
+  if (Array.isArray(params.list)) {
+    // Quoted the language's way ("um", “嗯”, «يعني») and listed the way it lists.
+    const quoted = params.list.map((w) => t('rehearse.quoted', { word: w }, lang));
+    out.list = usesIntlFormats(lang) ? joinList(quoted, lang) : joinItems(quoted, lang);
+  }
   return out;
 }

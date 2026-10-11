@@ -33,7 +33,7 @@
 .pr-switch:last-of-type { border-bottom: 1px solid var(--hairline); }
 .pr-switch__t { display: block; font-weight: 600; }
 .pr-switch__s { display: block; font-size: 14px; line-height: 20px; color: var(--slate); margin-top: 2px; }
-.pr-switch__state { font: 600 14px/20px var(--font-text); color: var(--slate); min-width: 2.25em; text-align: right; }
+.pr-switch__state { font: 600 14px/20px var(--font-text); color: var(--slate); min-width: 2.25em; text-align: end; }
 .pr-switch:has(input:checked) .pr-switch__state { color: var(--ink); }
 .pr-switch__ctl { position: relative; width: 52px; height: 32px; flex: none; }
 .pr-switch__ctl input { position: absolute; inset: -6px; width: calc(100% + 12px); height: calc(100% + 12px); margin: 0; opacity: 0; cursor: pointer; z-index: 1; }
@@ -42,13 +42,13 @@
   transition: background-color var(--d2) var(--ease), border-color var(--d2) var(--ease);
 }
 .pr-switch__thumb {
-  position: absolute; top: 6px; left: 6px; width: 16px; height: 16px; border-radius: 50%; background: var(--edge);
+  position: absolute; top: 6px; inset-inline-start: 6px; width: 16px; height: 16px; border-radius: 50%; background: var(--edge);
   display: grid; place-items: center;
-  transition: left var(--d2) var(--ease), top var(--d2) var(--ease), width var(--d2) var(--ease), height var(--d2) var(--ease), background-color var(--d2) var(--ease);
+  transition: inset-inline-start var(--d2) var(--ease), top var(--d2) var(--ease), width var(--d2) var(--ease), height var(--d2) var(--ease), background-color var(--d2) var(--ease);
 }
 .pr-switch__thumb .icon { width: 16px; height: 16px; stroke-width: 3; color: var(--ink); opacity: 0; transition: opacity var(--d1) var(--ease); }
 .pr-switch__ctl input:checked + .pr-switch__track { background: var(--ink); border-color: var(--ink); }
-.pr-switch__ctl input:checked + .pr-switch__track .pr-switch__thumb { top: 2px; left: 22px; width: 24px; height: 24px; background: var(--card); }
+.pr-switch__ctl input:checked + .pr-switch__track .pr-switch__thumb { top: 2px; inset-inline-start: 22px; width: 24px; height: 24px; background: var(--card); }
 .pr-switch__ctl input:checked + .pr-switch__track .pr-switch__thumb .icon { opacity: 1; }
 .pr-switch__ctl input:focus-visible + .pr-switch__track { outline: 2px solid var(--ink); outline-offset: 2px; }
 @media (hover: hover) { .pr-switch:not(.is-disabled):hover .pr-switch__track { border-color: var(--ink); } }
@@ -59,21 +59,21 @@
 .pr-privacy { display: grid; gap: 0; margin-top: calc(-1 * var(--s2)); }
 .pr-privacy__line { display: flex; gap: var(--s2); align-items: flex-start; font-size: 14px; line-height: 20px; color: var(--slate); max-width: none; }
 .pr-privacy__line .icon { color: var(--go-ink); flex: none; }
-.pr-privacy .disc--plain > summary { font-size: 14px; line-height: 20px; padding-left: 28px; }
-.pr-privacy .disc--plain .disc__body { padding-left: 28px; }
+.pr-privacy .disc--plain > summary { font-size: 14px; line-height: 20px; padding-inline-start: 28px; }
+.pr-privacy .disc--plain .disc__body { padding-inline-start: 28px; }
 .pr-bullets { display: grid; gap: var(--s2); font-size: 14px; line-height: 20px; color: var(--slate); }
-.pr-bullets li { position: relative; padding-left: var(--s4); }
-.pr-bullets li::before { content: ""; position: absolute; left: 2px; top: 8px; width: 5px; height: 5px; border-radius: 50%; background: var(--edge); }
+.pr-bullets li { position: relative; padding-inline-start: var(--s4); }
+.pr-bullets li::before { content: ""; position: absolute; inset-inline-start: 2px; top: 8px; width: 5px; height: 5px; border-radius: 50%; background: var(--edge); }
 
 /* "Using your draft from Write" sits where the help line would be. */
 .pr-from { margin-top: var(--s1); padding-block: var(--s1); grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; }
 .pr-from > .icon { color: var(--go-ink); }
-.pr-from .act { grid-column: auto; margin: 0 calc(-1 * var(--s3)) 0 0; gap: 0; flex-wrap: nowrap; }
+.pr-from .act { grid-column: auto; margin-block: 0; margin-inline: 0 calc(-1 * var(--s3)); gap: 0; flex-wrap: nowrap; }
 @media (max-width: 479px) {
   .pr-from { grid-template-columns: auto minmax(0, 1fr); align-items: start; padding-block: var(--s3) var(--s1); }
-  .pr-from .act { grid-column: 2; margin: 0 0 0 calc(-1 * var(--s3)); }
+  .pr-from .act { grid-column: 2; margin-block: 0; margin-inline: calc(-1 * var(--s3)) 0; }
 }
-.pr-script__help button.link { text-align: left; }
+.pr-script__help button.link { text-align: start; }
 
 .pr-go { align-self: stretch; }
 @media (min-width: 600px) { .pr-go { align-self: flex-start; } }
@@ -132,8 +132,8 @@
 @keyframes pr-pop { from { transform: scale(1.3); opacity: 0; } 25% { transform: none; opacity: 1; } }
 
 .pr-rec {
-  position: absolute; top: var(--s3); left: var(--s3); display: inline-flex; align-items: center; gap: var(--s2);
-  padding: 4px 12px 4px 10px; border-radius: var(--r-pill); background: rgb(21 24 43 / .72); color: var(--card);
+  position: absolute; top: var(--s3); inset-inline-start: var(--s3); display: inline-flex; align-items: center; gap: var(--s2);
+  padding-block: 4px; padding-inline: 10px 12px; border-radius: var(--r-pill); background: rgb(21 24 43 / .72); color: var(--card);
   font: 600 14px/20px var(--font-text);
 }
 .pr-view--audio .pr-rec { background: var(--ink); }
@@ -172,8 +172,8 @@
 .pr-timer__of { font: 700 20px/28px var(--font-text); }
 .pr-timer__state { margin-top: var(--s1); font-weight: 700; }
 .pr-timer__track { position: relative; height: 10px; margin-top: var(--s4); border-radius: var(--r-pill); background: rgb(21 24 43 / .16); overflow: hidden; }
-.pr-timer__fill { position: absolute; inset: 0 auto 0 0; border-radius: var(--r-pill); background: var(--ink); transition: width 200ms linear; }
-.pr-timer__warn { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: rgb(21 24 43 / .3); }
+.pr-timer__fill { position: absolute; inset-block: 0; inset-inline: 0 auto; border-radius: var(--r-pill); background: var(--ink); transition: width 200ms linear; }
+.pr-timer__warn { position: absolute; top: 0; bottom: 0; width: 2px; margin-inline-start: -1px; background: rgb(21 24 43 / .3); }
 .pr-timer--wait .pr-timer__track { background: var(--well); }
 .pr-timer--stop .pr-timer__track { background: rgb(255 255 255 / .3); }
 .pr-timer--stop .pr-timer__fill { background: var(--card); }
@@ -212,7 +212,7 @@
 .pr-prompt.is-hidden { padding-bottom: var(--s3); }
 .pr-prompt__head { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); }
 .pr-prompt__t { font: 700 14px/20px var(--font-text); color: var(--slate); }
-.pr-prompt__head .btn--quiet { margin-right: calc(-1 * var(--s3)); }
+.pr-prompt__head .btn--quiet { margin-inline-end: calc(-1 * var(--s3)); }
 .pr-prompt__text {
   max-height: 40vh; overflow-y: auto; overscroll-behavior: contain; scroll-padding-block: var(--s4);
   font-size: 20px; line-height: 30px; font-weight: 500; white-space: pre-line; overflow-wrap: anywhere;
@@ -258,7 +258,7 @@
 .pr-block .sec-head { margin-bottom: var(--s3); }
 .pr-finds { background: var(--card); border-radius: var(--r-group); overflow: hidden; }
 .pr-find { position: relative; display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: var(--s3); padding: var(--s4); }
-.pr-find + .pr-find::before { content: ""; position: absolute; top: 0; left: var(--s4); right: 0; height: 1px; background: var(--hairline); }
+.pr-find + .pr-find::before { content: ""; position: absolute; top: 0; inset-inline-start: var(--s4); inset-inline-end: 0; height: 1px; background: var(--hairline); }
 .pr-find__n { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--ink); display: grid; place-items: center; font: 800 16px/1 var(--font-display); font-stretch: 112.5%; }
 .pr-find:first-child .pr-find__n { background: var(--ink); color: var(--card); }
 .pr-find__t { font-weight: 700; font-size: 18px; line-height: 26px; padding-top: 3px; overflow-wrap: break-word; }
@@ -266,7 +266,7 @@
 .pr-find__d { color: var(--slate); margin-top: var(--s1); }
 .pr-find__try { margin-top: var(--s2); }
 .pr-find__try strong { font-weight: 700; }
-@media (min-width: 1024px) { .pr-find { padding: var(--s5); } .pr-find + .pr-find::before { left: var(--s5); } }
+@media (min-width: 1024px) { .pr-find { padding: var(--s5); } .pr-find + .pr-find::before { inset-inline-start: var(--s5); } }
 .pr-none { color: var(--slate); }
 
 .pr-wins { background: var(--card); border-radius: var(--r-group); padding: var(--s2) var(--s4); }
@@ -287,12 +287,12 @@
 .pr-skipped { padding-top: var(--s3); border-top: 1px solid var(--hairline); }
 .pr-skipped__t { font-weight: 700; }
 .pr-skipped ul { display: grid; gap: var(--s1); margin-top: var(--s2); }
-.pr-skipped li { position: relative; padding-left: var(--s4); color: var(--slate); }
-.pr-skipped li::before { content: ""; position: absolute; left: 2px; top: 10px; width: 5px; height: 5px; border-radius: 50%; background: var(--edge); }
+.pr-skipped li { position: relative; padding-inline-start: var(--s4); color: var(--slate); }
+.pr-skipped li::before { content: ""; position: absolute; inset-inline-start: 2px; top: 10px; width: 5px; height: 5px; border-radius: 50%; background: var(--edge); }
 .pr-bodyfacts .facts { margin-top: 0; }
 .pr-bodyfacts .facts > div:first-child { border-top: 0; padding-top: 0; }
 .pr-bodyfacts .facts > div { grid-template-columns: minmax(0, 1fr) auto; }
-.pr-bodyfacts .facts dd { text-align: right; font-weight: 600; }
+.pr-bodyfacts .facts dd { text-align: end; font-weight: 600; }
 
 /* charts */
 .pr-figs { display: grid; gap: var(--s4); }
@@ -303,7 +303,7 @@
 .pr-fig__head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--s3); }
 .pr-fig__head figcaption { min-width: 0; }
 .pr-fig__head .figure__t, .pr-fig__head .figure__s { display: block; }
-.pr-fig__tool { flex: none; margin: -6px -8px 0 0; }
+.pr-fig__tool { flex: none; margin-block: -6px 0; margin-inline: 0 -8px; }
 .pr-fig .figure__body { overflow: hidden; }
 .pr-chart { display: block; overflow: visible; }
 .pr-chart__line { fill: none; stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }

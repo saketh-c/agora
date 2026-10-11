@@ -62,6 +62,9 @@ export default {
   usually: ' (usually {day}s)',
   at: ' at {time}',
   and: 'and',
+  sep: ', ',
+  labelValue: '{label}: {value}',
+  fullStop: '.',
   am: 'AM',
   pm: 'PM',
 };

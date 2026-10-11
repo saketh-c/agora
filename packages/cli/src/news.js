@@ -1,4 +1,4 @@
-import { getTopic, formatDate, todayStr, t } from '@agora/core';
+import { getTopic, formatDate, todayStr, t, joinItems, tn } from '@agora/core';
 import { c, heading, bullet, wrapText, safe } from './ui.js';
 
 const WIDTH = 76;
@@ -20,7 +20,7 @@ export function newsOffline(result) {
 
 function tags(ids) {
   const labels = (ids || []).filter((id) => id !== 'other').map((id) => getTopic(id).label);
-  return labels.length ? c.cyan(`[${labels.join(', ')}]`) : '';
+  return labels.length ? c.cyan(`[${joinItems(labels)}]`) : '';
 }
 
 /**
@@ -35,7 +35,7 @@ export function renderNews(result, { topic, city } = {}) {
   const topicLabel = topic ? getTopic(topic).label : '';
   const title =
     topic && city ? t('cli.newsHeadingTopicCity', { topic: topicLabel, city }) : topic ? t('cli.newsHeadingTopic', { topic: topicLabel }) : city ? t('cli.newsHeadingCity', { city }) : t('cli.newsHeading');
-  const lines = [heading(title), c.dim(t('cli.feedsResponded', { n: result.fetchedFeeds, total: result.totalFeeds })), ''];
+  const lines = [heading(title), c.dim(t('cli.feedsResponded', { n: result.fetchedFeeds, feeds: tn('cli.feedsN', result.totalFeeds) })), ''];
   for (const i of result.items || []) {
     const date = newsDate(i.publishedAt);
     const tagText = tags(i.topics);

@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LOCALES, t } from '@agora/core';
+import { LOCALES, offeredLocales, t } from '@agora/core';
 import { useStore } from '../../lib/store.jsx';
 import Icon from '../ui/Icon.jsx';
 import Menu from '../ui/Menu.jsx';
@@ -8,7 +8,10 @@ import Brand from './Brand.jsx';
 import { SETUP_STATE, setupTo } from './SetupHost.jsx';
 import { DESTINATIONS, activeDestination } from './nav.js';
 
-/** Globe + current language; the menu lists each language in its own name. */
+/**
+ * Globe + current language; the menu lists each language in its own name. Only languages that
+ * are completely translated are offered (LOCALES[].ready), plus the one in use.
+ */
 function LanguageMenu() {
   const { lang, setLang } = useStore();
   const current = LOCALES.find((l) => l.code === lang) || LOCALES[0];
@@ -19,13 +22,13 @@ function LanguageMenu() {
       button={
         <>
           <Icon name="globe" />
-          <span className="tool__label" aria-hidden="true" lang={current.code}>
+          <span className="tool__label langname" aria-hidden="true" lang={current.tag} dir={current.dir}>
             {current.nativeName}
           </span>
           <Icon name="chev-d" size={16} className="tool__chev" />
         </>
       }
-      items={LOCALES.map((l) => ({ type: 'radio', key: l.code, label: l.nativeName, lang: l.code, checked: l.code === lang, onSelect: () => setLang(l.code) }))}
+      items={offeredLocales(lang).map((l) => ({ type: 'radio', key: l.code, label: l.nativeName, lang: l.tag, dir: l.dir, checked: l.code === lang, onSelect: () => setLang(l.code) }))}
     />
   );
 }

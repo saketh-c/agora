@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { addDays, isDateStr, t, tList } from '@agora/core';
+import { addDays, isDateStr, t, weekdayNames, weekdayShortNames } from '@agora/core';
 import { Chip, CityPicker, Icon } from '../ui/index.js';
 import ChoiceChips from './ChoiceChips.jsx';
 import { MAX_DAYS_AHEAD, TIMES, WEEK_ORDER, WHEN, fold, mileChoices } from '../../lib/meetingFilters.js';
@@ -68,8 +68,8 @@ export default function FilterControls({
   const otherRef = useRef(null);
   const nearIsOther = Boolean(f.near) && !['home', 'school', 'here'].includes(f.near);
   const [otherOpen, setOtherOpen] = useState(nearIsOther);
-  const shortDays = tList('format.weekdaysShort');
-  const longDays = tList('format.weekdays');
+  const shortDays = weekdayShortNames();
+  const longDays = weekdayNames();
   const max = addDays(today, MAX_DAYS_AHEAD);
 
   useEffect(() => {

@@ -10,6 +10,7 @@ import AppFooter from './components/shell/AppFooter.jsx';
 import SetupHost from './components/shell/SetupHost.jsx';
 import { PageMetaProvider, RouteEffects, SkipLinks, useShellChrome } from './components/shell/PageMeta.jsx';
 import UpdatePrompt from './components/shell/UpdatePrompt.jsx';
+import LanguageNotice from './components/shell/LanguageNotice.jsx';
 import EmptyState from './components/ui/EmptyState.jsx';
 import Home from './pages/Home.jsx';
 
@@ -184,7 +185,11 @@ function Shell() {
       {!footerHidden && <AppFooter />}
       <TabBar />
       <SetupHost />
-      <UpdatePrompt />
+      {/* One status region for the shell's toasts: a new version, a language that could not load. */}
+      <div className="update" role="status" aria-live="polite">
+        <UpdatePrompt />
+        <LanguageNotice />
+      </div>
       <RouteEffects languageKey={lang} />
     </>
   );

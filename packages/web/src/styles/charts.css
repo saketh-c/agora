@@ -39,10 +39,10 @@
 
 /* Table view for every chart */
 .chart-table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 20px; }
-.chart-table caption { text-align: left; font-weight: 700; padding-bottom: var(--s2); }
-.chart-table th, .chart-table td { text-align: left; padding: var(--s2) var(--s3) var(--s2) 0; border-top: 1px solid var(--hairline); vertical-align: top; }
+.chart-table caption { text-align: start; font-weight: 700; padding-bottom: var(--s2); }
+.chart-table th, .chart-table td { text-align: start; padding-block: var(--s2); padding-inline: 0 var(--s3); border-top: 1px solid var(--hairline); vertical-align: top; }
 .chart-table thead th { font-weight: 600; color: var(--slate); border-top: 0; }
-.chart-table td.n, .chart-table th.n { text-align: right; font-variant-numeric: tabular-nums; padding-right: 0; }
+.chart-table td.n, .chart-table th.n { text-align: end; font-variant-numeric: tabular-nums; padding-inline-end: 0; }
 
 /* Figure parts used by components/charts.jsx Figure (title row with optional tools, table view). */
 .figure__head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--s3); }

@@ -25,8 +25,13 @@ import {
   matchYouthPrograms,
   setLocale,
   isLocale,
+  setBidiIsolation,
   t,
   tn,
+  offeredLocales,
+  getLocale,
+  joinItems,
+  labelValue,
 } from '@agora/core';
 import { loadNews } from '@agora/core/node';
 import { parseArgs, UsageError, GLOBAL_FLAGS, textFlag, dateFlag, intFlag, numberFlag, langCode, suggest } from './args.js';
@@ -39,6 +44,10 @@ import { renderNews, newsOffline } from './news.js';
 import { serve } from './serve.js';
 
 export { parseArgs };
+
+// Terminals print text in logical order and show bidi isolates as gaps, so the CLI asks the
+// dictionaries for plain text in every language (the web app keeps them around Arabic params).
+setBidiIsolation(false);
 
 const CMD = BRAND.cliCommand;
 const WIDTH = 76;
@@ -154,7 +163,8 @@ function pickLanguage(flags, prefs, io) {
   const fallback = langCode(process.env.AGORA_LANG) || (isLocale(prefs.lang) ? prefs.lang : 'en');
   setLocale(fallback);
   if (flags.lang === undefined || flags.lang === false) return fallback;
-  const list = LOCALES.map((l) => l.code).join(', ');
+  // Languages still being translated work with --lang but are not suggested.
+  const list = offeredLocales(getLocale()).map((l) => l.code).join(', ');
   if (flags.lang === true) {
     io.error(c.yellow(t('cli.errors.badLang', { lang: '', list })));
     return fallback;
@@ -260,7 +270,7 @@ function topicFlag(flags) {
 /** Topic tags as one bracketed label list, so they never read as part of a title. */
 function topicTags(ids) {
   const labels = (ids || []).filter((id) => id !== 'other').map((id) => getTopic(id).label);
-  return labels.length ? c.cyan(`[${labels.join(', ')}]`) : '';
+  return labels.length ? c.cyan(`[${joinItems(labels)}]`) : '';
 }
 
 function statusText(status) {
@@ -285,13 +295,11 @@ function detail(text, indent = 4) {
 
 /** Whether you can speak, any schedule change, and how many agenda items: "you can speak, moved". */
 function meetingNotes(m) {
-  return [
+  return joinItems([
     m.openToPublicComment ? c.green(t('cli.canSpeak')) : c.dim(t('cli.watchOnly')),
     m.status !== 'scheduled' ? c.yellow(statusText(m.status)) : '',
     (m.agendaItems || []).length ? c.cyan(tn('common.agendaItems', m.agendaItems.length)) : '',
-  ]
-    .filter(Boolean)
-    .join(', ');
+  ]);
 }
 
 /**
@@ -421,7 +429,7 @@ function agendaLine(a, today, { past = false } = {}) {
 function renderCity(ctx, city, upcoming, agenda) {
   const { today } = ctx;
   const council = city.council || {};
-  const councilText = [council.size ? t('cli.membersCount', { n: council.size }) : '', council.structure || '', council.mayorName ? t('cli.mayor', { name: council.mayorName }) : ''].filter(Boolean).join(', ');
+  const councilText = joinItems([council.size ? t('cli.membersCount', { n: council.size }) : '', council.structure || '', council.mayorName ? t('cli.mayor', { name: council.mayorName }) : '']);
   const lines = [
     heading(t('cli.cityHeading', { city: city.name })),
     labelBlock([
@@ -437,7 +445,7 @@ function renderCity(ctx, city, upcoming, agenda) {
 
   lines.push('', c.bold(t('cli.schedule')));
   for (const m of city.meetings || []) {
-    const rule = `${m.label}: ${describeRecurrence(m.recurrence)}${m.openToPublicComment === false ? c.dim(` (${t('cli.noPublicComment')})`) : ''}`;
+    const rule = `${labelValue(m.label, describeRecurrence(m.recurrence))}${m.openToPublicComment === false ? c.dim(` (${t('cli.noPublicComment')})`) : ''}`;
     lines.push(bullet(`${wrapText(rule, WIDTH - 4, 4).trimStart()}${m.location ? `\n${detail(m.location)}` : ''}`));
   }
 
@@ -530,7 +538,7 @@ function cmdMeetings(ctx) {
   if (flags.speak) list = list.filter((m) => m.openToPublicComment);
   if (topic) list = list.filter((m) => (m.agendaItems || []).some((a) => (a.topics || []).includes(topic)));
   const empty = topic ? t('cli.noTopicMeetings', { topic: getTopic(topic).label }) : city ? noMeetingText(city, today, days) : undefined;
-  emit(ctx, { from: today, days, meetings: list }, () => [heading(tn('cli.meetingsHeading', days, { days, n: list.length })), meetingsTable(list, today, { showCity: !city, empty })].join('\n'));
+  emit(ctx, { from: today, days, meetings: list }, () => [heading(tn('cli.meetingsHeading', days, { total: list.length })), meetingsTable(list, today, { showCity: !city, empty })].join('\n'));
   return 0;
 }
 
@@ -580,7 +588,7 @@ function cmdYouth(ctx) {
   emit(ctx, { programs }, () => {
     const lines = [heading(t('cli.youthHeading', { n: programs.length }))];
     for (const p of programs) {
-      lines.push(c.bold(wrapText(`${p.cityName}: ${p.name}`, WIDTH)));
+      lines.push(c.bold(wrapText(labelValue(p.cityName, p.name), WIDTH)));
       if (p.ages) lines.push(c.gray(wrapText(p.ages, WIDTH, 2)));
       if (p.description) lines.push(wrapText(p.description, WIDTH, 2));
       if (p.applyWindow) lines.push(wrapText(`${c.yellow(t('cli.applyLabel'))} ${p.applyWindow}`, WIDTH, 2));
@@ -618,8 +626,8 @@ function renderPrefs(ctx, prefs) {
   const where = prefs.location ? [place, `(${prefs.location.lat.toFixed(3)}, ${prefs.location.lng.toFixed(3)})`].filter(Boolean).join(' ') : c.dim(t('cli.notSet'));
   return labelBlock([
     [t('cli.languageLabel'), language ? language.nativeName : c.dim(t('cli.notSet'))],
-    [t('cli.interests'), prefs.interests.length ? prefs.interests.map((id) => getTopic(id).label).join(', ') : c.dim(t('cli.noneYet'))],
-    [t('cli.available'), available.length ? available.join(', ') : c.dim(t('cli.notSet'))],
+    [t('cli.interests'), prefs.interests.length ? joinItems(prefs.interests.map((id) => getTopic(id).label)) : c.dim(t('cli.noneYet'))],
+    [t('cli.available'), available.length ? joinItems(available) : c.dim(t('cli.notSet'))],
     [t('cli.student'), yn(prefs.student)],
     [t('cli.homeCity'), city ? city.name : c.dim(t('cli.notSet'))],
     [t('cli.location'), where],
@@ -723,7 +731,7 @@ function renderPlan(ctx, plan) {
     const recent = Array.isArray(plan.recentAgendaItems) ? plan.recentAgendaItems : [];
     if (recent.length) {
       lines.push(c.bold(t('cli.recentOnTopics')));
-      for (const a of recent.slice(0, 5)) lines.push(bullet(wrapText(`${c.bold(a.cityName)}: ${agendaLine(a, today, { past: true })}`, WIDTH - 4, 4).trimStart()));
+      for (const a of recent.slice(0, 5)) lines.push(bullet(wrapText(labelValue(c.bold(a.cityName), agendaLine(a, today, { past: true })), WIDTH - 4, 4).trimStart()));
       lines.push('');
     }
   }
@@ -731,7 +739,7 @@ function renderPlan(ctx, plan) {
     // "Near you" only when there is a location to be near; otherwise the list is home city first, then A to Z.
     const title = plan.prefs.location ? t('cli.youthNearYou') : plan.prefs.homeCityId ? t('cli.youthHomeFirst') : t('cli.youthPlain');
     lines.push(c.bold(title));
-    for (const p of plan.youthPrograms.slice(0, 5)) lines.push(bullet(`${c.bold(p.cityName)}: ${p.name}${p.distanceMiles != null ? c.gray(` (${milesText(p.distanceMiles)})`) : ''}`));
+    for (const p of plan.youthPrograms.slice(0, 5)) lines.push(bullet(`${labelValue(c.bold(p.cityName), p.name)}${p.distanceMiles != null ? c.gray(` (${milesText(p.distanceMiles)})`) : ''}`));
     lines.push('');
   }
   lines.push(c.dim(t('cli.nextSpeak', { cmd: CMD })));
@@ -786,7 +794,7 @@ function cmdStats(ctx) {
 }
 
 function renderStats(s, agendaTopics) {
-  const lines = [heading(tn('cli.statsHeading', s.windowDays, { region: BRAND.region, days: s.windowDays }))];
+  const lines = [heading(tn('cli.statsHeading', s.windowDays, { region: BRAND.region }))];
   lines.push(
     labelBlock([
       [t('cli.cities'), String(s.totals.cities)],
@@ -815,7 +823,7 @@ function renderStats(s, agendaTopics) {
   const nameWidth = Math.max(...top.map((x) => visibleLength(x.name)));
   const emax = Math.max(...s.perCity.map((x) => x.evening), 1);
   for (const city of top) {
-    const tags = [city.virtualComment ? c.green(t('cli.remoteTag')) : '', city.youthPrograms ? c.cyan(t('cli.youthTag')) : ''].filter(Boolean).join(', ');
+    const tags = joinItems([city.virtualComment ? c.green(t('cli.remoteTag')) : '', city.youthPrograms ? c.cyan(t('cli.youthTag')) : '']);
     lines.push(`  ${padVisible(city.name, nameWidth)} ${bar(city.evening, emax, 16)} ${city.evening}${tags ? `  ${tags}` : ''}`);
   }
   if (agendaTopics.counts.length) {
@@ -904,7 +912,7 @@ function cmdComment(ctx) {
     ask: textFlag(flags, 'ask'),
     timeOfDay: timeOfDayFor(time),
   });
-  const seconds = estimateSpeakingSeconds(draft);
+  const seconds = estimateSpeakingSeconds(draft, ctx.lang);
   emit(ctx, { draft, seconds }, () =>
     [
       heading(t('cli.draftHeading')),
@@ -983,7 +991,7 @@ function globalOptionLines() {
   const rows = [
     ['--json', t('cli.jsonOpt')],
     ['--today', t('cli.todayOpt')],
-    ['--lang', t('cli.langOpt')],
+    ['--lang', t('cli.langOpt', { codes: offeredLocales(getLocale()).map((l) => l.code).join(', ') })],
     ['--no-color', t('cli.noColorOpt')],
     ['-h, --help', t('cli.helpOpt', { cmd: CMD })],
     ['--version', t('cli.versionOpt')],

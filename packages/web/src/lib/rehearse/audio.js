@@ -1,3 +1,5 @@
+import { SPEECH_PACE } from '@agora/core';
+
 /**
  * How it was said: pauses, volume consistency, pitch variety, and a syllable estimate
  * for pace when there is no transcript. The summaries are pure functions over frames of
@@ -179,10 +181,11 @@ export function loudnessSeries(input, dt, bucketSec = 5, opts = {}) {
 }
 
 /**
- * Syllables in a spoken word, on average: English about 1.4, Spanish about 1.9, and
- * Vietnamese 1, since its words (what the pace band counts) are single syllables.
+ * Syllables in a spoken word (the unit each pace band counts), on average: English about 1.4,
+ * Spanish about 1.9, Vietnamese and Chinese 1 (their words and characters are single
+ * syllables), Hindi about 1.9, Arabic about 2.5 and Telugu about 3.2. From core's SPEECH_PACE.
  */
-export const SYLLABLES_PER_WORD = Object.freeze({ en: 1.4, es: 1.9, vi: 1 });
+export const SYLLABLES_PER_WORD = Object.freeze(Object.fromEntries(Object.entries(SPEECH_PACE).map(([lang, p]) => [lang, p.syllables])));
 
 /** Estimated words per minute per bucket from syllables. */
 export function paceEstimateSeries(input, dt, bucketSec = 15, opts = {}) {

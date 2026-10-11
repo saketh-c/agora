@@ -90,16 +90,16 @@ export function buildFindings({ speech, envelope, pitch, body, seconds, limitSec
     // A pace counted from syllables in the voice is rough: only call it off when it is
     // clearly outside the band.
     const slack = wpmEstimated ? 0.1 : 0;
-    if (wpm > hi * (1 + slack)) add(findings, 'pace_fast', 0.4 + (wpm - hi) / hi, { wpm, hi });
-    else if (wpm < lo * (1 - slack)) add(findings, 'pace_slow', 0.3 + (lo - wpm) / lo, { wpm, lo });
-    else if (wpm >= lo && wpm <= hi) strengths.push({ id: 'pace_good', params: { wpm } });
+    if (wpm > hi * (1 + slack)) add(findings, 'pace_fast', 0.4 + (wpm - hi) / hi, { n: wpm, hi });
+    else if (wpm < lo * (1 - slack)) add(findings, 'pace_slow', 0.3 + (lo - wpm) / lo, { n: wpm, lo });
+    else if (wpm >= lo && wpm <= hi) strengths.push({ id: 'pace_good', params: { n: wpm } });
   }
 
   if (speech && speech.words >= 20) {
     if (speech.fillerRate >= LIMITS.fillerRate) add(findings, 'fillers', 0.4 + speech.fillerRate / 10, { rate: speech.fillerRate, list: speech.fillers.slice(0, 3).map((f) => f.word), total: speech.fillerTotal });
     else if (speech.fillerTotal === 0) strengths.push({ id: 'no_fillers', params: {} });
     else strengths.push({ id: 'few_fillers', params: { total: speech.fillerTotal, words: speech.words } });
-    if (speech.longSentences >= 2) add(findings, 'long_sentences', 0.3, { n: speech.longSentences });
+    if (speech.longSentences >= 2) add(findings, 'long_sentences', 0.3, { n: speech.longSentences, max: speech.longSentenceAt || 30 });
     if (speech.repeats.length && speech.repeats[0].count >= 6) add(findings, 'repeats', 0.25, { word: speech.repeats[0].word, count: speech.repeats[0].count });
     if (hasScript && speech.script) {
       const skipped = typeof speech.script.skippedCount === 'number' ? speech.script.skippedCount : speech.script.skipped.length;

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { t, tn, estimateSpeakingSeconds } from '@agora/core';
+import { t, tn, estimateSpeakingSeconds, compareText, speechUnits } from '@agora/core';
 import { useStore } from '../lib/store.jsx';
 import { Disclosure, Icon, Notice, PageHeader } from '../components/ui/index.js';
 import MeetingPicker, { CarryNotice, ForLine, MeetingNotice, forText } from '../components/prepare/MeetingPicker.jsx';
@@ -16,6 +16,7 @@ import { MODEL_BASE, VISION_AVAILABLE } from '../lib/rehearse/models.js';
 import { clock, coachParams, limitPhrase, megabytes, numberText, takeWhen } from '../lib/rehearse/format.js';
 import { SCRIPT_MAX, initialScript, isFromDraft, latestDraft, scriptParagraphs } from '../lib/rehearse/script.js';
 import { HISTORY_MAX } from '../lib/profiles.js';
+import { inputDir } from '../lib/textDir.js';
 // The "Getting ready for" line and the meeting picker share Prepare's styles.
 import '../styles/pages/prepare.css';
 import '../styles/pages/practice.css';
@@ -336,21 +337,19 @@ function KeyHint({ action }) {
   );
 }
 
-function wordCount(text) {
-  return String(text || '')
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean).length;
+/** Words in a script, as the language counts them (characters in Chinese). */
+function wordCount(text, lang) {
+  return speechUnits(text, lang);
 }
 
 function Setup({ setup, onChange, cities, city, limitSec, draft, session, onStart, focusRef, history, cityById, lang, onClearHistory }) {
   const problem = useMemo(() => deviceProblem(), []);
   const starting = session.phase === 'starting';
   const error = session.error || problem;
-  const sorted = useMemo(() => [...cities].sort((a, b) => a.name.localeCompare(b.name, lang)), [cities, lang]);
+  const sorted = useMemo(() => [...cities].sort((a, b) => compareText(a.name, b.name, lang)), [cities, lang]);
   const fromDraft = isFromDraft(setup.script, draft);
   const hasDraft = Boolean(draft && draft.text.trim());
-  const scriptSec = setup.script.trim() ? estimateSpeakingSeconds(setup.script) : 0;
+  const scriptSec = setup.script.trim() ? estimateSpeakingSeconds(setup.script, lang) : 0;
   const update = (patch) => onChange((s) => ({ ...s, ...patch }));
   const scriptRef = useRef(null);
   const submit = (e) => {
@@ -399,6 +398,7 @@ function Setup({ setup, onChange, cities, city, limitSec, draft, session, onStar
           <textarea
             id="pr-script"
             ref={scriptRef}
+            dir={inputDir(setup.script)}
             className="textarea pr-script"
             value={setup.script}
             maxLength={SCRIPT_MAX}
@@ -421,7 +421,7 @@ function Setup({ setup, onChange, cities, city, limitSec, draft, session, onStar
                 </>
               }
             >
-              <span id="pr-script-from">{tn('rehearse.setup.usingDraft', wordCount(setup.script))}</span>
+              <span id="pr-script-from">{tn('rehearse.setup.usingDraft', wordCount(setup.script, lang))}</span>
             </Notice>
           )}
           {!fromDraft && (
@@ -430,7 +430,7 @@ function Setup({ setup, onChange, cities, city, limitSec, draft, session, onStar
                 <>
                   <span>{t('rehearse.setup.scriptHelpDraft')}</span>{' '}
                   <button type="button" className="link" onClick={useDraft}>
-                    {tn('rehearse.setup.useDraft', wordCount(draft.text))}
+                    {tn('rehearse.setup.useDraft', wordCount(draft.text, lang))}
                   </button>
                 </>
               ) : (
@@ -648,8 +648,10 @@ function Stage({ session, setup, onShowScript, city, limitSec, focusRef }) {
                 <span className="pr-timer__of num">{t('rehearse.rec.of', { limit: clock(limitSec) })}</span>
               </p>
               <p className="pr-timer__state num">{stateText}</p>
+              {/* The timer's bar is a gauge of the time used: it fills from the start of the line
+                  (the right in Arabic), under the clock, like the Write page's ruler. */}
               <div className="pr-timer__track" aria-hidden="true">
-                <span className="pr-timer__warn" style={{ left: `${((limitSec - warnSeconds(limitSec)) / limitSec) * 100}%` }} />
+                <span className="pr-timer__warn" style={{ insetInlineStart: `${((limitSec - warnSeconds(limitSec)) / limitSec) * 100}%` }} />
                 <span className="pr-timer__fill" style={{ width: `${Math.min(100, (sec / limitSec) * 100)}%` }} />
               </div>
             </section>
@@ -750,7 +752,8 @@ function Transcript({ speech }) {
       <p className="pr-said__text">
         {speech.marked.map((m, i) => (
           <span key={i}>
-            {m.filler ? <mark className="pr-filler">{m.text}</mark> : m.text}{' '}
+            {m.filler ? <mark className="pr-filler">{m.text}</mark> : m.text}
+            {m.sep ?? ' '}
           </span>
         ))}
       </p>

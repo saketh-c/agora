@@ -1,25 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useNavigationType, useSearchParams } from 'react-router-dom';
-import {
-  addDays,
-  agendaFor,
-  cityPoint,
-  expandCityMeetings,
-  formatDate,
-  hasEnded,
-  haversineMiles,
-  isDateStr,
-  joinList,
-  lowerFirst,
-  nextMeetingFor,
-  normalizePrefs,
-  scoreMeeting,
-  t,
-  tList,
-  tn,
-  topicList,
-  upcomingMeetings,
-} from '@agora/core';
+import { addDays, agendaFor, cityPoint, expandCityMeetings, formatDate, hasEnded, haversineMiles, isDateStr, joinItems, joinList, labelValue, lowerFirst, nextMeetingFor, normalizePrefs, scoreMeeting, t, tn, topicList, upcomingMeetings, weekdayNames, weekdayShortNames, compareText } from '@agora/core';
 import { nowIso, today as todayFn } from '../lib/data.js';
 import { useCities } from '../lib/DataProvider.jsx';
 import { useStore } from '../lib/store.jsx';
@@ -159,7 +140,7 @@ export default function Meetings() {
   const counties = useMemo(() => {
     const byKey = new Map();
     for (const c of cities) byKey.set(countyKey(c.county), c.county);
-    return [...byKey].map(([key, name]) => ({ key, name })).sort((a, b) => a.name.localeCompare(b.name));
+    return [...byKey].map(([key, name]) => ({ key, name })).sort((a, b) => compareText(a.name, b.name));
   }, [cities]);
   const countySet = useMemo(() => new Set(counties.map((c) => c.key)), [counties]);
   const countyOfCity = useMemo(() => new Map(cities.map((c) => [c.cityId, countyKey(c.county)])), [cities]);
@@ -585,12 +566,13 @@ export default function Meetings() {
   }, [list, selected, cityById, lang]); // eslint-disable-line react-hooks/exhaustive-deps
   const councils = new Set(list.map((m) => m.cityId)).size;
 
-  // The chip row fades out on the right while more chips are hidden past the edge.
+  // The chip row fades out at its end (the right; the left in Arabic) while more chips are
+  // hidden past the edge. Right to left, scrollLeft runs from 0 into negative numbers.
   const chipbarRef = useRef(null);
   const [chipEnd, setChipEnd] = useState(false);
   const checkChipEnd = useCallback(() => {
     const el = chipbarRef.current;
-    if (el) setChipEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 4);
+    if (el) setChipEnd(Math.abs(el.scrollLeft) + el.clientWidth >= el.scrollWidth - 4);
   }, []);
   useEffect(() => {
     checkChipEnd();
@@ -617,17 +599,17 @@ export default function Meetings() {
   );
 
   // ---------- words for chips ----------
-  const shortDays = tList('format.weekdaysShort');
-  const longDays = tList('format.weekdays');
+  const shortDays = weekdayShortNames();
+  const longDays = weekdayNames();
   const keyLabel = (key) => {
     const [kind, id] = key.split(/:(.*)/s);
     switch (kind) {
       case 'when':
         return whenLabel(f, today);
       case 'dow':
-        return f.dow.map((i) => shortDays[i]).join(', ');
+        return joinItems(f.dow.map((i) => shortDays[i]));
       case 'time':
-        return f.time.map((x) => t(`meetings.time.${x}`)).join(', ');
+        return joinItems(f.time.map((x) => t(`meetings.time.${x}`)));
       case 'after':
         return t('ui.timing.after');
       case 'speak':
@@ -681,7 +663,7 @@ export default function Meetings() {
     let text;
     if (query.weekdays.size) text = t('meetings.hint.days', { days: joinList(WEEK_ORDER.filter((i) => query.weekdays.has(i)).map((i) => longDays[i])) });
     else if (query.dates) text = t('meetings.hint.dates', { dates: query.dateWord ? t(`meetings.when.phrase.${query.dateWord}`) : joinList([...query.dates].sort().map((d) => monthDay(d))) });
-    else text = t('meetings.hint.county', { county: counties.filter((c) => query.counties.has(c.key)).map((c) => c.name).join(', ') });
+    else text = t('meetings.hint.county', { county: joinItems(counties.filter((c) => query.counties.has(c.key)).map((c) => c.name)) });
     searchHint = { text, action: t('meetings.hint.makeFilter'), onClick: makeFilter };
   }
   let countyHint = null;
@@ -973,7 +955,7 @@ export default function Meetings() {
                 {t('meetings.filters')}
               </Chip>
               <Menu
-                label={`${t('meetings.when.label')}: ${whenLabel(f, today)}`}
+                label={labelValue(t('meetings.when.label'), whenLabel(f, today))}
                 buttonClassName={`chip chip--menu${f.when !== DEFAULT_WHEN ? ' is-on' : ''}`}
                 align="start"
                 button={
@@ -999,7 +981,7 @@ export default function Meetings() {
               />
               {origin ? (
                 <Menu
-                  label={`${t('meetings.distance.label')}: ${milesLabel}`}
+                  label={labelValue(t('meetings.distance.label'), milesLabel)}
                   buttonClassName={`chip chip--menu${f.miles != null ? ' is-on' : ''}`}
                   align="start"
                   button={
@@ -1131,7 +1113,7 @@ export default function Meetings() {
         <div className={`listbar${showSort ? '' : ' listbar--count'}`}>
           {showSort ? (
             <Menu
-              label={`${t('meetings.sort')}: ${sortName[sort]}`}
+              label={labelValue(t('meetings.sort'), sortName[sort])}
               buttonClassName="sortbtn"
               align="start"
               button={

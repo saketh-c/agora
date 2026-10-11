@@ -89,11 +89,15 @@ export function numberFlag(flags, name, { max, fallback }) {
   return n;
 }
 
-/** Normalize a language code ("ES" -> "es"); undefined when it is not one we support. */
+/**
+ * Normalize a language code or tag ("ES" -> "es", "zh-CN" -> "zh", "ar_EG.UTF-8" -> "ar"), as
+ * --lang and AGORA_LANG may carry either; undefined when it is not a language we support.
+ */
 export function langCode(value) {
   const code = String(value ?? '')
     .trim()
-    .toLowerCase();
+    .toLowerCase()
+    .split(/[-_.@]/)[0];
   return isLocale(code) ? code : undefined;
 }
 

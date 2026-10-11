@@ -45,7 +45,7 @@ export default {
   },
   stat: {
     n: '{n}/10',
-    text: 'cuộc họp hội đồng trong {days} ngày tới bắt đầu từ {time} trở đi.',
+    text: 'cuộc họp hội đồng trong {n} ngày tới bắt đầu từ {time} trở đi.',
     see: 'Xem dữ liệu',
   },
   languages: 'Ngôn ngữ khác',

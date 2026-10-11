@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { buildComment, estimateSpeakingSeconds, isTopicId, timeOfDayFor, t, tn, topicList, getTopic } from '@agora/core';
+import { buildComment, estimateSpeakingSeconds, isTopicId, joinItems, joinSentences, timeOfDayFor, t, tn, topicList, getTopic, speechUnits, speakingRate } from '@agora/core';
 import { useStore } from '../../lib/store.jsx';
 import { api, apiAvailable } from '../../lib/api.js';
 import { copyText } from '../../lib/clipboard.js';
@@ -9,6 +9,7 @@ import { commentEmail } from '../ui/cityText.js';
 import { rawCity } from '../../lib/data.js';
 import TimeRuler, { mmss, rulerTone } from './TimeRuler.jsx';
 import { DEFAULT_LIMIT_SECONDS } from './prepMeeting.js';
+import { inputDir } from '../../lib/textDir.js';
 
 const POSITIONS = ['support', 'oppose', 'concerned', 'ask'];
 const POSITION_KEY = { support: 'support', oppose: 'oppose', concerned: 'concerned', ask: 'askingForAction' };
@@ -227,8 +228,9 @@ export default function CommentBuilder({ ctx, meeting, city, practicing, heading
   const editing = custom !== null;
   const usePolish = !editing && Boolean(polished && polished.base === template);
   const shown = editing ? custom : usePolish ? polished.text : template;
-  const seconds = estimateSpeakingSeconds(shown);
-  const words = shown.trim().split(/\s+/).filter(Boolean).length;
+  // Timed and counted in the draft's language: words, or characters in Chinese.
+  const seconds = estimateSpeakingSeconds(shown, lang);
+  const words = speechUnits(shown, lang);
 
   // The phone timer bar keeps "0:40 of 3:00" on one line: where "See draft" does not fit beside
   // it (narrow phones, longer languages) the pill shows only its arrow and keeps the words for
@@ -267,11 +269,12 @@ export default function CommentBuilder({ ctx, meeting, city, practicing, heading
 
   const minutes = practicing ? null : speakMinutes(city);
   const limitSeconds = minutes ? minutes * 60 : DEFAULT_LIMIT_SECONDS;
+  const rate = speakingRate(lang);
   const note = practicing || !city
-    ? t('prepare.ruler.notePractice')
+    ? t('prepare.ruler.notePractice', { n: rate })
     : minutes
-      ? t('prepare.ruler.noteCity', { city: city.name, minutes: tn('common.minutes', minutes) })
-      : t('prepare.ruler.noteNoLimit', { city: city.name });
+      ? t('prepare.ruler.noteCity', { city: city.name, minutes: tn('common.minutes', minutes), n: rate })
+      : t('prepare.ruler.noteNoLimit', { city: city.name, n: rate });
 
   const flash = (kind, ms = 2500) => {
     clearTimeout(statusTimer.current);
@@ -296,6 +299,9 @@ export default function CommentBuilder({ ctx, meeting, city, practicing, heading
       fieldRefs.current[key] = el;
     },
   });
+  // A text field: typed text runs its own way once it has a letter; an empty field follows
+  // the page, so an Arabic placeholder and caret start on the right (lib/textDir.js).
+  const textBind = (key) => ({ ...bind(key), dir: inputDir(form[key]) });
   const edit = (group, first) => {
     setOpen((o) => ({ ...o, [group]: true }));
     requestAnimationFrame(() => fieldRefs.current[first] && fieldRefs.current[first].focus());
@@ -434,14 +440,14 @@ export default function CommentBuilder({ ctx, meeting, city, practicing, heading
           <fieldset className="builder__group">
             <legend className="builder__gh">{t('prepare.write.who')}</legend>
             <Field id={`${idPrefix}-name`} label={t('prepare.write.name')}>
-              <input className="input" autoComplete="name" maxLength={80} {...bind('name')} />
+              <input className="input" autoComplete="name" maxLength={80} {...textBind('name')} />
             </Field>
             <Field id={`${idPrefix}-school`} label={t('prepare.write.school')}>
-              <input className="input" placeholder={t('prepare.write.schoolPlaceholder')} maxLength={120} {...bind('school')} />
+              <input className="input" placeholder={t('prepare.write.schoolPlaceholder')} maxLength={120} {...textBind('school')} />
             </Field>
           </fieldset>
         ) : (
-          <Summary id={ids.who} title={t('prepare.write.who')} value={[form.name.trim(), form.school.trim()].filter(Boolean).join(', ')} onEdit={() => edit('who', 'name')} />
+          <Summary id={ids.who} title={t('prepare.write.who')} value={joinItems([form.name.trim(), form.school.trim()])} onEdit={() => edit('who', 'name')} />
         )}
 
         {open.what ? (
@@ -457,7 +463,7 @@ export default function CommentBuilder({ ctx, meeting, city, practicing, heading
               </select>
             </Field>
             <Field id={`${idPrefix}-itemTitle`} label={t('prepare.write.agendaItem')} optional help={t('prepare.write.agendaHelp')}>
-              <input className="input" placeholder={t('prepare.write.agendaItemPlaceholder')} maxLength={200} aria-describedby={`${idPrefix}-itemTitle-help`} {...bind('itemTitle')} />
+              <input className="input" placeholder={t('prepare.write.agendaItemPlaceholder')} maxLength={200} aria-describedby={`${idPrefix}-itemTitle-help`} {...textBind('itemTitle')} />
             </Field>
             <div className="field">
               <span className="label" id={ids.position}>
@@ -476,7 +482,7 @@ export default function CommentBuilder({ ctx, meeting, city, practicing, heading
           <Summary
             id={ids.what}
             title={t('prepare.write.what')}
-            value={`${topicLabel}. ${form.itemTitle.trim() || t('prepare.write.notOnAgenda')}. ${t(`prepare.write.${POSITION_KEY[form.position]}`)}.`}
+            value={joinSentences([topicLabel, form.itemTitle.trim() || t('prepare.write.notOnAgenda'), t(`prepare.write.${POSITION_KEY[form.position]}`)])}
             onEdit={() => edit('what', 'topicId')}
           />
         )}
@@ -484,10 +490,10 @@ export default function CommentBuilder({ ctx, meeting, city, practicing, heading
         <fieldset className={`builder__group${open.who && open.what ? '' : ' bopen'}`}>
           <legend className="builder__gh">{t('prepare.write.storyGroup')}</legend>
           <Field id={`${idPrefix}-story`} label={t('prepare.write.story')} help={t('prepare.write.storyHelp')}>
-            <textarea className="textarea" rows={4} placeholder={t('prepare.write.storyPlaceholder')} maxLength={1200} aria-describedby={`${idPrefix}-story-help`} {...bind('story')} />
+            <textarea className="textarea" rows={4} placeholder={t('prepare.write.storyPlaceholder')} maxLength={1200} aria-describedby={`${idPrefix}-story-help`} {...textBind('story')} />
           </Field>
           <Field id={`${idPrefix}-ask`} label={t('prepare.write.ask')} help={t('prepare.write.askHelp')}>
-            <input className="input" placeholder={t('prepare.write.askPlaceholder')} maxLength={300} aria-describedby={`${idPrefix}-ask-help`} {...bind('ask')} />
+            <input className="input" placeholder={t('prepare.write.askPlaceholder')} maxLength={300} aria-describedby={`${idPrefix}-ask-help`} {...textBind('ask')} />
           </Field>
         </fieldset>
 
@@ -544,6 +550,7 @@ export default function CommentBuilder({ ctx, meeting, city, practicing, heading
             <textarea
               id={ids.edit}
               ref={editRef}
+              dir={inputDir(custom)}
               className="textarea draft__edit"
               value={custom}
               maxLength={CUSTOM_MAX}

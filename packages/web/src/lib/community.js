@@ -12,7 +12,7 @@
  * Other pages (Home's community module) can call seedPosts(seed, lang) for the team posts,
  * localized and newest first, with KIND_ICON for the kind's icon.
  */
-import { isDateStr, todayStr } from '@agora/core';
+import { graphemes, isDateStr, stripIsolates, t, tn, todayStr } from '@agora/core';
 
 export const KINDS = Object.freeze(['tip', 'toolkit', 'win', 'question']);
 
@@ -196,14 +196,20 @@ export function normalizePost(p) {
   };
 }
 
-/** The post in `lang`, when the team translated it; otherwise as written. */
+/**
+ * The post in `lang`, when the team translated it; otherwise as written. `textLang` says
+ * which language the title and body are in ('en' for an original), so the page can read an
+ * untranslated post as English (lib/textDir.js).
+ */
 export function localizePost(post, lang) {
-  const tr = post && post.i18n && post.i18n[lang];
-  if (!tr) return post;
+  if (!post) return post;
+  const tr = post.i18n && post.i18n[lang];
+  if (!tr || !tr.title || !tr.body) return post.textLang ? post : { ...post, textLang: 'en' };
   return {
     ...post,
-    title: tr.title || post.title,
-    body: tr.body || post.body,
+    textLang: lang,
+    title: tr.title,
+    body: tr.body,
     media: post.media.map((m, i) => {
       const mt = (tr.media || [])[i] || {};
       return { ...m, alt: mt.alt || m.alt, caption: mt.caption || m.caption };
@@ -242,6 +248,17 @@ export function sortPosts(posts, by = 'newest', { homeCityId = '' } = {}) {
     .map((x) => x.p);
 }
 
+/**
+ * The line over the feed: "9 posts", "3 posts about Plano", or "9 posts, Plano first" when
+ * your city's posts lead the list. The count is a phrase by then, so it goes in {posts}: a
+ * translator may make any sentence with {n} or {count} plural forms, and only a number can
+ * choose among them.
+ */
+export function feedCountText(count, { filterCity = null, firstCity = null } = {}) {
+  const text = filterCity ? tn('community.countIn', count, { city: filterCity.name }) : tn('community.count', count);
+  return firstCity && !filterCity && count > 1 ? t('community.countFirst', { posts: text, city: firstCity.name }) : text;
+}
+
 export function newPostId() {
   const rand = Math.random().toString(36).slice(2, 8);
   return `local-${Date.now().toString(36)}-${rand}`;
@@ -275,7 +292,9 @@ const DEFAULT_ISSUE_LABELS = {
  * school is never included (the issue is public). Video links are written into the body;
  * photo and video files are attached by the student in GitHub's editor, so only those are
  * counted. The body is shortened until the whole encoded URL fits in `maxLength`, because
- * Vietnamese text grows about 2.6 times when encoded.
+ * Vietnamese text grows about 2.6 times when encoded (Chinese, Hindi, Telugu and Arabic about
+ * 9 times); it is cut between graphemes, never inside a character or a conjunct. The issue is
+ * plain text, so the bidi isolates of Arabic labels are left out.
  *
  * options: { kindLabel, cityName, labels: Partial<DEFAULT_ISSUE_LABELS>, maxLength }
  */
@@ -290,21 +309,23 @@ export function buildIssueUrl(repoUrl, post, { kindLabel, cityName, labels = {},
   const title = `[community] ${post.title || ''}`;
 
   const make = (body, cut) => {
-    const text = [...head, '', body, ...(cut ? ['', `_${L.shortened}_`] : []), ...(tail.length ? ['', ...tail] : [])].join('\n');
-    return `${base}?${new URLSearchParams({ title, body: text }).toString()}`;
+    const text = stripIsolates([...head, '', body, ...(cut ? ['', `_${L.shortened}_`] : []), ...(tail.length ? ['', ...tail] : [])].join('\n'));
+    return `${base}?${new URLSearchParams({ title: stripIsolates(title), body: text }).toString()}`;
   };
 
   const full = String(post.body || '');
   let url = make(full, false);
   if (url.length <= maxLength) return url;
-  // Binary search on the body length, measured on the encoded URL.
+  // Binary search on the body length in graphemes, measured on the encoded URL.
+  const pieces = graphemes(full);
+  const upTo = (n) => `${pieces.slice(0, n).join('').trimEnd()}…`;
   let lo = 0;
-  let hi = full.length;
+  let hi = pieces.length;
   while (lo < hi) {
     const mid = Math.ceil((lo + hi) / 2);
-    if (make(`${full.slice(0, mid).trimEnd()}…`, true).length <= maxLength) lo = mid;
+    if (make(upTo(mid), true).length <= maxLength) lo = mid;
     else hi = mid - 1;
   }
-  url = make(`${full.slice(0, lo).trimEnd()}…`, true);
+  url = make(upTo(lo), true);
   return url;
 }

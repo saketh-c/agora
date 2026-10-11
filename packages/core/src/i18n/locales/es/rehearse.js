@@ -7,6 +7,10 @@ export default {
     one: '{n} segundo',
     other: '{n} segundos',
   },
+  wordsN: {
+    one: '{n} palabra',
+    other: '{n} palabras',
+  },
   setup: {
     title: 'Prepara tu práctica',
     city: '¿Qué concejo?',
@@ -185,12 +189,13 @@ export default {
     other: '{n} líneas de tu guion no salieron',
   },
   skippedMore: 'y {n} más',
+  quoted: '"{word}"',
   charts: {
     time: 'Tiempo',
     showTable: 'Ver como tabla',
     showChart: 'Ver gráfica',
     seconds: '{n} s',
-    stripAria: 'Mirando a la sala {on} de los {known} segundos en que se vio tu cara, de {total}.',
+    stripAria: 'Mirando a la sala {on} de los {n} segundos en que se vio tu cara, de {total}.',
     pace: 'Ritmo',
     paceNote: 'Palabras por minuto, cada 15 segundos.',
     paceEstNote: 'Estimado a partir de tu voz, cada 15 segundos.',
@@ -267,12 +272,12 @@ export default {
       drill: 'Agrega una oración sobre cómo se ve esto en tu calle y vuelve a medir el tiempo.',
     },
     pace_fast: {
-      title: 'Hablaste a {wpm} palabras por minuto',
+      title: 'Hablaste a {n} palabras por minuto',
       detail: 'Arriba de unas {hi}, la gente deja de tomar notas y solo espera a que termines.',
       drill: 'Lee tu petición en voz alta y haz una pausa completa después de cada oración.',
     },
     pace_slow: {
-      title: 'Hablaste a {wpm} palabras por minuto',
+      title: 'Hablaste a {n} palabras por minuto',
       detail: 'Abajo de unas {lo}, puede sonar a que estás buscando las palabras.',
       drill: 'Practica tus dos primeras oraciones hasta que salgan fácil. Lo demás te va a seguir.',
     },
@@ -282,7 +287,7 @@ export default {
       drill: 'Hazlo otra vez y cambia cada muletilla por una pausa.',
     },
     long_sentences: {
-      title: '{n} oraciones pasaron de 30 palabras',
+      title: '{n} oraciones pasaron de {length}',
       detail: 'En las oraciones largas se te acaba el aire y se pierde la idea.',
       drill: 'Divide cada una en la primera "y".',
     },
@@ -302,7 +307,7 @@ export default {
       drill: 'Empieza con tu nombre y tu escuela, di el punto de la agenda y termina con tu petición. Siempre en ese orden.',
     },
     long_pauses: {
-      title: '{n} pausas de más de {sec} segundos',
+      title: '{n} pausas de más de {duration}',
       detail: 'Una pausa antes de tu petición tiene fuerza. Varias a mitad de oración suenan a que buscas palabras.',
       drill: 'Encuentra dónde te trabaste y acorta esas oraciones.',
     },
@@ -359,9 +364,9 @@ export default {
   },
   strengths: {
     on_time: 'A tiempo, y te sobraron {left}.',
-    pace_good: 'Ritmo constante: {wpm} palabras por minuto.',
+    pace_good: 'Ritmo constante: {n} palabras por minuto.',
     no_fillers: 'Ninguna muletilla.',
-    few_fillers: 'Pocas muletillas: {total} en {words} palabras.',
+    few_fillers: 'Pocas muletillas: {total} en {words}.',
     script_covered: 'Dijiste el {pct}% de tu guion.',
     elements_landed: 'La sala oyó {landed}.',
     steady_volume: 'Tu volumen se mantuvo parejo todo el tiempo.',

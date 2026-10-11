@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { lowerFirst, normalizePrefs, t, tList } from '@agora/core';
+import { formatDate, lowerFirst, normalizePrefs, t, weekdayName } from '@agora/core';
 import { useCities } from '../../lib/DataProvider.jsx';
 import { useStore } from '../../lib/store.jsx';
 import { api } from '../../lib/api.js';
 import { KIND_ICON, seedPosts } from '../../lib/community.js';
+import { postTextProps } from '../../lib/textDir.js';
 import { Avatar, Icon, MeetingRow, NewsList, Section, distanceText, meetingDeadline, monthDay } from '../ui/index.js';
 import NextMeetingCard from './NextMeetingCard.jsx';
 import NextPicker from './NextPicker.jsx';
@@ -17,9 +18,7 @@ import { pickerMeetings } from '../prepare/prepPick.js';
 
 /** "Saturday, Oct 10": today's date for the line beside the greeting, in the app language. */
 function todayLine(today) {
-  const [y, m, d] = today.split('-').map(Number);
-  const weekday = tList('format.weekdays')[new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
-  const text = t('format.date', { weekday, month: tList('format.monthsShort')[m - 1], day: d });
+  const text = formatDate(today, { weekday: 'long', month: 'short' });
   return text.charAt(0).toLocaleUpperCase() + text.slice(1);
 }
 
@@ -28,9 +27,7 @@ function headline(meeting, today, name) {
   const kind = greetingKind(meeting, today);
   const suffix = name ? '' : 'NoName';
   if (kind === 'hi') return name ? t('home.greet.hi', { name }) : t('home.greet.hiNoName');
-  const [y, m, d] = meeting.date.split('-').map(Number);
-  const day = tList('format.weekdays')[new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
-  return t(`home.greet.${kind}${suffix}`, { name, day, date: monthDay(meeting.date) });
+  return t(`home.greet.${kind}${suffix}`, { name, day: weekdayName(meeting.date), date: monthDay(meeting.date) });
 }
 
 /** The team's posts, loaded on demand so the first screen does not carry them. */
@@ -125,7 +122,7 @@ function seatStatus(apply) {
   return { tone: 'plain', icon: 'info', text: t('home.seats.ask') };
 }
 
-function Seats({ seats, prefs }) {
+function Seats({ seats, prefs, lang }) {
   if (!seats.length) {
     return (
       <div className="home-quiet">
@@ -143,7 +140,10 @@ function Seats({ seats, prefs }) {
           <li key={`${s.cityId}:${s.name}`}>
             <a className="lrow" href={s.url} target="_blank" rel="noopener noreferrer">
               <span>
-                <span className="lrow__t">{s.name}</span>
+                {/* Program names stay in English in every language. */}
+                <span className="lrow__t" lang={lang !== 'en' ? 'en' : undefined}>
+                  {s.name}
+                </span>
                 <span className="lrow__m">{where ? t('home.seats.meta', { city: s.cityName, where: lowerFirst(where) }) : s.cityName}</span>
                 {status && status.text ? (
                   <span className={`st st--${status.tone} seat__st`}>
@@ -162,7 +162,7 @@ function Seats({ seats, prefs }) {
   );
 }
 
-function CommunityPost({ post, cityName }) {
+function CommunityPost({ post, cityName, lang }) {
   if (!post) {
     return (
       <div className="home-quiet">
@@ -180,8 +180,14 @@ function CommunityPost({ post, cityName }) {
         <Icon name={KIND_ICON[post.kind] || 'bulb'} />
         {cityName ? t('home.community.kindCity', { kind, city: cityName }) : kind}
       </span>
-      <span className="post__t">{post.title}</span>
-      {lead && <span className="post__b">{lead}</span>}
+      <span className="post__t" {...postTextProps(post, lang)}>
+        {post.title}
+      </span>
+      {lead && (
+        <span className="post__b" {...postTextProps(post, lang)}>
+          {lead}
+        </span>
+      )}
       <span className="post__foot">
         <span className="post__who">
           {who && <Avatar name={post.team ? 'Agora' : who} />}
@@ -343,13 +349,13 @@ export default function HomeReturning({ focusHeading = false, onOpenMeeting, con
 
       <div className="home-more">
         <Section title={t('home.seats.title')} see={homeCity ? { to: `/city/${homeCity.cityId}` } : undefined}>
-          <Seats seats={seats} prefs={prefs} />
+          <Seats seats={seats} prefs={prefs} lang={lang} />
         </Section>
         <Section title={t('home.news.title')} see={{ to: '/news' }}>
           <HomeNews prefs={prefs} county={homeCity ? homeCity.county : null} lang={lang} />
         </Section>
         <Section title={t('home.community.title')} see={{ to: '/community' }}>
-          {posts ? <CommunityPost post={post} cityName={postCity ? postCity.name : ''} /> : <div className="post home-post skel--post" aria-hidden="true" />}
+          {posts ? <CommunityPost post={post} lang={lang} cityName={postCity ? postCity.name : ''} /> : <div className="post home-post skel--post" aria-hidden="true" />}
         </Section>
       </div>
 

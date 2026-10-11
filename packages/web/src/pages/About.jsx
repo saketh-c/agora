@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { BRAND, t, tList } from '@agora/core';
+import { BRAND, formatMonthDay, isDateStr, t } from '@agora/core';
 import { SCHEDULES_VERIFIED_ON } from '../lib/data.js';
 import { useCities } from '../lib/DataProvider.jsx';
 import { useStore } from '../lib/store.jsx';
@@ -7,9 +7,7 @@ import { Icon, PageHeader, Section } from '../components/ui/index.js';
 import '../styles/pages/about.css';
 
 function monthDayYear(dateStr) {
-  const [y, m, d] = String(dateStr || '').split('-').map(Number);
-  if (!y || !m || !d) return '';
-  return t('ui.monthDayYear', { month: tList('format.monthsShort')[m - 1], day: d, year: y });
+  return isDateStr(String(dateStr || '')) ? formatMonthDay(dateStr, { withYear: true }) : '';
 }
 
 /** What you can do in the app, as the same link rows the rest of the app uses. */

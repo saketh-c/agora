@@ -7,7 +7,10 @@ export default {
   setAsMyCity: 'Elegir como mi ciudad',
   today: 'Hoy',
   tomorrow: 'Mañana',
-  inDays: 'En {n} días',
+  inDays: {
+    one: 'En {n} día',
+    other: 'En {n} días',
+  },
   nextWeek: 'La próxima semana',
   inWeeks: {
     one: 'En {n} semana',
@@ -16,6 +19,10 @@ export default {
   daysAgo: {
     one: 'Hace {n} día',
     other: 'Hace {n} días',
+  },
+  days: {
+    one: '{n} día',
+    other: '{n} días',
   },
   under1Mile: 'menos de 1 milla',
   miles: '{n} millas',

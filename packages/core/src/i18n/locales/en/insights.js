@@ -1,17 +1,17 @@
 /** The data ( /insights ): when and how the councils meet, as charts with takeaway titles. */
 export default {
   heading: 'The data',
-  lead: 'How the {n} councils in Dallas-Fort Worth meet, from their official calendars. Numbers cover the next {days} days.',
+  lead: 'How the {n} councils in Dallas-Fort Worth meet, from their official calendars. Numbers cover the next {days}.',
   inTen: '{n} in 10',
-  statMeetings: 'council meetings in the next {days} days',
+  statMeetings: 'council meetings in the next {n} days',
   statEvening: 'start at {time} or later',
   statSpeak: 'let the public speak',
   schoolTitle: {
-    one: '{n} of {total} councils meets during school hours',
-    other: '{n} of {total} councils meet during school hours',
+    one: '{n} of {councils} meets during school hours',
+    other: '{n} of {councils} meet during school hours',
   },
   schoolNone: 'No council meets during school hours',
-  schoolSub: 'Meetings in the next {days} days that start during school hours',
+  schoolSub: 'Meetings in the next {n} days that start during school hours',
   schoolRest: {
     one: 'The other {n} council meets outside school hours.',
     other: 'The other {n} councils meet outside school hours.',
@@ -23,7 +23,7 @@ export default {
   schoolDef: 'School hours here are weekdays from {from} to {to}.',
   heatTitle: '{day} at {time} is the busiest time',
   heatEmpty: 'No meetings in this window',
-  heatSub: 'Meetings in the next {days} days, by start time and weekday',
+  heatSub: 'Meetings in the next {n} days, by start time and weekday',
   heatNone: 'No meetings on {days}.',
   limitTitle: {
     one: 'Most councils give you {n} minute to speak',

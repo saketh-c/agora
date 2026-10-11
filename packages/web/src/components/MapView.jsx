@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { AttributionControl, Circle, MapContainer, Marker, TileLayer, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { DFW_CENTER, t, tn } from '@agora/core';
+import { DFW_CENTER, isRtl, localeDir, t, tn } from '@agora/core';
 import Icon from './ui/Icon.jsx';
 
 /**
@@ -23,8 +23,13 @@ import Icon from './ui/Icon.jsx';
  *            selectedId="plano" hotId="allen" onSelect={(cityId) => ...} origin={{ lat, lng, label }}
  *            ringMiles={15} insetRight={452} empty={<p>...</p>} />
  *
- * `insetRight` is how many pixels a panel covers on the right, so fitting and panning keep
- * pins out from under it.
+ * `insetRight` is how many pixels a panel covers at the end edge of the map (the right; the
+ * left in Arabic, where the panel opens there), so fitting and panning keep pins out from
+ * under it.
+ *
+ * The map itself is left to right in every language (geography does not mirror; Leaflet's
+ * panes are positioned for it); the controls over it follow the page direction, and the
+ * attribution moves to the corner the panel never covers.
  */
 
 const PIN = 18;
@@ -38,6 +43,7 @@ function plainIcon(tone, tag, hot) {
   if (tag) {
     const label = document.createElement('span');
     label.className = 'pin-label';
+    label.dir = localeDir();
     label.textContent = tag;
     el.append(label);
   }
@@ -50,6 +56,7 @@ function originIcon(label) {
   if (label) {
     const span = document.createElement('span');
     span.className = 'pin-label pin-label--you';
+    span.dir = localeDir();
     span.textContent = label;
     el.append(span);
   }
@@ -75,6 +82,7 @@ function selectedIcon(tag) {
   if (tag) {
     const label = document.createElement('span');
     label.className = 'pin-label';
+    label.dir = localeDir();
     label.textContent = tag;
     el.append(label);
   }
@@ -137,9 +145,12 @@ function SizeWatch() {
   return null;
 }
 
+/** Map padding that keeps pins clear of a panel at the end edge (the left, right to left). */
 const padFor = (map, insetRight) => {
   const pad = map.getSize().x < 600 ? 20 : 40;
-  return { paddingTopLeft: [pad, pad], paddingBottomRight: [insetRight + pad, pad] };
+  const left = isRtl() ? insetRight : 0;
+  const right = isRtl() ? 0 : insetRight;
+  return { paddingTopLeft: [left + pad, pad], paddingBottomRight: [right + pad, pad] };
 };
 
 /** The area a ring covers, as bounds (no map needed). */
@@ -246,10 +257,11 @@ function FollowSelection({ pins, selectedId, insetRight, labelSelector = '.pin-i
       const label = map.getContainer().querySelector(labelSelector);
       const half = label ? Math.ceil(label.offsetWidth / 2) + 16 : 0;
       const below = label ? size / 2 + 6 + label.offsetHeight + 16 : 0;
-      const side = Math.max(base.paddingTopLeft[0], half);
+      const rtl = isRtl();
+      const side = Math.max(Math.min(base.paddingTopLeft[0], base.paddingBottomRight[0]), half);
       map.panInside([pin.lat, pin.lng], {
-        paddingTopLeft: [side, Math.max(base.paddingTopLeft[1], size)],
-        paddingBottomRight: [insetRight + side, Math.max(base.paddingBottomRight[1], below)],
+        paddingTopLeft: [(rtl ? insetRight : 0) + side, Math.max(base.paddingTopLeft[1], size)],
+        paddingBottomRight: [(rtl ? 0 : insetRight) + side, Math.max(base.paddingBottomRight[1], below)],
       });
     });
     return () => cancelAnimationFrame(raf);
@@ -274,7 +286,8 @@ export default function MapView({ pins, selectedId, hotId, followHot = false, on
       <MapContainer ref={setMap} className="map__leaflet" center={[DFW_CENTER.lat, DFW_CENTER.lng]} zoom={10} minZoom={8} maxZoom={17} zoomSnap={0.5} zoomControl={false} attributionControl={false} scrollWheelZoom>
         {/* OSM standard tiles, grayed by .basemap (styles/map.css). crossOrigin keeps the requests anonymous. */}
         <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" crossOrigin="anonymous" className="basemap" eventHandlers={tileHandlers} />
-        <AttributionControl position="bottomleft" prefix={false} />
+        {/* Bottom left, clear of the meeting panel; right to left the panel opens on the left. */}
+        <AttributionControl key={isRtl() ? 'rtl' : 'ltr'} position={isRtl() ? 'bottomright' : 'bottomleft'} prefix={false} />
         <SizeWatch />
         <Framing pins={pins} insetRight={insetRight} origin={origin} ringMiles={ringMiles} />
         <FollowSelection pins={pins} selectedId={selectedId} insetRight={insetRight} />

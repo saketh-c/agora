@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { formatDate, getTopic, isTopicId, lowerFirst, t, tn, topicList } from '@agora/core';
+import { formatDate, getTopic, isTopicId, labelValue, lowerFirst, t, tn, topicList, intlLocale } from '@agora/core';
 import { sources as NEWSROOMS } from '@data/news.json';
 import { useStore } from '../lib/store.jsx';
 import { useCities } from '../lib/DataProvider.jsx';
@@ -31,8 +31,6 @@ function dayLabel(day, today) {
   if (day === y.toISOString().slice(0, 10)) return t('news.yesterday');
   return formatDate(day, { withYear: day.slice(0, 4) !== today.slice(0, 4) });
 }
-
-const LOCALE = { en: 'en-US', es: 'es-US', vi: 'vi-VN' };
 
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -220,7 +218,7 @@ export default function News() {
 
   const snapshotWhen =
     data && data.snapshotAt
-      ? new Intl.DateTimeFormat(LOCALE[lang] || 'en-US', { timeZone: CENTRAL, month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(data.snapshotAt))
+      ? new Intl.DateTimeFormat(intlLocale(lang), { timeZone: CENTRAL, month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(data.snapshotAt))
       : '';
 
   return (
@@ -239,7 +237,7 @@ export default function News() {
             <Menu
               align="start"
               className="nw-topic"
-              label={`${t('news.topicsLabel')}: ${topicName}`}
+              label={labelValue(t('news.topicsLabel'), topicName)}
               buttonClassName="chip chip--menu"
               button={
                 <>

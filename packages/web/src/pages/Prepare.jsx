@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { checklist, daysBetween, t, tList, tn, todayStr, weekdayOf } from '@agora/core';
+import { checklist, daysBetween, t, tn, todayStr, weekdayName } from '@agora/core';
 import { useStore } from '../lib/store.jsx';
 import { PREP_STEPS, checkedItems } from '../lib/prep.js';
 import { directionsUrl } from '../lib/ics.js';
@@ -24,7 +24,7 @@ function progressText(summary, meeting, day) {
   const params = { done: summary.done, total: summary.total };
   if (!meeting || meeting.date < day) return t('prepare.progress.plain', params);
   if (meeting.date === day) return t('prepare.progress.today', params);
-  const when = daysBetween(day, meeting.date) <= 6 ? tList('format.weekdays')[weekdayOf(meeting.date)] : monthDay(meeting.date);
+  const when = daysBetween(day, meeting.date) <= 6 ? weekdayName(meeting.date) : monthDay(meeting.date);
   return t('prepare.progress.before', { ...params, day: when });
 }
 
@@ -36,7 +36,7 @@ function savedText(at, day) {
   const ago = daysBetween(date, day);
   if (ago <= 0) return t('prepare.write.subSaved.today');
   if (ago === 1) return t('prepare.write.subSaved.yesterday');
-  if (ago < 7) return t('prepare.write.subSaved.day', { day: tList('format.weekdays')[weekdayOf(date)] });
+  if (ago < 7) return t('prepare.write.subSaved.day', { day: weekdayName(date) });
   return t('prepare.write.subSaved.date', { date: monthDay(date) });
 }
 
@@ -375,7 +375,9 @@ function PrepareSteps({ ctx }) {
                   <dt>{t('prepare.day.where')}</dt>
                   <dd>
                     {/* Addresses stay in English in every language. */}
-                    <p lang={lang !== 'en' ? 'en' : undefined}>{meeting.location}</p>
+                    <p>
+                      <bdi lang={lang !== 'en' ? 'en' : undefined}>{meeting.location}</bdi>
+                    </p>
                     <p>
                       <a className="link" href={directionsUrl(meeting)} target="_blank" rel="noopener noreferrer">
                         {t('ui.directions')}

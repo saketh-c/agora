@@ -20,6 +20,9 @@ export const LINK_RE = new RegExp(
 );
 
 const EMAIL_RE = /\b[\w.+-]+@[\w-]+(?:\.[\w-]+)+\b/g;
+
+/** A US phone number: "214-670-3738", "(972) 205-2000", "972.205.2000", "+1 817-392-6150". */
+export const PHONE_RE = /(?:\+1[\s.-]?)?(?:\(\d{3}\)\s?|\b\d{3}[\s.-])\d{3}[.-]\d{4}\b/g;
 // A link to a page: a full URL, a domain with a path, or a host with a subdomain of 4+ letters
 // ("feedback.cor.gov"). A bare "city.gov" is the city's home page, never a comment form.
 const PAGE_RE = /https?:\/\/[^\s<>()]*[^\s<>().,;:!?'"]|\b(?:[a-z0-9-]+\.)+(?:gov|org|com|net|us|io)\/[^\s<>()]*[^\s<>().,;:!?'"]|\b(?!www\.)[a-z0-9-]{4,}\.(?:[a-z0-9-]+\.)+(?:gov|org|com|net|us|io)\b/gi;

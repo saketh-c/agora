@@ -11,7 +11,7 @@
  * that English source; only display strings (labels, notes) follow the active locale.
  */
 
-import { t, tList } from './i18n/runtime.js';
+import { t, tList, usesIntlFormats, intlLocale } from './i18n/runtime.js';
 
 const DATE_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
 const TIME_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
@@ -294,9 +294,19 @@ const WEEKDAY_WORDS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', '
 const MONTH_WORDS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
 const MONTH_DAY_RE = /\b(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\.?\s+(\d{1,2})(?:st|nd|rd|th)?\b(?:,?\s+(\d{4})\b)?/i;
 
-/** "2026-11-10" -> "Tue, Nov 10" in the active locale (kept local to avoid a circular import with format.js). */
+const shortDates = new Map();
+
+/**
+ * "2026-11-10" -> "Tue, Nov 10" in the active locale, from the dictionary or, for the
+ * languages Intl formats, from Intl (kept local to avoid a circular import with format.js).
+ */
 function shortDate(dateStr) {
-  const { m, d } = parseDate(dateStr);
+  const { y, m, d } = parseDate(dateStr);
+  if (usesIntlFormats()) {
+    const tag = intlLocale();
+    if (!shortDates.has(tag)) shortDates.set(tag, new Intl.DateTimeFormat(tag, { timeZone: 'UTC', weekday: 'short', month: 'short', day: 'numeric' }));
+    return shortDates.get(tag).format(new Date(Date.UTC(y, m - 1, d, 12)));
+  }
   return t('format.date', { weekday: tList('format.weekdaysShort')[weekdayOf(dateStr)], month: tList('format.monthsShort')[m - 1], day: d });
 }
 

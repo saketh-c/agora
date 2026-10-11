@@ -66,10 +66,18 @@ function useLiveAgendas() {
   return { snapshot, ready };
 }
 
-/** Translation memories are loaded on demand so English users never download them. */
+/**
+ * Translation memories (data/i18n/<code>.json) are loaded on demand so English users never
+ * download them. Each is its own chunk (city-i18n-<code>, see vite.config.js), cached by the
+ * service worker after first use. Every language in core's LOCALES other than English has one.
+ */
 const LOADERS = {
   es: () => import('@data/i18n/es.json'),
   vi: () => import('@data/i18n/vi.json'),
+  zh: () => import('@data/i18n/zh.json'),
+  hi: () => import('@data/i18n/hi.json'),
+  te: () => import('@data/i18n/te.json'),
+  ar: () => import('@data/i18n/ar.json'),
 };
 
 /** Memories already loaded in this tab, so switching back is instant. */

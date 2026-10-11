@@ -51,7 +51,7 @@ h1[tabindex="-1"]:focus, [data-route-focus]:focus { outline: none; }
 .muted { color: var(--muted); }
 .slate { color: var(--slate); }
 .nowrap { white-space: nowrap; }
-.spinner { display: inline-block; width: 20px; height: 20px; border-radius: 50%; border: 2.5px solid currentColor; border-right-color: transparent; animation: spin 800ms linear infinite; vertical-align: -4px; }
+.spinner { display: inline-block; width: 20px; height: 20px; border-radius: 50%; border: 2.5px solid currentColor; border-inline-end-color: transparent; animation: spin 800ms linear infinite; vertical-align: -4px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ---------- Type scale (7 sizes: 12 14 16 20 28 40 72) ---------- */

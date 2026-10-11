@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { defaultPrefs, normalizePrefs, setLocale, getLocale, detectLocale, hasLocale, isLocale, loadLocale, cityPoint } from '@agora/core';
+import { defaultPrefs, normalizePrefs, setLocale, getLocale, detectLocale, hasLocale, isLocale, loadLocale, localeFromTag, cityPoint, htmlLang, localeDir } from '@agora/core';
 import { PROFILES_KEY, makeProfile, normalizeState, normalizeUi, cleanName, cleanEmail, displayName, isSetupComplete, exportPayload, readImport } from './profiles.js';
 import { prepSummary, withPrepStep } from './prep.js';
 import { withHomeCity } from './places.js';
@@ -18,7 +18,11 @@ import { withHomeCity } from './places.js';
  *    switch re-renders in the new language without remounting anything. Languages other than
  *    English load on demand (core's loadLocale): main.jsx loads the first one before the app
  *    renders, a switch waits for its dictionary, and until it arrives the app keeps the
- *    language it is in. `lang` in the store is the language on screen.
+ *    language it is in. `lang` in the store is the language on screen. A switch is saved only
+ *    once its dictionary is here; one that cannot download (offline) is reported through
+ *    `langIssue` and saves nothing, so the profile never claims a language the screen is not in.
+ *  - ?lang=<code> in the address picks a language on purpose, even one that is not offered in
+ *    the menus yet (LOCALES[].ready), which is how a language is reviewed before release.
  */
 
 // Keys from before profiles existed, and from before the app was renamed. Anyone with a
@@ -66,14 +70,44 @@ function deviceLang() {
   return detectLocale(typeof navigator !== 'undefined' ? navigator.languages || [navigator.language] : []);
 }
 
-function initialState() {
+/**
+ * The language named by ?lang= in the address (any language the app has, ready or not), once:
+ * it is taken out of the address, so a copied link or a reload does not keep forcing it, and
+ * the choice is saved like a pick from the menu. Call before the router reads the address.
+ */
+export function takeUrlLanguage() {
+  if (typeof window === 'undefined') return null;
+  try {
+    const url = new URL(window.location.href);
+    const code = localeFromTag(url.searchParams.get('lang'));
+    if (!url.searchParams.has('lang')) return null;
+    url.searchParams.delete('lang');
+    window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+    return code || null;
+  } catch {
+    return null;
+  }
+}
+
+/** The state with the active profile's language set to `lang`. */
+function withActiveLang(state, lang) {
+  if (!state || !isLocale(lang)) return state;
+  return { ...state, profiles: state.profiles.map((p) => (p.id === state.activeId ? { ...p, lang } : p)) };
+}
+
+function initialState(urlLang) {
   const stored = normalizeState(readJson(PROFILES_KEY), deviceLang());
-  if (stored) return stored;
+  if (stored) {
+    if (!urlLang) return stored;
+    const next = withActiveLang(stored, urlLang);
+    write(PROFILES_KEY, next);
+    return next;
+  }
 
   // First run, or an upgrade from the single-setup version that came before profiles.
   const oldPrefs = readJson(LEGACY_PREFS);
   const oldUi = readJson(LEGACY_UI) || {};
-  const profile = makeProfile({ prefs: oldPrefs || defaultPrefs(), ui: oldUi, lang: isLocale(oldUi.lang) ? oldUi.lang : undefined, onboarded: Boolean(oldPrefs) }, deviceLang());
+  const profile = makeProfile({ prefs: oldPrefs || defaultPrefs(), ui: oldUi, lang: urlLang || (isLocale(oldUi.lang) ? oldUi.lang : undefined), onboarded: Boolean(oldPrefs) }, deviceLang());
   const next = { activeId: profile.id, profiles: [profile] };
   // Persist immediately, so a visitor who only reads a page is not migrated again (with a
   // new id) on every visit.
@@ -91,10 +125,12 @@ function initialState() {
 }
 
 /**
- * The language the app opens in: the active profile's, or the device's for a first visit.
- * main.jsx loads its dictionary before the first render, so nothing shows in English first.
+ * The language the app opens in: ?lang= when the address names one, else the active
+ * profile's, or the device's for a first visit. main.jsx loads its dictionary before the
+ * first render, so nothing shows in English first.
  */
-export function initialLang() {
+export function initialLang(urlLang) {
+  if (urlLang && isLocale(urlLang)) return urlLang;
   const stored = normalizeState(readJson(PROFILES_KEY), deviceLang());
   const active = stored && (stored.profiles.find((p) => p.id === stored.activeId) || stored.profiles[0]);
   return active && isLocale(active.lang) ? active.lang : deviceLang();
@@ -105,9 +141,30 @@ function applyLocale(lang) {
   if (getLocale() !== lang && hasLocale(lang)) setLocale(lang);
 }
 
-export function StoreProvider({ children }) {
-  const [state, setState] = useState(initialState);
+/**
+ * The page's language and direction: <html lang="zh-Hans">, <html lang="ar" dir="rtl">.
+ * Set on <html> rather than on the app, so the whole document (scrollbars, sheets in portals,
+ * the tab title) follows, and changed in place: switching language never remounts anything.
+ */
+export function applyDocumentLanguage(lang) {
+  if (typeof document === 'undefined') return;
+  const root = document.documentElement;
+  const tag = htmlLang(lang);
+  const dir = localeDir(lang);
+  if (root.lang !== tag) root.lang = tag;
+  if (root.dir !== dir) root.dir = dir;
+}
+
+export function StoreProvider({ children, urlLang = null }) {
+  const [state, setState] = useState(() => initialState(urlLang));
   const fromStorage = useRef(false);
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  // A language whose dictionary could not be downloaded: { lang, at } until it loads or is dismissed.
+  const [langIssue, setLangIssue] = useState(null);
+  // Languages whose download failed in this page. The browser keeps a failed module download
+  // for the life of the page, so trying again, even once the connection is back, fails too.
+  const failedLangs = useRef(new Set());
 
   const active = state.profiles.find((p) => p.id === state.activeId) || state.profiles[0];
   // Synchronous on purpose: children rendered below in this same pass must translate in the
@@ -116,13 +173,18 @@ export function StoreProvider({ children }) {
   const shown = getLocale();
 
   // A language whose dictionary has not loaded (another tab switched to it, or a profile
-  // switch): load it, then render again in it.
+  // switch): load it, then render again in it; say so when it cannot download.
   const [, setLoaded] = useState(0);
   useEffect(() => {
     if (hasLocale(active.lang)) return undefined;
     let alive = true;
     loadLocale(active.lang).then((ok) => {
-      if (alive && ok) setLoaded((n) => n + 1);
+      if (!alive) return;
+      if (ok) setLoaded((n) => n + 1);
+      else {
+        failedLangs.current.add(active.lang);
+        setLangIssue({ lang: active.lang, at: Date.now() });
+      }
     });
     return () => {
       alive = false;
@@ -130,7 +192,7 @@ export function StoreProvider({ children }) {
   }, [active.lang]);
 
   useLayoutEffect(() => {
-    document.documentElement.lang = shown;
+    applyDocumentLanguage(shown);
   }, [shown]);
 
   // One place that persists. Changes that arrived from another tab are not written back.
@@ -225,19 +287,44 @@ export function StoreProvider({ children }) {
     [patchActive],
   );
 
+  /**
+   * Switch language once its dictionary is here (at once when it already is). Nothing is
+   * saved when it cannot download: the screen stays in the language it is in, and
+   * `langIssue` says why. A second try after a failed download, with the connection back,
+   * saves the choice and reloads, since the browser would only repeat the failure; the reload
+   * loads the language before the app draws (main.jsx).
+   */
   const setLang = useCallback(
     (lang) => {
       if (!isLocale(lang)) return;
-      // Switch once the dictionary is here (at once when it already is).
       const go = () => {
+        failedLangs.current.delete(lang);
+        setLangIssue(null);
         applyLocale(lang);
         patchActive({ lang });
       };
-      if (hasLocale(lang)) go();
-      else loadLocale(lang).then(go);
+      if (hasLocale(lang)) {
+        go();
+        return;
+      }
+      loadLocale(lang).then((ok) => {
+        if (ok) {
+          go();
+          return;
+        }
+        const online = typeof navigator === 'undefined' || navigator.onLine !== false;
+        if (failedLangs.current.has(lang) && online && typeof window !== 'undefined') {
+          write(PROFILES_KEY, withActiveLang(stateRef.current, lang));
+          window.location.reload();
+          return;
+        }
+        failedLangs.current.add(lang);
+        setLangIssue({ lang, at: Date.now() });
+      });
     },
     [patchActive],
   );
+  const dismissLangIssue = useCallback(() => setLangIssue(null), []);
 
   /** Merge into the active profile's ui bag. `lang` is accepted for older callers. */
   const setUi = useCallback(
@@ -327,6 +414,8 @@ export function StoreProvider({ children }) {
       // language: the one on screen (a newly picked one once its dictionary has loaded)
       lang: shown,
       setLang,
+      langIssue,
+      dismissLangIssue,
       // ui bag
       ui: active.ui,
       setUi,
@@ -346,7 +435,7 @@ export function StoreProvider({ children }) {
       importProfile,
     }),
     // shown is listed so the display name re-resolves in the new language.
-    [active, shown, setPrefs, completeSetup, setHomeCity, resetSetup, setLang, setUi, prepFor, setPrepStep, setPrepMeeting, state.profiles, switchProfile, createProfile, updateProfile, deleteProfile, exportProfile, importProfile],
+    [active, shown, setPrefs, completeSetup, setHomeCity, resetSetup, setLang, langIssue, dismissLangIssue, setUi, prepFor, setPrepStep, setPrepMeeting, state.profiles, switchProfile, createProfile, updateProfile, deleteProfile, exportProfile, importProfile],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

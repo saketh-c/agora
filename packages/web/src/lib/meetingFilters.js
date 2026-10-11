@@ -13,7 +13,7 @@
  * Every filter is combined with AND. The URL holds only what differs from the profile's
  * defaults, so a link stays short and the saved copy follows later profile changes.
  */
-import { addDays, daysBetween, daysInMonth, getLocale, hourOf, isDateStr, isTopicId, parseDate, t, tList, toDateStr, weekdayOf } from '@agora/core';
+import { addDays, daysBetween, daysInMonth, getLocale, hourOf, isDateStr, isTopicId, monthNames, monthShortNames, parseDate, searchFold, t, toDateStr, weekdayNames, weekdayOf, weekdayShortNames } from '@agora/core';
 
 export const WHEN = Object.freeze(['today', 'tomorrow', 'weekend', 'week', '2weeks', 'month', '3months']);
 export const DEFAULT_WHEN = '2weeks';
@@ -28,15 +28,11 @@ export const SORTS = Object.freeze(['best', 'soonest', 'nearest']);
 /** URL keys that are filters (a URL with none of them may be filled from the saved copy). */
 export const FILTER_KEYS = Object.freeze(['q', 'when', 'from', 'to', 'days', 'dow', 'time', 'after', 'speak', 'remote', 'miles', 'near', 'at', 'atl', 'topics', 'county', 'cities', 'sort', 'view']);
 
-export const fold = (s) =>
-  String(s || '')
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/đ/g, 'd')
-    .replace(/Đ/g, 'd')
-    .toLowerCase()
-    .replace(/\s+/g, ' ')
-    .trim();
+/**
+ * Search folding (core's searchFold): case, Latin accents, đ and full-width letters never stop
+ * a match, while the marks Devanagari, Telugu and Arabic need stay; Arabic alef forms are unified.
+ */
+export const fold = (s) => searchFold(s);
 
 const uniq = (xs) => [...new Set(xs)];
 
@@ -337,16 +333,16 @@ export function queryVocab(locale = getLocale()) {
   months[8].push('sept');
   const words = { today: [], tomorrow: [], weekend: [], county: [] };
   for (const lang of langs) {
-    const long = tList('format.weekdays', lang);
-    const short = tList('format.weekdaysShort', lang);
+    const long = weekdayNames(lang);
+    const short = weekdayShortNames(lang);
     long.forEach((w, i) => weekdays[i].push(fold(w)));
     // Short names only when they are a real word (not "T2" or a month abbreviation such as "mar").
     short.forEach((w, i) => {
       const s = fold(w);
       if (s.length >= 3 && /^[a-z]+$/.test(s)) weekdays[i].push(s);
     });
-    tList('format.months', lang).forEach((m, i) => months[i].push(fold(m)));
-    tList('format.monthsShort', lang).forEach((m, i) => months[i].push(fold(m).replace(/\.$/, '')));
+    monthNames(lang).forEach((m, i) => months[i].push(fold(m)));
+    monthShortNames(lang).forEach((m, i) => months[i].push(fold(m).replace(/[.\u0970]$/, '')));
     for (const k of Object.keys(words)) words[k].push(...splitWords(t(`meetings.searchWords.${k}`, undefined, lang)));
   }
   const monthWords = new Set(months.flat());

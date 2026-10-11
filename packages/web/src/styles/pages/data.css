@@ -65,4 +65,4 @@
 
 .dt-source { margin-top: var(--s6); }
 .dt-source .link { white-space: nowrap; }
-.dt .chart-table th.n, .dt .chart-table td.n { padding-left: var(--s4); }
+.dt .chart-table th.n, .dt .chart-table td.n { padding-inline-start: var(--s4); }

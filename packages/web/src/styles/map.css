@@ -11,22 +11,23 @@
 .map__leaflet { position: absolute; inset: 0; isolation: isolate; z-index: 0; }
 .map--loading { min-height: 240px; animation: pulse 1.6s var(--ease) infinite; }
 .map__note {
-  position: absolute; z-index: 500; top: var(--s4); left: 50%; transform: translateX(-50%);
+  /* physical: centered with translateX, the same in both directions */
+  position: absolute; z-index: 500; top: var(--s4); left: 50%; transform: translateX(-50%); /* physical */
   display: flex; align-items: center; gap: var(--s2); max-width: calc(100% - 2 * var(--s8));
   padding: var(--s2) var(--s4); border-radius: var(--r-pill); background: var(--card); box-shadow: var(--lift);
   font-size: 14px; line-height: 20px; font-weight: 600; color: var(--ink);
 }
 /* Nothing to pin: a small card over the map that says so (and, on phones, the way out). */
 /* Clear of the zoom buttons on the left. */
-.map__empty { position: absolute; z-index: 550; inset: 0; display: grid; place-items: center; padding: var(--s4) var(--s4) var(--s4) 76px; pointer-events: none; }
+.map__empty { position: absolute; z-index: 550; inset: 0; display: grid; place-items: center; padding-block: var(--s4); padding-inline: 76px var(--s4); pointer-events: none; }
 .map__emptycard { pointer-events: auto; max-width: 320px; display: grid; justify-items: start; gap: var(--s2); padding: var(--s4); border-radius: var(--r-group); background: var(--card); box-shadow: var(--lift); }
 .map__emptyt { font-weight: 700; }
 .map__emptycard .help { margin: 0; }
 .leaflet-container { background: var(--floor) !important; font-family: var(--font-text) !important; font-size: 14px; }
 .basemap { filter: grayscale(1) contrast(.62) brightness(1.18); }
-.leaflet-control-attribution { font-size: 12px !important; line-height: 16px !important; background: rgb(255 255 255 / .85) !important; color: var(--slate) !important; padding: 2px 8px !important; border-radius: 8px 0 0 0; }
+.leaflet-control-attribution { font-size: 12px !important; line-height: 16px !important; background: rgb(255 255 255 / .85) !important; color: var(--slate) !important; padding: 2px 8px !important; border-start-start-radius: 8px; border-start-end-radius: 0; border-end-end-radius: 0; border-end-start-radius: 0; }
 .leaflet-control-attribution a { color: var(--ink) !important; }
-.leaflet-bottom.leaflet-left .leaflet-control-attribution { border-radius: 0 8px 0 0; }
+.leaflet-bottom.leaflet-left .leaflet-control-attribution { border-start-start-radius: 0; border-start-end-radius: 8px; border-end-end-radius: 0; border-end-start-radius: 0; }
 .leaflet-div-icon, .pin-icon { background: transparent; border: 0; }
 .leaflet-marker-icon:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; border-radius: 50%; }
 
@@ -40,7 +41,7 @@
 /* Where distance is measured from: an Ink ring with a white centre and its own light label. */
 .pin--you { background: var(--card); border: 3px solid var(--ink); box-shadow: 0 0 0 3px rgb(255 255 255 / .9), 0 1px 3px rgb(21 24 43 / .35); }
 .pin--you::after { content: ""; position: absolute; inset: 3px; border-radius: 50%; background: var(--ink); }
-.pin-label { position: absolute; z-index: 1; left: 50%; top: calc(100% + 6px); transform: translateX(-50%); background: var(--ink); color: var(--card); font: 700 12px/16px var(--font-text); padding: 4px 8px; border-radius: var(--r-pill); white-space: nowrap; pointer-events: none; }
+.pin-label { position: absolute; z-index: 1; left: 50%; /* physical: centered */ top: calc(100% + 6px); transform: translateX(-50%); background: var(--ink); color: var(--card); font: 700 12px/16px var(--font-text); padding: 4px 8px; border-radius: var(--r-pill); white-space: nowrap; pointer-events: none; }
 .pin-label--you { background: var(--card); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink), 0 1px 3px rgb(21 24 43 / .25); }
 /* A plain pin's label shows on hover, keyboard focus, or when its row is under the pointer. */
 .pin-icon .pin--go > .pin-label, .pin-icon .pin--watch > .pin-label { display: none; }
@@ -52,7 +53,7 @@
 .ring { stroke: var(--ink); fill: var(--ink); stroke-opacity: .55; }
 
 /* Floating map controls */
-.mapctl { position: absolute; z-index: 500; display: grid; gap: var(--s2); top: var(--s4); left: var(--s4); }
+.mapctl { position: absolute; z-index: 500; display: grid; gap: var(--s2); top: var(--s4); inset-inline-start: var(--s4); }
 .mapctl .iconbtn { background: var(--card); box-shadow: var(--lift); }
 @media (hover: hover) { .mapctl .iconbtn:hover { background: var(--row-hover); } }
 

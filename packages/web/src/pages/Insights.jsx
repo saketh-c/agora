@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { computeStats, formatTime, getTopic, hourOf, joinList, t, tList, tn, upcomingMeetings } from '@agora/core';
+import { computeStats, formatMonthDay, formatTime, getTopic, hourOf, isDateStr, joinList, t, tn, upcomingMeetings, weekdayNames, weekdayShortNames, compareText } from '@agora/core';
 import { SCHEDULES_VERIFIED_ON } from '../lib/data.js';
 import useClock from '../components/home/useClock.js';
 import { useCities } from '../lib/DataProvider.jsx';
@@ -17,9 +17,7 @@ const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
 const inTen = (share) => t('insights.inTen', { n: Math.round(share * 10) });
 
 function monthDayYear(dateStr) {
-  const [y, m, d] = String(dateStr || '').split('-').map(Number);
-  if (!y || !m || !d) return '';
-  return t('ui.monthDayYear', { month: tList('format.monthsShort')[m - 1], day: d, year: y });
+  return isDateStr(String(dateStr || '')) ? formatMonthDay(dateStr, { withYear: true }) : '';
 }
 
 /**
@@ -61,7 +59,7 @@ export default function Insights() {
       const mine = meetings.filter((m) => m.cityId === c.cityId);
       return { city: c, during: mine.filter((m) => m.isSchoolHours).length, other: mine.filter((m) => !m.isSchoolHours).length };
     });
-    rows.sort((a, b) => b.during - a.during || a.city.name.localeCompare(b.city.name, lang));
+    rows.sort((a, b) => b.during - a.during || compareText(a.city.name, b.city.name, lang));
     return { rows, during: rows.filter((r) => r.during > 0) };
   }, [cities, meetings, lang]);
 
@@ -73,7 +71,7 @@ export default function Insights() {
       if (!groups.has(n)) groups.set(n, []);
       groups.get(n).push(c);
     }
-    const list = [...groups.entries()].map(([n, list]) => ({ n, cities: list.sort((a, b) => a.name.localeCompare(b.name, lang)) }));
+    const list = [...groups.entries()].map(([n, list]) => ({ n, cities: list.sort((a, b) => compareText(a.name, b.name, lang)) }));
     list.sort((a, b) => (a.n === 0) - (b.n === 0) || a.n - b.n);
     const mode = [...list].filter((g) => g.n > 0).sort((a, b) => b.cities.length - a.cities.length)[0];
     return { list, mode: mode ? mode.n : 3 };
@@ -89,17 +87,17 @@ export default function Insights() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stats, lang]);
 
-  const dayName = (wd) => tList('format.weekdays')[wd];
-  const dayShort = (wd) => tList('format.weekdaysShort')[wd];
+  const dayName = (wd) => weekdayNames()[wd];
+  const dayShort = (wd) => weekdayShortNames()[wd];
   const homeLimit = homeCity ? (homeCity.publicComment && homeCity.publicComment.timeLimitMinutes) || 0 : null;
   const homeSchool = homeCity ? school.rows.find((r) => r.city.cityId === homeCity.cityId) : null;
 
   return (
     <div className="wrap dt">
-      <PageHeader title={t('insights.heading')} lead={t('insights.lead', { n: cities.length, days: WINDOW })} />
+      <PageHeader title={t('insights.heading')} lead={t('insights.lead', { n: cities.length, days: tn('common.days', WINDOW) })} />
 
       <div className="dt-stats">
-        <StatTile value={stats.totals.meetings} label={t('insights.statMeetings', { days: WINDOW })} />
+        <StatTile value={stats.totals.meetings} label={t('insights.statMeetings', { n: WINDOW })} />
         <StatTile value={inTen(stats.totals.eveningShare)} label={t('insights.statEvening', { time: time(17) })} />
         <StatTile value={inTen(stats.totals.speakableShare)} label={t('insights.statSpeak')} />
       </div>
@@ -107,8 +105,8 @@ export default function Insights() {
       <div className="dt-grid">
         <Figure
           className="dt-fig dt-fig--school"
-          title={school.during.length ? tn('insights.schoolTitle', school.during.length, { total: cities.length }) : t('insights.schoolNone')}
-          note={t('insights.schoolSub', { days: WINDOW })}
+          title={school.during.length ? tn('insights.schoolTitle', school.during.length, { councils: tn('meetings.councils', cities.length) }) : t('insights.schoolNone')}
+          note={t('insights.schoolSub', { n: WINDOW })}
           foot={
             <>
               <span className="dt-cap-line">
@@ -121,23 +119,23 @@ export default function Insights() {
           }
           table={
             <ChartTable
-              caption={t('insights.schoolSub', { days: WINDOW })}
+              caption={t('insights.schoolSub', { n: WINDOW })}
               head={[{ label: t('insights.colCity') }, { label: t('insights.colDuring'), num: true }, { label: t('insights.colOther'), num: true }]}
               rows={school.rows.map((r) => [r.city.name, r.during, r.other])}
             />
           }
         >
-          <BarList label={t('insights.schoolSub', { days: WINDOW })} rows={school.during.map((r) => ({ key: r.city.cityId, label: r.city.name, value: r.during, hi: homeCity && r.city.cityId === homeCity.cityId }))} />
+          <BarList label={t('insights.schoolSub', { n: WINDOW })} rows={school.during.map((r) => ({ key: r.city.cityId, label: r.city.name, value: r.during, hi: homeCity && r.city.cityId === homeCity.cityId }))} />
         </Figure>
 
         <Figure
           className="dt-fig dt-fig--heat"
           title={heat.peak ? t('insights.heatTitle', { day: dayName(heat.peak.weekday), time: time(heat.peak.hour) }) : t('insights.heatEmpty')}
-          note={t('insights.heatSub', { days: WINDOW })}
+          note={t('insights.heatSub', { n: WINDOW })}
           foot={heat.empty.length > 0 && heat.days.length > 0 ? t('insights.heatNone', { days: joinList(heat.empty.map(dayName)) }) : null}
           table={
             <ChartTable
-              caption={t('insights.heatSub', { days: WINDOW })}
+              caption={t('insights.heatSub', { n: WINDOW })}
               head={[{ label: t('insights.colWeekday') }, { label: t('insights.colTime') }, { label: t('insights.colMeetings'), num: true }]}
               rows={[...heat.grid.entries()]
                 .map(([key, n]) => ({ wd: Number(key.split(':')[0]), h: Number(key.split(':')[1]), n }))
@@ -148,7 +146,7 @@ export default function Insights() {
         >
           {heat.days.length > 0 && (
             <Heatmap
-              label={t('insights.heatSub', { days: WINDOW })}
+              label={t('insights.heatSub', { n: WINDOW })}
               rowHeader={t('insights.colTime')}
               cols={heat.days.map((wd) => ({ key: wd, label: dayShort(wd) }))}
               rows={Array.from({ length: heat.to - heat.from + 1 }, (_, i) => heat.from + i).map((h) => ({ key: h, label: time(h) }))}

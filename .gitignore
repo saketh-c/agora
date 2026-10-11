@@ -29,3 +29,6 @@ packages/web/public/agendas-snapshot.json
 
 # On-device vision models, fetched by scripts/fetch-models.mjs (about 10 MB)
 packages/web/public/models/
+
+# Translation work files from scripts/i18n-todo.mjs, merged by scripts/i18n-apply.mjs
+data/i18n/work/

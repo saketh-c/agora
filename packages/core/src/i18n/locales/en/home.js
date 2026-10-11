@@ -49,7 +49,7 @@ export default {
   },
   stat: {
     n: '{n} in 10',
-    text: 'council meetings in the next {days} days start at {time} or later.',
+    text: 'council meetings in the next {n} days start at {time} or later.',
     see: 'See the data',
   },
   languages: 'Other languages',

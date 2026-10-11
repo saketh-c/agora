@@ -4,7 +4,7 @@
 
 The agora was the open square at the center of a Greek city, the place where citizens gathered to trade news, argue, and decide things together, and nobody needed an invitation to stand in it. A council chamber is the closest thing a modern city has to that square, so the app is named after it and looks the part.
 
-Agora is a web app, an installable phone app (PWA), and a terminal tool that all share one engine and one dataset. It works in English, Spanish, and Vietnamese, including the city guides and agenda items. It is strictly nonpartisan: Texas city councils are nonpartisan, and the app is about showing up and being heard, not about picking a side.
+Agora is a web app, an installable phone app (PWA), and a terminal tool that all share one engine and one dataset. It works in English, Spanish, and Vietnamese, including the city guides and agenda items, and is built for Simplified Chinese, Hindi, Telugu, and Arabic (right to left) too, whose translations are on their way. It is strictly nonpartisan: Texas city councils are nonpartisan, and the app is about showing up and being heard, not about picking a side.
 
 ## Try it
 
@@ -53,7 +53,7 @@ npm run cli -- demo                                     # a scripted tour of the
 npm run cli -- help
 ```
 
-Add `--json` to any command for raw JSON, `--today 2026-09-14` to pretend it is another day, and `--lang es` or `--lang vi` (or set `AGORA_LANG`) for Spanish or Vietnamese.
+Add `--json` to any command for raw JSON, `--today 2026-09-14` to pretend it is another day, and `--lang es`, `vi`, `zh`, `hi`, `te` or `ar` (or set `AGORA_LANG`; full tags such as `zh-CN` or `ar_EG.UTF-8` work too) for another language.
 
 ### Tests
 
@@ -95,7 +95,8 @@ language menu and the profile menu; the footer links to News, The data, About an
 
 "Your city, topics and times" opens from the profile menu over whatever page you are on,
 so changing your city never loses your place. Everything works in English, Spanish and
-Vietnamese, including the city guides and agenda items.
+Vietnamese, including the city guides and agenda items; Simplified Chinese, Hindi, Telugu and
+Arabic are wired through every screen and are being translated.
 
 The terminal tool covers the same ground: `map`, `match`, `speak`, `city`, `youth`,
 `agenda`, `explain`, `comment`, `news` and `stats`.
@@ -237,12 +238,37 @@ To add or fix a city, edit or add a file in `data/cities/` and run `npm run buil
 
 ## Languages
 
-Every string in the web app, the engine, and the CLI comes from one dictionary per language in `packages/core/src/i18n/locales/` (English is the source of truth). City data is translated with a translation memory in `data/i18n/<lang>.json` that maps each English sentence to its translation; a sentence is only swapped when the English source still matches, so a data update falls back to English instead of showing a stale translation. The web app picks the browser language on first visit and remembers the choice from the language menu.
+English, Español, Tiếng Việt, 中文 (Simplified Chinese), हिन्दी (Hindi), తెలుగు (Telugu) and العربية (Arabic, right to left). Every string in the web app, the engine, the server and the CLI comes from one dictionary per language in `packages/core/src/i18n/locales/<code>/` (English is the source of truth; the languages are listed in `LOCALES` in `packages/core/src/i18n/runtime.js`). City data is translated with a translation memory in `data/i18n/<lang>.json` that maps each English sentence to its translation; a sentence is only swapped when the English source still matches, so a data update falls back to English instead of showing a stale translation. Team posts in `data/community.json` carry their translations in `i18n.<lang>`. The web app picks the browser language on first visit (`es-MX` finds Spanish, any `zh-*`, `hi-*`, `te-*` or `ar-*` tag its language) and remembers the choice from the language menu; each language other than English is its own download, and a pick that cannot download (offline) is not saved: a notice says so, and picking it again once online works.
+
+A language is offered only once it is completely translated: `ready: true` in `LOCALES`. Until then the menus leave it out and browser and `Accept-Language` detection skip it, so nobody lands on English placeholder text (laid out right to left, in Arabic). It still works when chosen on purpose, which is how it is reviewed: `?lang=ar` on any page of the web app (saved like a menu pick), `--lang ar` or `AGORA_LANG` in the CLI, `?lang=ar` on the API. Today English, Spanish and Vietnamese are ready; Chinese, Hindi, Telugu and Arabic are being translated. The service worker precaches the dictionaries of ready languages, so an installed app switches between them offline.
+
+How each language is handled:
+
+- **Plurals** follow CLDR through `Intl.PluralRules`: a plural value is an object with the forms the language uses (English one and other; Arabic zero, one, two, few, many and other; Hindi and Telugu one and other; Chinese only other). Any English string that counts something (`{n}` or `{count}`) may be answered with plural forms in a language that needs them, so `{n}` and `{count}` always carry a number: text that is already words goes in a param with another name (`{posts}` in "9 posts, Plano first"), and a sentence that counts two things takes the second as a phrase made by its own plural entry (`{days}`, `{duration}`, `{length}`, `{words}`). `t()` never returns plural forms as an object: without a number it shows the `other` form and, in development, warns in the console. A test checks every call site.
+- **Dates, times and numbers** in Chinese, Hindi, Telugu and Arabic come from `Intl` with Latin digits (addresses, times and phone numbers in Texas sources use them), so weekday and month names are right before anyone translates; sentences around them (recurrence rules, "In 3 days") stay dictionary templates, so word order is the translator's.
+- **Right to left**: Arabic sets `dir="rtl"` on the page; the styles use logical properties (a test fails on any `left` or `right` that is not marked as meant), and icons that point along the line mirror. Gauges of time used (the Write ruler, the Practice timer and the report's ruler) fill from the start of the line, like progress bars; the map, charts with time or number axes, the eye-contact strip, video controls, links and phone numbers stay left to right. Values inside Arabic sentences are wrapped in Unicode isolates (a message inside another message that only joins its parts with punctuation, such as a day and a time, is isolated as right to left), list items and joined sentences are isolated one by one, and text that leaves the app (copied text, shared text, calendar files, API responses) carries none. Text decides its direction from the whole of it, not its first letter: a translation follows the page even when it starts with an English name ("Plano: ..."), an English original not translated yet is marked `lang="en"` and reads left to right, a post someone wrote goes by most of its letters, and an empty field follows the page.
+- **Punctuation** is the language's own: `format.sep` between list items, `format.labelValue` for "Label: value", `format.fullStop` at the end of a sentence (`joinItems`, `labelValue`, `asSentence` and `joinSentences` in core), and `rehearse.quoted` for a quoted word.
+- **Fonts**: Noto Sans Arabic, Devanagari and Telugu are self-hosted and download only when their script is on screen (their ranges leave out the joiners and marks other text shares, so an emoji with a zero-width joiner on an English page downloads none of them); Chinese uses the system's fonts. Display numbers made of digits alone (date tiles, timers, step numbers) keep the podium's wide cut in every language.
+- **Practice** counts Chinese pace in characters a minute and every other language in words, with fillers, stop words and a steady pace band per language (`SPEECH_PACE` in `packages/core/src/text.js`).
 
 ```bash
-node scripts/i18n-check.mjs      # dictionary coverage per language
-node scripts/i18n-extract.mjs    # data strings still untranslated per language
+node scripts/i18n-check.mjs              # every language: keys, plural forms, params, dashes, ready flags, and what is still English
+node scripts/i18n-check.mjs --strict     # the same, failing while anything is untranslated or a finished language is not ready
+node scripts/i18n-extract.mjs --lang ar  # city strings still untranslated in one language
 ```
+
+### Translating a language
+
+Work goes in chunks through two scripts, so several translators can work at once:
+
+```bash
+node scripts/i18n-todo.mjs ar                 # writes data/i18n/work/ar-ui-1..4.json, ar-data-1..8.json, ar-community.json
+node scripts/i18n-todo.mjs zh --chunks 6 --data-chunks 12 --only ui
+node scripts/i18n-apply.mjs ar                # merges every data/i18n/work/ar-*.json that is filled in
+node scripts/i18n-apply.mjs ar data/i18n/work/ar-ui-2.json --dry-run
+```
+
+Each work file carries its instructions (register, digits, what stays in English) and maps keys (app text) or English sentences (city data) to the English text; a translator replaces the values and leaves the keys alone. Plural values arrive as objects with the language's forms. Every value still in English is listed, including an old English copy left behind when the English changed (in a language written in another script, a value counts as translated only once it has letters of that script), and the four punctuation keys above, which each such language answers or keeps on purpose. Templates with nothing to translate (`{city} ({n})` in Hindi) are not asked for and are counted apart. `i18n-apply` checks every value before writing anything (unknown keys, missing or extra `{params}`, missing plural forms, em or en dashes, city translations that drop a link or an email address) and then rewrites only the values that changed: comments, key order and layout of the dictionary files stay as they were, existing translation-memory entries keep their place, and `data/community.json` keeps its formatting. Values still identical to English are skipped, so a half-done file can be applied and resumed; a value that should stay English on purpose goes in the file's `keepEnglish` list (recorded in `packages/core/src/i18n/same-as-english.json`). When `i18n-check --strict` reports a language as completely translated, set `ready: true` for it in `LOCALES`: the check fails until then, and fails for a ready language with anything missing. To add another language: add it to `LOCALES` (with `ready: false`) and the loaders in `runtime.js`, `index.js` and `packages/web/src/lib/DataProvider.jsx` (`packages/web/vite.config.js` reads `LOCALES`), then run `node scripts/i18n-scaffold.mjs <code>` to create its files.
 
 ## Accessibility
 
@@ -252,7 +278,7 @@ alternative to the map, labels on icons and pins, reduced-motion support, a forc
 fallback, and a table view for every chart. Touch targets are at least 44px (small chips
 and buttons extend their hit area past their outline), nothing scrolls sideways at 320px,
 and inputs use 16px text so phones do not zoom. Text clears WCAG AA contrast and control
-borders clear 3:1. English data shown on a Spanish or Vietnamese page, such as headlines
+borders clear 3:1. English data shown on a page in another language, such as headlines
 and addresses, is marked `lang="en"` so screen readers switch voices.
 
 ## Renaming

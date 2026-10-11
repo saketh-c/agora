@@ -1,5 +1,5 @@
 import readline from 'node:readline';
-import { topicList, cityPoint, defaultPrefs, setLocale, t, BRAND, LOCALES } from '@agora/core';
+import { topicList, cityPoint, defaultPrefs, setLocale, t, BRAND, LOCALES, searchFold, offeredLocales } from '@agora/core';
 import { c, heading, safe, wrapText } from './ui.js';
 import { savePrefs } from './prefs.js';
 import { matchCity } from './data.js';
@@ -14,13 +14,11 @@ class Cancelled extends Error {
   }
 }
 
-/** Compare answers without case or accents, so "SI", "si" and "sí" (or "co" and "có") match. */
-const fold = (s) =>
-  String(s ?? '')
-    .normalize('NFD')
-    .replace(/\p{M}/gu, '')
-    .toLowerCase()
-    .trim();
+/**
+ * Compare answers without case or Latin accents, so "SI", "si" and "sí" (or "co" and "có")
+ * match. Devanagari and Telugu vowel signs are letters there and stay (core's searchFold).
+ */
+const fold = (s) => searchFold(s);
 
 /** A comma-separated word list from the dictionary ("s, si, sí"), folded for comparison. */
 const wordList = (s) => String(s || '').split(',').map(fold).filter(Boolean);
@@ -33,7 +31,7 @@ const ENGLISH_NO = ['n', 'no'];
 function languageFrom(answer) {
   const a = fold(answer);
   if (!a) return null;
-  const hit = LOCALES.find((l) => [l.code, l.name, l.nativeName].some((x) => fold(x) === a));
+  const hit = LOCALES.find((l) => [l.code, l.tag, l.name, l.nativeName, ...(l.aliases || [])].some((x) => fold(x) === a));
   return hit ? hit.code : null;
 }
 
@@ -130,7 +128,7 @@ export async function runWizard(cities, existing, lang = 'en', { input = process
     const prefs = { ...defaultPrefs(), ...(existing || {}) };
 
     for (;;) {
-      const code = languageFrom(await ask(t('cli.wizard.language'), lang));
+      const code = languageFrom(await ask(t('cli.wizard.language', { codes: offeredLocales(lang).map((l) => l.code).join(', ') }), lang));
       if (code) {
         prefs.lang = code;
         break;

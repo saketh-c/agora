@@ -1,13 +1,9 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
-import { t, tn } from '@agora/core';
+import { searchFold, t, tn, compareText } from '@agora/core';
 import Icon from './Icon.jsx';
 
-const fold = (s) =>
-  String(s || '')
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .trim();
+/** Case, accents and width never stop a match; Devanagari, Telugu and Arabic marks are kept (core's searchFold). */
+const fold = (s) => searchFold(s);
 
 /**
  * The cities that match what someone typed, best first: exact name, name prefix, word prefix
@@ -30,7 +26,7 @@ export function matchCities(cities, query, limit = 8) {
     else if (fold(city.county).startsWith(q)) score = 5;
     if (score >= 0) scored.push({ city, score });
   }
-  scored.sort((a, b) => a.score - b.score || a.city.name.localeCompare(b.city.name));
+  scored.sort((a, b) => a.score - b.score || compareText(a.city.name, b.city.name));
   return scored.slice(0, limit).map((s) => s.city);
 }
 
@@ -109,7 +105,7 @@ export default function CityPicker({
   }, [current]);
 
   const options = useMemo(() => {
-    if (showAll && !fold(query)) return [...cities].sort((a, b) => a.name.localeCompare(b.name));
+    if (showAll && !fold(query)) return [...cities].sort((a, b) => compareText(a.name, b.name));
     return matchCities(cities, query);
   }, [cities, query, showAll]);
 

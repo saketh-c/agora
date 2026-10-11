@@ -19,6 +19,9 @@
  *   node scripts/i18n-extract.mjs --check      read-only; exit 1 if anything the app shows is untranslated
  *   node scripts/i18n-extract.mjs --chunks N   also write N chunk files for translators
  *   node scripts/i18n-extract.mjs --json       print the report as JSON (combines with --check)
+ *   node scripts/i18n-extract.mjs --lang ar    report one language only (combines with the others)
+ * Every language in LOCALES is reported, so a new language shows up here as soon as it is
+ * registered; node scripts/i18n-todo.mjs <lang> writes its untranslated strings to work files.
  * Run `npm run build:data` first when data/cities/*.json changed.
  */
 import { readdirSync, readFileSync, writeFileSync, existsSync, mkdirSync, statSync } from 'node:fs';
@@ -89,6 +92,13 @@ function staleSources(builtFile, citiesDir) {
 function main(argv) {
   const check = argv.includes('--check');
   const asJson = argv.includes('--json');
+  const langArg = argv.indexOf('--lang');
+  const only = langArg !== -1 ? argv[langArg + 1] : null;
+  if (only && !LOCALES.some((l) => l.code === only && l.code !== 'en')) {
+    console.error(`--lang ${only}: not a language in LOCALES other than English`);
+    return 1;
+  }
+  const wanted = ({ code }) => code !== 'en' && (!only || code === only);
   const builtFile = path.join(root, 'data', 'cities.json');
   const citiesDir = path.join(root, 'data', 'cities');
   const outDir = path.join(root, 'data', 'i18n');
@@ -99,8 +109,7 @@ function main(argv) {
   const stale = staleSources(builtFile, citiesDir);
   const cities = JSON.parse(readFileSync(builtFile, 'utf8')).cities;
   const memories = {};
-  for (const { code } of LOCALES) {
-    if (code === 'en') continue;
+  for (const { code } of LOCALES.filter(wanted)) {
     const file = path.join(outDir, `${code}.json`);
     if (existsSync(file)) {
       const memory = JSON.parse(readFileSync(file, 'utf8'));
@@ -129,8 +138,7 @@ function main(argv) {
 
   if (stale.length) console.log(`warning: data/cities.json is older than ${stale.slice(0, 3).join(', ')}${stale.length > 3 ? ` and ${stale.length - 3} more` : ''}; run npm run build:data for an exact count`);
   console.log(`${report.strings.length} unique strings the app shows, about ${report.words} words, from data/cities.json (${cities.length} cities)${check ? '' : '; written to data/i18n/source-strings.json'}`);
-  for (const { code } of LOCALES) {
-    if (code === 'en') continue;
+  for (const { code } of LOCALES.filter(wanted)) {
     const l = report.locales[code];
     if (!l) {
       console.log(`${code}: no translation memory yet (data/i18n/${code}.json)`);

@@ -1,14 +1,10 @@
 import { useId, useRef, useState } from 'react';
-import { t, tn } from '@agora/core';
+import { searchFold, t, tn } from '@agora/core';
 import { CityPicker, Icon, matchCities } from '../ui/index.js';
 import usePlaceFinder from './usePlaceFinder.js';
 
-const fold = (s) =>
-  String(s || '')
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .trim();
+/** Case, accents and width never stop a match; Devanagari, Telugu and Arabic marks are kept (core's searchFold). */
+const fold = (s) => searchFold(s);
 
 const OSM_COPYRIGHT = 'https://www.openstreetmap.org/copyright';
 

@@ -7,6 +7,10 @@ export default {
     one: '{n} second',
     other: '{n} seconds',
   },
+  wordsN: {
+    one: '{n} word',
+    other: '{n} words',
+  },
   setup: {
     title: 'Set up your practice',
     city: 'Which council?',
@@ -185,12 +189,13 @@ export default {
     other: '{n} lines of your script never came out',
   },
   skippedMore: 'and {n} more',
+  quoted: '"{word}"',
   charts: {
     time: 'Time',
     showTable: 'Show as table',
     showChart: 'Show chart',
     seconds: '{n} s',
-    stripAria: 'Facing the room for {on} of the {known} seconds your face was seen, out of {total}.',
+    stripAria: 'Facing the room for {on} of the {n} seconds your face was seen, out of {total}.',
     pace: 'Pace',
     paceNote: 'Words a minute, every 15 seconds.',
     paceEstNote: 'Estimated from your voice, every 15 seconds.',
@@ -267,12 +272,12 @@ export default {
       drill: 'Add one sentence about what this looks like on your street, then time it again.',
     },
     pace_fast: {
-      title: 'You spoke at {wpm} words a minute',
+      title: 'You spoke at {n} words a minute',
       detail: 'Above about {hi}, people stop taking notes and just wait for you to finish.',
       drill: 'Read your ask out loud and take a full stop after every sentence.',
     },
     pace_slow: {
-      title: 'You spoke at {wpm} words a minute',
+      title: 'You spoke at {n} words a minute',
       detail: "Below about {lo}, it can sound like you're searching for words.",
       drill: 'Practice your first two sentences until they come out easily. The rest will follow.',
     },
@@ -282,7 +287,7 @@ export default {
       drill: 'Run it again and swap every filler word for a pause.',
     },
     long_sentences: {
-      title: '{n} sentences ran past 30 words',
+      title: '{n} sentences ran past {length}',
       detail: 'Long sentences are where you run out of breath and the point gets lost.',
       drill: 'Split each one at the first "and".',
     },
@@ -302,7 +307,7 @@ export default {
       drill: 'Open with your name and school, name the item, end with the ask. Same order every time.',
     },
     long_pauses: {
-      title: '{n} pauses longer than {sec} seconds',
+      title: '{n} pauses longer than {duration}',
       detail: 'One pause before your ask is powerful. Several in the middle of sentences sound like searching.',
       drill: 'Find where you stalled and make those sentences shorter.',
     },
@@ -359,9 +364,9 @@ export default {
   },
   strengths: {
     on_time: 'On time, with {left} to spare.',
-    pace_good: 'Steady pace: {wpm} words a minute.',
+    pace_good: 'Steady pace: {n} words a minute.',
     no_fillers: 'No filler words.',
-    few_fillers: 'Few filler words: {total} in {words} words.',
+    few_fillers: 'Few filler words: {total} in {words}.',
     script_covered: 'You said {pct}% of your script.',
     elements_landed: 'The room heard {landed}.',
     steady_volume: 'Your volume stayed even all the way through.',

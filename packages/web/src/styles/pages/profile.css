@@ -14,11 +14,11 @@
 /* The row menus hang below their row, so the list must not clip them (.group hides overflow
    to round its corners; the rows here have no background of their own to clip). */
 .pf-list { overflow: visible; }
-.pf-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--s3); align-items: center; padding: var(--s3) var(--s2) var(--s3) var(--s4); min-height: 72px; }
+.pf-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--s3); align-items: center; padding-block: var(--s3); padding-inline: var(--s4) var(--s2); min-height: 72px; }
 .pf-row__main { min-width: 0; }
 .pf-row__name { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1) var(--s2); font-weight: 600; }
 .pf-row__n { min-width: 0; overflow-wrap: anywhere; }
-.pf-row__name .badge { min-height: 24px; padding: 0 8px 0 6px; font-size: 12px; line-height: 16px; }
+.pf-row__name .badge { min-height: 24px; padding-block: 0; padding-inline: 6px 8px; font-size: 12px; line-height: 16px; }
 .pf-row__name .badge .icon { width: 14px; height: 14px; }
 .pf-row__meta { font-size: 14px; line-height: 20px; color: var(--slate); margin-top: 2px; overflow-wrap: anywhere; }
 .pf-row__act { display: flex; align-items: center; gap: var(--s1); }
@@ -36,10 +36,10 @@
 
 /* toast */
 .pf-toaster {
-  position: fixed; left: 0; right: 0; bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + var(--s3)); z-index: calc(var(--z-tabbar) + 1);
+  position: fixed; inset-inline-start: 0; inset-inline-end: 0; bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + var(--s3)); z-index: calc(var(--z-tabbar) + 1);
   display: flex; justify-content: center; padding: 0 var(--gutter); pointer-events: none;
 }
-.pf-toaster .toast { pointer-events: auto; max-width: 560px; padding-right: var(--s4); animation: pf-toast-in var(--d3) var(--ease-in); }
+.pf-toaster .toast { pointer-events: auto; max-width: 560px; padding-inline-end: var(--s4); animation: pf-toast-in var(--d3) var(--ease-in); }
 @keyframes pf-toast-in { from { opacity: 0; transform: translateY(8px); } }
 @media (min-width: 1024px) { .pf-toaster { bottom: var(--s6); } }
 
@@ -48,7 +48,7 @@
 /* The language menu hangs below its row, so the group must not clip it. */
 .pf-set { overflow: visible; }
 .pf-set__row { position: relative; display: grid; grid-template-columns: 20px minmax(0, 1fr); column-gap: var(--s3); align-items: start; padding: var(--s3) var(--s4); min-height: 64px; }
-.pf-set__row + .pf-set__row::before { content: ""; position: absolute; top: 0; left: var(--s4); right: 0; height: 1px; background: var(--hairline); pointer-events: none; }
+.pf-set__row + .pf-set__row::before { content: ""; position: absolute; top: 0; inset-inline-start: var(--s4); inset-inline-end: 0; height: 1px; background: var(--hairline); pointer-events: none; }
 .pf-set__ic { grid-row: 1 / span 2; width: 20px; height: 20px; margin-top: 2px; color: var(--slate); }
 .pf-set__l { font-size: 14px; line-height: 20px; color: var(--slate); }
 .pf-set__v { grid-column: 2; margin-top: 2px; font-weight: 600; overflow-wrap: anywhere; }

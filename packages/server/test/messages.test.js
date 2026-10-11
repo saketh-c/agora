@@ -24,7 +24,7 @@ test('API messages exist in every language with the same parameters and no em or
 });
 
 test('apiMessage fills parameters and falls back to English', () => {
-  assert.match(apiMessage('rateLimited', { seconds: 42 }, 'es'), /42 segundos/);
-  assert.match(apiMessage('rateLimited', { seconds: 42 }, 'klingon'), /42 seconds/);
+  assert.match(apiMessage('rateLimited', { n: 42 }, 'es'), /42 segundos/);
+  assert.match(apiMessage('rateLimited', { n: 42 }, 'klingon'), /42 seconds/);
   assert.equal(apiMessage('geoOutside', { place: 'Houston, TX' }, 'vi').startsWith('Houston, TX nằm ngoài'), true);
 });

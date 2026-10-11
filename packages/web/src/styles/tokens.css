@@ -44,9 +44,14 @@
 
   /* type: Mona Sans (wide, 800) for display, Public Sans for text. Both self-hosted
      through Fontsource; the variable Mona Sans file carries the wdth axis, so
-     font-stretch: 125% is real, not synthesized. */
-  --font-display: 'Mona Sans Variable', 'Mona Sans', 'Public Sans Variable', system-ui, sans-serif;
-  --font-text: 'Public Sans Variable', 'Public Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+     font-stretch: 125% is real, not synthesized.
+     Other scripts follow the Latin fonts, so each is used only for its own characters and
+     downloads only when one is on screen (fonts.css): Noto Sans Arabic, Devanagari (Hindi) and
+     Telugu, self-hosted; Simplified Chinese from the system's fonts. i18n.css tunes weight,
+     width, tracking and line height per script. */
+  --font-scripts: 'Noto Sans Arabic Variable', 'Noto Sans Devanagari Variable', 'Noto Sans Telugu Variable', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Source Han Sans SC';
+  --font-display: 'Mona Sans Variable', 'Mona Sans', 'Public Sans Variable', var(--font-scripts), system-ui, sans-serif;
+  --font-text: 'Public Sans Variable', 'Public Sans', var(--font-scripts), system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 
   /* space: 4 8 12 16 24 32 48 64 (+96 hero) */
   --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px; --s9: 96px;

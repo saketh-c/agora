@@ -10,7 +10,7 @@ test('safe() removes terminal control sequences from network text', () => {
   assert.equal(safe(hostile), 'Council vote FAKE ALERT click here done');
   assert.equal(safe('a\u001b]0;new window title\u001b\\b'), 'ab');
   assert.equal(safe('bell\u0007 and backspace\u0008s and \u009b2J C1'), 'bell and backspaces and 2J C1');
-  assert.equal(safe('abc‮dcba‬'), 'abcdcba', 'bidi overrides could disguise text');
+  assert.equal(safe('abc\u202edcba\u202c'), 'abcdcba', 'bidi overrides could disguise text');
   assert.equal(safe('line one\nline two\ttab'), 'line one line two tab');
   assert.equal(safe('para one\n\npara two', { multiline: true }), 'para one\n\npara two');
   assert.equal(safe('Café Đà Nẵng, Señor'), 'Café Đà Nẵng, Señor', 'accents survive');

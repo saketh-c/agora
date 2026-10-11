@@ -1,4 +1,4 @@
-import { parseDate, tList } from '@agora/core';
+import { parseDate, weekdayShortNames } from '@agora/core';
 
 /**
  * The date tile: weekday over day number. The tile is the light, so its color is a signal:
@@ -9,7 +9,7 @@ export default function DateTile({ date, tone = 'go', size, className = '' }) {
   if (!date) return null;
   const { y, m, d } = parseDate(date);
   const weekday = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
-  const dow = tList('format.weekdaysShort')[weekday] || '';
+  const dow = weekdayShortNames()[weekday] || '';
   return (
     <span className={`tile${tone && tone !== 'go' ? ` tile--${tone}` : ''}${size === 'lg' ? ' tile--lg' : ''} ${className}`.trim()} aria-hidden="true">
       <span className="tile__dow">{dow}</span>

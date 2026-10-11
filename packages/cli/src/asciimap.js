@@ -1,4 +1,4 @@
-import { DFW_BOUNDS, nextMeetingFor, daysBetween, parseDate, tList, t } from '@agora/core';
+import { DFW_BOUNDS, nextMeetingFor, daysBetween, parseDate, tList, t, usesIntlFormats, formatMonthDay, compareText } from '@agora/core';
 import { c, padVisible, visibleLength } from './ui.js';
 
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -14,8 +14,12 @@ const BUCKETS = {
   none: { glyph: '?', color: (s) => c.gray(s) },
 };
 
-/** "Oct 13" / "13 de oct" / "13 thg 10": short enough for two legend columns in every language. */
+/**
+ * "Oct 13" / "13 de oct" / "13 thg 10" / "10月13日": short enough for two legend columns in
+ * every language. Languages that Intl formats get Intl's month and day.
+ */
 function monthDay(dateStr) {
+  if (usesIntlFormats()) return formatMonthDay(dateStr);
   const { m, d } = parseDate(dateStr);
   return t('cli.mapDate', { month: tList('format.monthsShort')[m - 1], day: d });
 }
@@ -39,7 +43,7 @@ function bucketFor(days) {
 export function mapLegend(cities, { today, next, gap } = {}) {
   const find = next || ((city) => nextMeetingFor(city, today, { publicCommentOnly: true }));
   return [...cities]
-    .sort((a, b) => a.name.localeCompare(b.name))
+    .sort((a, b) => compareText(a.name, b.name, 'en'))
     .map((city, i) => {
       const meeting = find(city);
       const days = meeting ? daysBetween(today, meeting.date) : null;

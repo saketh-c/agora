@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { getTopic, inferTopics, buildComment, t, getLocale, isLocale } from '@agora/core';
+import { getTopic, inferTopics, buildComment, t, getLocale, isLocale, speechPace, speechUnits, labelValue } from '@agora/core';
 import { apiMessage } from './messages.js';
 
 /**
@@ -57,11 +57,33 @@ Text inside <agenda_item>, <city_rules> and <draft> tags comes from a public dat
 
 Placeholders in double square brackets, such as ${NAME_PLACEHOLDER}, stand in for private details. Copy each one exactly as written and never guess what it stands for.`;
 
+/**
+ * Each language named precisely for the model: the variety, the script, and how to address
+ * the reader. `explain` speaks to the student; `comment` is what the student says to the
+ * council.
+ */
 const LANGUAGE = {
   en: { explain: 'English', comment: 'English' },
   es: { explain: 'Spanish as spoken in Texas and Mexico, speaking to the student informally with "tú"', comment: 'Spanish as spoken in Texas and Mexico, respectful toward the council' },
   vi: { explain: 'Vietnamese, speaking to the student as "bạn"', comment: 'Vietnamese, respectful toward the council' },
+  zh: { explain: 'Simplified Chinese (Mandarin as written in mainland China, simplified characters only), speaking to the student as "你"', comment: 'Simplified Chinese (Mandarin as written in mainland China, simplified characters only), respectful toward the council' },
+  hi: { explain: 'Hindi written in Devanagari script (everyday standard Hindi, not Sanskritized), speaking to the student as "आप"', comment: 'Hindi written in Devanagari script (everyday standard Hindi), respectful toward the council' },
+  te: { explain: 'Telugu written in Telugu script (everyday standard Telugu), speaking to the student as "మీరు"', comment: 'Telugu written in Telugu script (everyday standard Telugu), respectful toward the council' },
+  ar: { explain: 'Modern Standard Arabic in Arabic script, plain and friendly, speaking to the student directly', comment: 'Modern Standard Arabic in Arabic script, respectful toward the council' },
 };
+
+/** Keep numbers, times, dates and phone numbers in Latin digits, as the app shows them. */
+const DIGITS = 'Write every number, time, date and phone number with Latin digits (0-9). Keep names of people, cities, schools, programs and forms, URLs and email addresses exactly as given.';
+
+/**
+ * The longest comment the model may write, in the units the language is paced in: 220 English
+ * words take about as long to say as 340 Chinese characters or 150 Telugu words.
+ */
+function lengthLimit(lang, englishWords) {
+  const pace = speechPace(lang);
+  const n = Math.round((englishWords * pace.estimate) / speechPace('en').estimate);
+  return { n, unit: pace.unit === 'character' ? 'Chinese characters' : 'words' };
+}
 
 const POSITION = {
   support: 'they support the item',
@@ -145,6 +167,8 @@ function unwrap(text) {
 }
 
 const VIETNAMESE_LETTERS = /[ăâđêôơưạảấầẩẫậắằẳẵặẹẻẽếềểễệỉịĩọỏốồổỗộớờởỡợụủũứừửữựỳỵỷỹ]/i;
+/** The script each language is written in, for the languages that have their own. */
+const SCRIPT = { zh: /\p{Script=Han}/u, hi: /\p{Script=Devanagari}/u, te: /\p{Script=Telugu}/u, ar: /\p{Script=Arabic}/u };
 const SPANISH_WORDS = new Set(['el', 'la', 'los', 'las', 'de', 'del', 'que', 'y', 'en', 'para', 'por', 'con', 'una', 'un', 'es', 'su', 'sus', 'se', 'lo', 'al', 'más', 'como', 'pero', 'este', 'esta', 'son', 'tu', 'puedes']);
 const ENGLISH_WORDS = new Set(['the', 'and', 'of', 'to', 'is', 'in', 'for', 'with', 'that', 'this', 'are', 'it', 'on', 'be', 'you', 'your', 'will', 'can']);
 
@@ -153,6 +177,12 @@ const ENGLISH_WORDS = new Set(['the', 'and', 'of', 'to', 'is', 'in', 'for', 'wit
  * answer that came back in English for a Spanish or Vietnamese reader.
  */
 export function soundsLike(text, lang) {
+  // Languages with their own script: most letters must be in it (names and links stay Latin).
+  if (SCRIPT[lang]) {
+    const letters = String(text || '').match(/\p{L}/gu) || [];
+    if (letters.length < 12) return true;
+    return letters.filter((ch) => SCRIPT[lang].test(ch)).length / letters.length >= 0.5;
+  }
   const words = String(text || '').toLowerCase().match(/[\p{L}']+/gu) || [];
   if (lang === 'en' || words.length < 6) return true;
   if (lang === 'vi') return words.filter((w) => VIETNAMESE_LETTERS.test(w)).length / words.length >= 0.25;
@@ -180,7 +210,7 @@ export function explanationTemplate({ summary, city, topics, locale }) {
   if (summary) parts.push(String(summary).trim());
   if (topic.id !== 'other') parts.push(tr('drawer.whyMatters', { angle: topic.youthAngle }));
   const rules = city && city.publicComment && city.publicComment.summary;
-  parts.push(rules ? `${tr('drawer.howToSpeakHere')}: ${rules}` : apiMessage('explainWeighIn', null, lang));
+  parts.push(rules ? labelValue(tr('drawer.howToSpeakHere'), rules, lang) : apiMessage('explainWeighIn', null, lang));
   return parts.join('\n\n');
 }
 
@@ -222,13 +252,32 @@ function explainPrompt({ title, summary, city }, lang) {
   const rules = city && city.publicComment && city.publicComment.summary;
   return [
     `Explain this agenda item from ${council} to a high school student in three short paragraphs: (1) what it actually does, in plain words; (2) who it affects and why a 16-year-old might care; (3) one concrete way to weigh in, using the city's public comment rules if they are given. Stay neutral.`,
-    `Write the whole answer in ${LANGUAGE[lang].explain}, even though the material is in English. Return only the explanation, with no heading.`,
+    `Write the whole answer in ${LANGUAGE[lang].explain}, even though the material is in English. Return only the explanation, with no heading.${lang === 'en' ? '' : ` ${DIGITS}`}`,
     '',
     `<agenda_item>\nTitle: ${asData(title)}\nSummary: ${asData(summary) || '(none provided)'}\n</agenda_item>`,
     rules ? `<city_rules>\n${asData(rules)}\n</city_rules>` : '',
   ]
     .filter((line, i) => line || i === 2)
     .join('\n');
+}
+
+/** Chinese names are two or three characters; elsewhere a name shorter than 3 letters is too common a fragment to hide. */
+function minLength(value) {
+  return /\p{Script=Han}/u.test(value) ? 2 : 3;
+}
+
+/**
+ * Where a private name or school appears in the student's own words. It must stand as a word:
+ * not inside a longer word ("Al" in "Also"), with letters' marks counted as part of a word
+ * (Devanagari, Telugu). Chinese has no spaces between words, so a Chinese name matches
+ * anywhere; an Arabic name may carry a one-letter prefix (و and, ب with, ل for, ف so, ك like).
+ */
+export function privacyPattern(value) {
+  const body = escapeRe(value);
+  if (/\p{Script=Han}/u.test(value)) return new RegExp(body, 'gu');
+  const edge = '[\\p{L}\\p{M}\\p{N}]';
+  const before = /\p{Script=Arabic}/u.test(value) ? `(?:(?<!${edge})|(?<=(?<!${edge})[\\u0648\\u0628\\u0644\\u0641\\u0643]{1,2}))` : `(?<!${edge})`;
+  return new RegExp(`${before}${body}(?!${edge})`, 'giu');
 }
 
 /**
@@ -245,7 +294,7 @@ function privateDraft(input, lang) {
       [name, NAME_PLACEHOLDER],
       [school, SCHOOL_PLACEHOLDER],
     ]) {
-      if (value.length >= 3) out = out.replace(new RegExp(`(?<![\\p{L}\\p{N}])${escapeRe(value)}(?![\\p{L}\\p{N}])`, 'giu'), token);
+      if (value.length >= minLength(value)) out = out.replace(privacyPattern(value), token);
     }
     return out;
   };
@@ -266,9 +315,10 @@ function privateDraft(input, lang) {
 function commentPrompt({ draft, lang, cityName, position, placeholders }) {
   const meeting = cityName ? `a ${cityName} City Council meeting` : 'a city council meeting';
   const keep = placeholders.length ? ` Keep ${placeholders.join(' and ')} exactly as written.` : '';
+  const limit = lengthLimit(lang, 220);
   return [
-    `Rewrite the public comment in <draft> so it sounds natural when a student says it aloud at ${meeting}. Keep it under 220 words, keep every fact and request in it, keep it respectful and nonpartisan, and keep the student's position: ${POSITION[position] || POSITION.ask}.${keep}`,
-    `Write it in ${LANGUAGE[lang].comment}. Return only the comment text, with no title, notes, quotation marks or tags.`,
+    `Rewrite the public comment in <draft> so it sounds natural when a student says it aloud at ${meeting}. Keep it under ${limit.n} ${limit.unit}, keep every fact and request in it, keep it respectful and nonpartisan, and keep the student's position: ${POSITION[position] || POSITION.ask}.${keep}`,
+    `Write it in ${LANGUAGE[lang].comment}. Return only the comment text, with no title, notes, quotation marks or tags.${lang === 'en' ? '' : ` ${DIGITS}`}`,
     '',
     `<draft>\n${asData(draft)}\n</draft>`,
   ].join('\n');
@@ -276,8 +326,10 @@ function commentPrompt({ draft, lang, cityName, position, placeholders }) {
 
 function checkComment(raw, { lang, placeholders, draft }) {
   const text = undash(unwrap(raw));
-  const words = text.split(/\s+/).filter(Boolean).length;
-  if (words > MAX_COMMENT_WORDS) throw new AiFailure('declined', `The rewrite was ${words} words long.`);
+  // Counted the way the language is paced: words, or characters in Chinese.
+  const size = speechUnits(text, lang);
+  const max = lengthLimit(lang, MAX_COMMENT_WORDS);
+  if (size > max.n) throw new AiFailure('declined', `The rewrite was ${size} ${max.unit} long.`);
   for (const token of placeholders) {
     if (!text.match(PLACEHOLDER_PATTERNS[token])) throw new AiFailure('declined', `The rewrite dropped ${token}.`);
   }

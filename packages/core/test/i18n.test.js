@@ -1,6 +1,7 @@
 import { test, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { LOCALES, DICTIONARIES, dictionaryKeys, t, tn, tList, joinList, setLocale, getLocale, isLocale, detectLocale } from '../src/i18n/index.js';
+import { LOCALES, DICTIONARIES, t, tn, tList, joinList, setLocale, getLocale, isLocale, detectLocale, isPluralForms, pluralCategoriesFor } from '../src/i18n/index.js';
+import { compareLocale, units, getPath } from '../../../scripts/lib/i18n-tools.mjs';
 import { collectCityStrings, localizeCity, localizeCities, translationCoverage } from '../src/i18n/data.js';
 import { getTopic, topicList } from '../src/topics.js';
 import { formatDate, formatTime, relativeDays, describeRecurrence } from '../src/format.js';
@@ -26,11 +27,12 @@ const city = {
   sources: [],
 };
 
-test('every locale mirrors the English dictionary exactly', () => {
-  const enKeys = dictionaryKeys(DICTIONARIES.en);
+test('every locale mirrors the English dictionary: same keys, list lengths, plural forms, params, no dashes', () => {
   for (const { code } of LOCALES) {
-    const keys = dictionaryKeys(DICTIONARIES[code]);
-    assert.deepEqual(new Set(keys), new Set(enKeys), `${code} keys differ from English`);
+    const r = compareLocale(code);
+    assert.deepEqual(r.missing, [], `${code} is missing keys`);
+    assert.deepEqual(r.extra, [], `${code} has keys English does not`);
+    assert.deepEqual(r.problems, [], `${code} problems`);
   }
 });
 
@@ -45,15 +47,14 @@ test('no locale uses an em dash or en dash', () => {
   }
 });
 
-test('every locale keeps the same parameters in each string', () => {
-  const params = (s) => [...String(s).matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort().join(',');
-  const get = (dict, key) => key.split('.').reduce((o, k) => (o == null ? undefined : o[k]), dict);
-  for (const key of dictionaryKeys(DICTIONARIES.en)) {
-    const en = get(DICTIONARIES.en, key);
-    if (typeof en !== 'string') continue;
-    for (const { code } of LOCALES) {
-      const other = get(DICTIONARIES[code], key);
-      assert.equal(params(other), params(en), `${code} ${key} parameters differ`);
+test('every plural object has the forms its language uses', () => {
+  const expected = { en: ['one', 'other'], es: ['one', 'other'], vi: ['other'], zh: ['other'], hi: ['one', 'other'], te: ['one', 'other'], ar: ['zero', 'one', 'two', 'few', 'many', 'other'] };
+  for (const [code, forms] of Object.entries(expected)) {
+    assert.deepEqual(pluralCategoriesFor(code), forms, code);
+    for (const { path, value } of units(DICTIONARIES.en)) {
+      if (!isPluralForms(value)) continue;
+      const theirs = getPath(DICTIONARIES[code], path);
+      for (const c of forms) assert.equal(typeof theirs[c], 'string', `${code} ${path}.${c}`);
     }
   }
 });

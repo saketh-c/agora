@@ -393,7 +393,7 @@ export default function UiGallery() {
           <div className="panel">
             <div className="sheet__bar">
               <MeetingDetailBadge meeting={sample.go} homeCityId="plano" />
-              <button type="button" className="iconbtn" aria-label={t('common.close')} style={{ margin: '-8px -8px 0 0' }}>
+              <button type="button" className="iconbtn" aria-label={t('common.close')} style={{ marginBlock: '-8px 0', marginInline: '0 -8px' }}>
                 <Icon name="x" />
               </button>
             </div>
@@ -601,7 +601,7 @@ export default function UiGallery() {
               </div>
             </div>
             <div className="next__do">
-              <p className="next__prephead">{t('ui.prep.progress', { done: 1, total: 4 })}</p>
+              <p className="next__prephead">{t('ui.prep.progress', { done: 1, n: 4 })}</p>
               <ProgressLights steps={stepLabels} label={t('ui.prep.progressLabel')} />
               <div className="next__actions">
                 <Link className="btn btn--primary" to="/prepare">
@@ -677,13 +677,13 @@ export default function UiGallery() {
                 <span />
               </div>
               <div className="ruler__fill" style={{ width: '50%' }} />
-              <div className="ruler__limit" style={{ left: '85.71%' }} aria-hidden="true" />
+              <div className="ruler__limit" style={{ insetInlineStart: '85.71%' }} aria-hidden="true" />
             </div>
             <div className="ruler__ticks num" aria-hidden="true">
-              <span style={{ left: 0 }}>0:00</span>
-              <span style={{ left: '28.57%' }}>1:00</span>
-              <span style={{ left: '57.14%' }}>2:00</span>
-              <span style={{ left: '85.71%' }}>3:00</span>
+              <span style={{ insetInlineStart: 0 }}>0:00</span>
+              <span style={{ insetInlineStart: '28.57%' }}>1:00</span>
+              <span style={{ insetInlineStart: '57.14%' }}>2:00</span>
+              <span style={{ insetInlineStart: '85.71%' }}>3:00</span>
             </div>
             <p className="ruler__note">Timed at a steady 130 words a minute.</p>
           </div>

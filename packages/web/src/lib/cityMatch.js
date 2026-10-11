@@ -2,16 +2,12 @@
  * Matching what someone types against a city: its name, its initials, or its county. Pure, so
  * the Node tests run it. The Cities directory uses it; any city search can.
  */
-import { t } from '@agora/core';
+import { searchFold, t } from '@agora/core';
 
 /** Lowercase, accents and extra spaces removed: "  Fort Wórth " -> "fort worth". */
 export function fold(s) {
-  return String(s || '')
-    .normalize('NFD')
-    .replace(/\p{M}/gu, '')
-    .toLowerCase()
-    .replace(/\s+/g, ' ')
-    .trim();
+  // Not every mark: in Devanagari and Telugu the vowel signs are letters (core's searchFold).
+  return searchFold(s);
 }
 
 /**

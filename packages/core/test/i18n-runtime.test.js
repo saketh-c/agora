@@ -10,8 +10,9 @@ import { getLocale, hasLocale, isLocale, LOCALES, loadLocale, setLocale, t } fro
 test('only English is loaded until another language is asked for; t() falls back to English meanwhile', async () => {
   assert.deepEqual(
     LOCALES.map((l) => l.code),
-    ['en', 'es', 'vi'],
+    ['en', 'es', 'vi', 'zh', 'hi', 'te', 'ar'],
   );
+  for (const code of ['zh', 'hi', 'te', 'ar']) assert.equal(hasLocale(code), false, `${code} waits for loadLocale`);
   assert.equal(isLocale('es'), true, 'a language the app speaks');
   assert.equal(hasLocale('en'), true);
   assert.equal(hasLocale('es'), false, 'not downloaded yet');

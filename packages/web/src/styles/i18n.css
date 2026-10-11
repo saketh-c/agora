@@ -1,0 +1,105 @@
+/* Other scripts and right to left.
+   The podium type system is built on Latin: Mona Sans' wide cut at 800, tight tracking, and
+   line heights sized for Latin letters. Chinese, Hindi (Devanagari), Telugu and Arabic keep the
+   same sizes and colors, and change only what their scripts need. Rules key on :lang() of each
+   element, so an English island inside (a headline, the wordmark) keeps the Latin styling.
+   Many are !important on purpose: they must win over every component and page rule, including
+   page stylesheets that load later. */
+
+/* ---------- Every non-Latin script: no tracking, no wide cut ----------
+   Letter-spacing breaks Arabic joining and pulls Devanagari and Telugu clusters apart;
+   font-stretch only exists for the Latin display face.
+   Display numbers made of Latin digits alone keep the podium's type in every language: the
+   date tile's day, the countdown, the timers, the step numbers and the report's figures
+   have no script to protect, so they keep Mona Sans' wide cut, weight and tracking. */
+:is(:lang(zh), :lang(hi), :lang(te), :lang(ar)):not(.tile__day, .next__count .t-hero.num, .ruler__read .t-title.num, .pr-count span, .pr-timer__n, .pr-stat dd, .step__num) {
+  letter-spacing: normal !important;
+  word-spacing: normal !important;
+  font-stretch: normal !important;
+}
+
+/* Display type: 800 is Mona Sans' Latin weight. The script fonts read heavier at the same
+   number, and the system Chinese fonts stop at bold (PingFang SC at semibold), so display
+   text uses 700 in these languages (not the digit-only numbers above). */
+:is(.t-hero:not(.num), .t-title:not(.num), .stat__n, .avatar, .unit, .next__word, .statline__n, .brand__word):is(:lang(zh), :lang(hi), :lang(te), :lang(ar)) {
+  font-weight: 700 !important;
+}
+
+/* Headings: never under 1.35, so stacked marks and tall clusters never touch the next line. */
+:is(h1, h2, h3, h4, .t-hero, .t-title, .t-heading, .unit, .next__word, .answer__a, .meetcard__t, .figure__t, .post__t, .pr-find__t):is(:lang(zh), :lang(hi), :lang(te), :lang(ar)) {
+  line-height: 1.4 !important;
+}
+:is(h1, h2, h3, h4, .t-hero, .t-title, .t-heading):is(:lang(zh), :lang(hi), :lang(te), :lang(ar)) * {
+  line-height: inherit !important;
+}
+
+/* ---------- Devanagari and Telugu: room for matras above and vattu below ----------
+   Noto Sans Devanagari and Telugu are about 1.7em from top to bottom, so every text box gets
+   that much line height (single-line labels with overflow hidden would otherwise clip the
+   marks). Headings keep 1.45. */
+:is(:lang(hi), :lang(te)):not(:is(h1, h2, h3, h4, .t-hero, .t-title, .t-heading, .unit, .next__word, .answer__a, .meetcard__t, .figure__t, .post__t, .pr-find__t), :is(h1, h2, h3, h4, .t-hero, .t-title, .t-heading) *) {
+  line-height: 1.7 !important;
+}
+:is(h1, h2, h3, h4, .t-hero, .t-title, .t-heading, .unit, .next__word, .answer__a, .meetcard__t, .figure__t, .post__t, .pr-find__t):is(:lang(hi), :lang(te)) {
+  line-height: 1.45 !important;
+}
+
+/* ---------- Arabic: room for the marks above and below the baseline ---------- */
+:lang(ar):not(:is(h1, h2, h3, h4, .t-hero, .t-title, .t-heading, .unit, .next__word, .answer__a, .meetcard__t, .figure__t, .post__t, .pr-find__t), :is(h1, h2, h3, h4, .t-hero, .t-title, .t-heading) *) {
+  line-height: 1.65 !important;
+}
+
+/* ---------- Chinese: comfortable body text ---------- */
+:is(p, li, dd, .help, .notice, .lrow__m, .row__meta, .post__b, .draft__text):lang(zh) {
+  line-height: 1.6;
+}
+
+/* The digits in big numbers stay in the Latin display face at its own line height; a date
+   tile, a countdown or a timer has no script marks to make room for. */
+:is(.tile__day, .pr-count span, .pr-timer__n, .stat__n, .statline__n, .ruler__read .t-title):is(:lang(zh), :lang(hi), :lang(te), :lang(ar)) {
+  line-height: 1.15 !important;
+}
+
+/* Telugu text with a danda (rare) should not pull in the Devanagari font. */
+:lang(te) {
+  --font-scripts: 'Noto Sans Telugu Variable', 'Noto Sans Devanagari Variable', 'Noto Sans Arabic Variable', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Source Han Sans SC';
+}
+
+/* A language's own name in the language menus, on a page in another language: drawn with the
+   system's font for that script, so opening the menu never downloads three script fonts. */
+html:not(:lang(ar)) .langname:lang(ar),
+html:not(:lang(hi)) .langname:lang(hi),
+html:not(:lang(te)) .langname:lang(te),
+html:not(:lang(zh)) .langname:lang(zh) {
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+/* ---------- Right to left ---------- */
+
+/* Icons that point along the line of reading (chevrons, arrows, external link, lists) face
+   the other way. `scale` composes with any rotation a component already sets. */
+[dir="rtl"] .icon--dir {
+  scale: -1 1;
+}
+
+/* English islands on a right-to-left page (headlines, agenda items read from city sites,
+   addresses) take their direction from their own text, so an English sentence keeps its
+   period at its end instead of the start. A block of them still lines up with its row, on
+   the page's start edge (the right), like the source and date under a headline; with
+   plaintext, "start" would follow the English text to the left. An English original marked
+   dir="ltr" (a team post or city rule not translated yet, lib/textDir.js) reads as a
+   left-to-right block of its own. */
+[dir="rtl"] [lang="en"]:not([dir]) {
+  unicode-bidi: plaintext;
+  text-align: right; /* physical: the start edge of the right-to-left page this rule is for */
+}
+
+/* Things that are left to right in every language: times and counts set in .num, the map, and
+   charts with time or number axes (their SVG text anchors are written for LTR). */
+.num {
+  unicode-bidi: isolate;
+}
+.map__leaflet,
+svg.chart {
+  direction: ltr;
+}

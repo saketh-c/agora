@@ -1,8 +1,8 @@
 import { upcomingMeetings, daysBetween, hourOf, agendaFor, parseDate, compareDates } from './schedule.js';
 import { haversineMiles, cityPoint } from './geo.js';
 import { getTopic, isTopicId } from './topics.js';
-import { milesText, formatDate, formatTime } from './format.js';
-import { t, tn, tList, joinList, isLocale, lowerFirst } from './i18n/runtime.js';
+import { milesText, formatDate, formatTime, monthShortNames } from './format.js';
+import { t, tn, joinList, isLocale, lowerFirst } from './i18n/runtime.js';
 
 /**
  * User preferences. No account needed: the web app keeps these in localStorage and
@@ -103,7 +103,7 @@ export function scoreMeeting(meeting, city, prefs, { today } = {}) {
         recent.filter((it) => it.meetingDate === latest),
         prefs.interests,
       );
-      add(1, t('match.recentAgenda', { topics, month: tList('format.monthsShort')[m - 1], day: d }), 'topic');
+      add(1, t('match.recentAgenda', { topics, month: monthShortNames()[m - 1], day: d }), 'topic');
     }
   }
 
@@ -135,7 +135,7 @@ export function scoreMeeting(meeting, city, prefs, { today } = {}) {
     if (distanceMiles != null) {
       const distance = milesText(distanceMiles);
       const past = prefs.maxMiles != null && distanceMiles > prefs.maxMiles;
-      add(distancePoints(distanceMiles, prefs.maxMiles), past ? t('match.awayPastLimit', { distance, max: prefs.maxMiles }) : t('match.away', { distance }), 'distance');
+      add(distancePoints(distanceMiles, prefs.maxMiles), past ? t('match.awayPastLimit', { distance, n: prefs.maxMiles }) : t('match.away', { distance }), 'distance');
     }
   }
   if (prefs.homeCityId && city && prefs.homeCityId === city.cityId) add(3, t('match.yourCity'), 'distance');

@@ -1,5 +1,6 @@
 import { getTopic } from './topics.js';
-import { t, tList, lowerFirst } from './i18n/runtime.js';
+import { t, tList, lowerFirst, stripIsolates, getLocale, isLocale } from './i18n/runtime.js';
+import { speechPace, speechUnits } from './text.js';
 
 /** English glossary, kept for callers that need a stable reference. Prefer glossary() for display. */
 export const GLOSSARY = Object.freeze(tList('civics.glossary', 'en'));
@@ -70,14 +71,22 @@ export function buildComment(input = {}) {
   // The ask continues "I am asking you to ...", so "Keep the bus" reads "keep the bus" (acronyms stay).
   const close = ask ? tr('civics.comment.closeAsk', { ask: lowerFirst(ask.replace(/\.$/, '')) }) : tr('civics.comment.closeDefault');
 
-  return [intro, subject, stance, why, close].join('\n\n');
+  // The draft is the student's own text (copied, edited, spoken), so it carries no bidi
+  // isolates: in Arabic the bidi algorithm lays out a name or a city on its own.
+  return stripIsolates([intro, subject, stance, why, close].join('\n\n'));
 }
 
-/** Rough spoken length: about 130 words per minute. */
-export function estimateSpeakingSeconds(text) {
-  const words = String(text || '')
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean).length;
-  return Math.round((words / 130) * 60);
+/**
+ * Rough spoken length of a text in the language it is written in: words (or, in Chinese,
+ * characters) at that language's steady speaking rate, SPEECH_PACE[lang].estimate (130 words a
+ * minute in English, 200 characters a minute in Chinese).
+ */
+export function estimateSpeakingSeconds(text, locale) {
+  const lang = locale && isLocale(locale) ? locale : getLocale();
+  return Math.round((speechUnits(text, lang) / speechPace(lang).estimate) * 60);
+}
+
+/** The speaking rate estimateSpeakingSeconds() assumes, in units (words or characters) a minute. */
+export function speakingRate(locale) {
+  return speechPace(locale && isLocale(locale) ? locale : getLocale()).estimate;
 }

@@ -4,7 +4,7 @@
 
 /* ---------- Skip link ---------- */
 .skip {
-  position: absolute; left: var(--s4); top: -100px; z-index: var(--z-skip);
+  position: absolute; inset-inline-start: var(--s4); top: -100px; z-index: var(--z-skip);
   background: var(--ink); color: var(--card); padding: var(--s3) var(--s4); border-radius: var(--r-pill);
   font-weight: 600; text-decoration: none;
 }
@@ -22,7 +22,7 @@
 .topbar { position: sticky; top: 0; z-index: var(--z-header); background: var(--card); border-bottom: 1px solid var(--hairline); padding-top: env(safe-area-inset-top); }
 .topbar__in { height: var(--header-h); display: flex; align-items: center; gap: var(--s4); min-width: 0; }
 .topnav { display: none; }
-.tools { margin-left: auto; display: flex; align-items: center; gap: var(--s2); flex: none; }
+.tools { margin-inline-start: auto; display: flex; align-items: center; gap: var(--s2); flex: none; }
 .tools__item { position: relative; }
 .tool {
   display: inline-flex; align-items: center; justify-content: center; gap: var(--s2);
@@ -45,7 +45,7 @@
 .avatar--guest .icon { width: 20px; height: 20px; }
 .avatar--soft { background: var(--well); color: var(--ink); }
 @media (min-width: 1024px) {
-  .topnav { display: flex; gap: var(--s1); margin-left: var(--s6); min-width: 0; }
+  .topnav { display: flex; gap: var(--s1); margin-inline-start: var(--s6); min-width: 0; }
   .topnav a {
     display: inline-flex; align-items: center; height: 40px; padding: 0 var(--s4);
     border-radius: var(--r-pill); text-decoration: none; font-weight: 600; color: var(--slate); white-space: nowrap;
@@ -54,7 +54,7 @@
   .topnav a[aria-current="page"] { background: var(--ink-tint); color: var(--ink); }
   .topnav a:hover { color: var(--ink); background: var(--hover); }
   .topnav a[aria-current="page"]:hover { background: var(--ink-tint); }
-  .tool { padding: 0 var(--s3) 0 10px; }
+  .tool { padding-block: 0; padding-inline: 10px var(--s3); }
   .tool__label, .tool__chev { display: inline; }
   .tool--avatar { padding: 0 4px; }
 }
@@ -112,15 +112,16 @@ html.shot-full .tabbar { position: absolute; }
 .page-error .empty { margin-top: var(--s5); }
 .page-error__detail { margin-top: var(--s4); font-size: 12px; line-height: 16px; color: var(--muted); overflow-wrap: anywhere; }
 
-/* ---------- New version ready (UpdatePrompt) ----------
-   A toast above the tab bar, like the pages' own; it stays until refreshed or dismissed. */
+/* ---------- Shell toasts: a new version (UpdatePrompt), a language that could not load ----------
+   Toasts above the tab bar, like the pages' own, stacked when both show. The new version
+   stays until refreshed or dismissed; the language notice also leaves on its own. */
 .update {
-  position: fixed; left: 0; right: 0; z-index: calc(var(--z-tabbar) + 1);
+  position: fixed; inset-inline-start: 0; inset-inline-end: 0; z-index: calc(var(--z-tabbar) + 1);
   bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + var(--s3));
-  display: flex; justify-content: center; padding: 0 var(--gutter); pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; gap: var(--s2); padding: 0 var(--gutter); pointer-events: none;
 }
-.update__toast { pointer-events: auto; max-width: 560px; gap: var(--s2); padding-right: var(--s1); animation: update-in var(--d3) var(--ease-in); }
-.update__toast > .icon { margin-right: var(--s1); }
+.update__toast { pointer-events: auto; max-width: 560px; gap: var(--s2); padding-inline-end: var(--s1); animation: update-in var(--d3) var(--ease-in); }
+.update__toast > .icon { margin-inline-end: var(--s1); }
 .update__text { flex: 1 1 auto; min-width: 0; }
 .update__toast .btn { flex: none; }
 .update__x { color: var(--card); }

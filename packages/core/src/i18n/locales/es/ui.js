@@ -123,7 +123,7 @@ export default {
       day: 'El día de la reunión',
       after: 'Después: cuenta cómo te fue',
     },
-    progress: '{done} de {total} pasos listos',
+    progress: '{done} de {n} pasos listos',
     progressLabel: 'Tu preparación',
     continue: 'Sigue: {step}',
     done: 'Listo',

@@ -1,17 +1,17 @@
 /** Dữ liệu ( /insights ): các hội đồng họp khi nào và ra sao, bằng biểu đồ có tiêu đề nêu kết luận. */
 export default {
   heading: 'Dữ liệu',
-  lead: 'Cách {n} hội đồng thành phố ở Dallas-Fort Worth họp, theo lịch chính thức của họ. Số liệu tính cho {days} ngày tới.',
+  lead: 'Cách {n} hội đồng thành phố ở Dallas-Fort Worth họp, theo lịch chính thức của họ. Số liệu tính cho {days} tới.',
   inTen: '{n} trên 10',
-  statMeetings: 'cuộc họp hội đồng trong {days} ngày tới',
+  statMeetings: 'cuộc họp hội đồng trong {n} ngày tới',
   statEvening: 'bắt đầu từ {time} trở đi',
   statSpeak: 'cho công chúng phát biểu',
   schoolTitle: {
-    one: '{n} trên {total} hội đồng họp trong giờ học',
-    other: '{n} trên {total} hội đồng họp trong giờ học',
+    one: '{n} trên {councils} họp trong giờ học',
+    other: '{n} trên {councils} họp trong giờ học',
   },
   schoolNone: 'Không hội đồng nào họp trong giờ học',
-  schoolSub: 'Các cuộc họp trong {days} ngày tới bắt đầu trong giờ học',
+  schoolSub: 'Các cuộc họp trong {n} ngày tới bắt đầu trong giờ học',
   schoolRest: {
     one: '{n} hội đồng còn lại họp ngoài giờ học.',
     other: '{n} hội đồng còn lại họp ngoài giờ học.',
@@ -23,7 +23,7 @@ export default {
   schoolDef: 'Giờ học ở đây là các ngày trong tuần từ {from} đến {to}.',
   heatTitle: '{day} lúc {time} là lúc có nhiều cuộc họp nhất',
   heatEmpty: 'Không có cuộc họp nào trong khoảng này',
-  heatSub: 'Các cuộc họp trong {days} ngày tới, theo giờ bắt đầu và ngày trong tuần',
+  heatSub: 'Các cuộc họp trong {n} ngày tới, theo giờ bắt đầu và ngày trong tuần',
   heatNone: 'Không có cuộc họp vào {days}.',
   limitTitle: {
     one: 'Đa số hội đồng cho bạn {n} phút để phát biểu',

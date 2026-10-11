@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { glossary, lowerFirst, speakingTips, t, tn } from '@agora/core';
+import { glossary, joinItems, lowerFirst, speakingTips, t, tn } from '@agora/core';
 import { Icon, Sheet } from '../ui/index.js';
 
 /** Terms named in the "Words you'll hear" row: consent agenda, public hearing, quorum. */
@@ -28,7 +28,7 @@ export default function Reference() {
   const tips = speakingTips();
   const terms = glossary();
   const sample = SAMPLE_TERMS.map((i) => terms[i] && terms[i].term).filter(Boolean);
-  const sampleText = sample.map((term, i) => (i === 0 ? term : lowerFirst(term))).join(', ');
+  const sampleText = joinItems(sample.map((term, i) => (i === 0 ? term : lowerFirst(term))));
 
   return (
     <section className="ref" aria-labelledby="ref-h">

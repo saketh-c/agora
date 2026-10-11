@@ -67,6 +67,8 @@ export function TimeRuler({ seconds, limitSec, note, label, readout = true, clas
           </span>
         </div>
       )}
+      {/* A gauge of the time used, like a progress bar: it fills from the start of the line (the
+          right in Arabic), under a readout that reads the same way. */}
       <div className="ruler__track" role="img" aria-label={t('rehearse.ruler.aria', { time: clock(s), limit: clock(limitSec) })}>
         <div className="ruler__zones" aria-hidden="true">
           <span style={{ flex: `0 0 ${pct(limitSec - warn)}` }} />
@@ -74,11 +76,11 @@ export function TimeRuler({ seconds, limitSec, note, label, readout = true, clas
           <span />
         </div>
         <div className="ruler__fill" style={{ width: pct(Math.min(s, max)) }} />
-        <div className="ruler__limit" style={{ left: pct(limitSec) }} aria-hidden="true" />
+        <div className="ruler__limit" style={{ insetInlineStart: pct(limitSec) }} aria-hidden="true" />
       </div>
       <div className="ruler__ticks num" aria-hidden="true">
         {rulerTicks(limitSec, max).map((tick) => (
-          <span key={tick.s} style={{ left: `${tick.left.toFixed(2)}%` }}>
+          <span key={tick.s} style={{ insetInlineStart: `${tick.left.toFixed(2)}%` }}>
             {clock(tick.s)}
           </span>
         ))}
@@ -278,12 +280,15 @@ export function EyeStrip({ title, note, cells, labels }) {
           </table>
         ) : (
           <>
-            <div className="pr-strip" role="img" aria-label={t('rehearse.charts.stripAria', { on, known, total: cells.length })} style={{ '--cells': shown.length }}>
+            {/* A chart of the run second by second: its time axis runs left to right in every
+                language, like the axes of the charts above it (charts stay left to right; gauges
+                such as the ruler and the timer fill from the start of the line). */}
+            <div className="pr-strip" dir="ltr" role="img" aria-label={t('rehearse.charts.stripAria', { on, n: known, total: cells.length })} style={{ '--cells': shown.length }}>
               {shown.map((c, i) => (
                 <span key={i} className={c === true ? 'is-on' : c === false ? 'is-off' : 'is-none'} />
               ))}
             </div>
-            <div className="pr-strip__axis num" aria-hidden="true">
+            <div className="pr-strip__axis num" dir="ltr" aria-hidden="true">
               <span>0:00</span>
               <span>{clock(cells.length)}</span>
             </div>

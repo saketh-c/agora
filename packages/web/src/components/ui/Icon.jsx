@@ -88,6 +88,14 @@ const FILL = {
 
 export const ICON_NAMES = Object.freeze([...Object.keys(LINE), ...Object.keys(FILL)]);
 
+/**
+ * Icons that point along the line of reading. Right to left (Arabic) they face the other way
+ * (class icon--dir, styles/i18n.css): chevrons and arrows, the external-link arrow, the
+ * "moved" arrow, and the left-aligned lines of the list, news and chat glyphs. Play, share,
+ * directions and clock icons keep their shape in every language.
+ */
+export const DIRECTIONAL_ICONS = Object.freeze(new Set(['chev-r', 'chev-l', 'ext', 'moved', 'list', 'news', 'chat', 'tune']));
+
 function renderChild(node, i) {
   const { t: Tag, ...attrs } = node;
   return <Tag key={i} {...attrs} />;
@@ -100,7 +108,7 @@ export default function Icon({ name, size, label, className = '', ...rest }) {
     if (import.meta.env && import.meta.env.DEV) console.warn(`Icon: unknown name "${name}"`);
     return null;
   }
-  const cls = ['icon', size && size !== 24 ? `icon--${size}` : '', filled ? 'icon--fill' : '', className].filter(Boolean).join(' ');
+  const cls = ['icon', size && size !== 24 ? `icon--${size}` : '', filled ? 'icon--fill' : '', DIRECTIONAL_ICONS.has(name) ? 'icon--dir' : '', className].filter(Boolean).join(' ');
   return (
     <svg className={cls} viewBox="0 0 24 24" focusable="false" aria-hidden={label ? undefined : 'true'} role={label ? 'img' : undefined} aria-label={label} {...rest}>
       {children.map(renderChild)}
