@@ -154,6 +154,13 @@ test('reasons come strongest first, so the plan summary names what mattered', ()
   const plan = buildPlan(cities, prefs, { today: '2026-10-10' });
   assert.equal(plan.meetings[0].reasons[0].kind, 'distance');
   assert.match(plan.summary, /\(under 1 mile away; evening meeting, after school\)/);
+  // The reasons take the language's own brackets and separator (match.why, match.whySep).
+  setLocale('zh');
+  try {
+    assert.match(buildPlan(cities, prefs, { today: '2026-10-10' }).summary, /（[^()（）;]+；[^()（）;]+）。$/);
+  } finally {
+    setLocale('en');
+  }
 });
 
 test('a meeting past the user\'s own limit counts against it, even under 10 miles', () => {

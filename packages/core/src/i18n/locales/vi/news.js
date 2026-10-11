@@ -43,4 +43,5 @@ export default {
   pending: 'Một số tòa soạn vẫn đang tải. Hãy thử lại sau giây lát để xem thêm.',
   keepReading: 'Thêm từ các tòa soạn địa phương',
   coverage: 'Tin về {topic}',
+  sourceDate: '{source}, {date}',
 };

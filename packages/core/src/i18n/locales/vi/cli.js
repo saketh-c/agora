@@ -254,7 +254,7 @@ export default {
     heading: 'Thiết lập chỗ của bạn',
     intro: 'Không cần tài khoản. Câu trả lời được lưu trên máy này và bạn có thể chạy lại "{cmd} setup" bất cứ lúc nào.',
     language: 'Ngôn ngữ ({codes})',
-    languageRetry: 'Gõ en, es, hoặc vi.',
+    languageRetry: 'Gõ một trong các mã sau: {codes}.',
     q1: '1. Bạn quan tâm điều gì?',
     pickNumbers: 'Nhập các số, cách nhau bằng dấu phẩy',
     pickRetry: 'Dùng các số từ 1 đến {n}, cách nhau bằng dấu phẩy.',

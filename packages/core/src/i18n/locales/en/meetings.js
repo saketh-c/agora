@@ -5,7 +5,7 @@ export default {
   viewList: 'List',
   viewMap: 'Map',
   searchLabel: 'Search meetings',
-  searchPlaceholder: 'Search a city, county, topic or day',
+  searchPlaceholder: 'City, county, topic or day',
   clearSearch: 'Clear search',
   skipToResults: {
     one: 'Skip to the result',

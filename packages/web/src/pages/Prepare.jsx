@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { checklist, daysBetween, t, tn, todayStr, weekdayName } from '@agora/core';
+import { checklist, daysBetween, joinSentences, sentenceGap, t, tn, todayStr, weekdayName } from '@agora/core';
 import { useStore } from '../lib/store.jsx';
 import { PREP_STEPS, checkedItems } from '../lib/prep.js';
 import { directionsUrl } from '../lib/ics.js';
@@ -276,7 +276,7 @@ function PrepareSteps({ ctx }) {
                     {deadline ? (
                       <p>
                         <strong className={deadline.passed ? 'prep-late' : undefined}>{deadline.passed ? t('ui.signupClosed') : asSentence(whenText(deadline.date, deadline.time))}</strong>
-                        {deadline.passed ? null : ` ${t('ui.noDoorSignup')}`}
+                        {deadline.passed ? null : `${sentenceGap(asSentence(whenText(deadline.date, deadline.time)))}${t('ui.noDoorSignup')}`}
                       </p>
                     ) : (
                       <p>{pc.deadline ? <Linkified text={pc.deadline} /> : t('prepare.signup.askCity')}</p>
@@ -295,7 +295,7 @@ function PrepareSteps({ ctx }) {
                 )}
                 <div>
                   <dt>{t('prepare.signup.atMic')}</dt>
-                  <dd>{`${minutes ? `${tn('common.minutes', minutes)}.` : t('prepare.signup.noLimit')} ${t(`ui.remoteLong.${remoteState(city)}`)}`}</dd>
+                  <dd>{joinSentences([minutes ? tn('common.minutes', minutes) : t('prepare.signup.noLimit'), t(`ui.remoteLong.${remoteState(city)}`)])}</dd>
                 </div>
               </dl>
               <div className="btn-row step__actions">

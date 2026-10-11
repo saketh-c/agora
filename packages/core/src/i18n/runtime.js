@@ -519,6 +519,41 @@ export function asSentence(text, locale) {
 }
 
 /**
+ * A message split around one of its params, for a page that renders that param itself (in
+ * <strong>, or visible while the rest is for screen readers): textAround('ui.dateTime',
+ * 'time', { date }) is ['Mon, Oct 12, ', ''] in English and ['الاثنين، 12 أكتوبر، ', ''] in
+ * Arabic. The other params are filled in (and isolated) as t() does.
+ */
+export function textAround(key, name, params, locale) {
+  const mark = '\u0000';
+  const full = t(key, { ...(params || {}), [name]: mark }, locale);
+  const at = full.indexOf(mark);
+  if (at < 0) return [full, ''];
+  return [full.slice(0, at).replace(/[\u2066-\u2068]$/u, ''), full.slice(at + 1).replace(/^\u2069/u, '')];
+}
+
+/** Full-width marks that carry their own spacing: 。！？，、：；, closing brackets and quotes. */
+const FULL_WIDTH_END = /[\u3001\u3002\uff01\uff1f\uff0c\uff1a\uff1b\uff09\u300d\u300f\u3011\u3015\u300b\u3000][\u2066-\u2069]*$/u;
+/** Full-width opening marks: （「『【〔《 and the ideographic space. */
+const FULL_WIDTH_START = /^[\u2066-\u2069]*[\uff08\u300c\u300e\u3010\u3014\u300a\u3000]/u;
+
+/**
+ * The space that goes between two pieces of running text ("Can't go?" and a link, a label and
+ * "(optional)"): ' ', or nothing when the first ends with a full-width mark or the second
+ * starts with one ("去不了？改用邮件", "主题（选填）"), since those marks carry their own spacing.
+ */
+export function sentenceGap(before, after = '') {
+  return FULL_WIDTH_END.test(String(before ?? '')) || FULL_WIDTH_START.test(String(after ?? '')) ? '' : ' ';
+}
+
+/** Two pieces of running text joined with sentenceGap's space (empty pieces dropped). */
+export function joinRun(before, after) {
+  if (!before) return String(after ?? '');
+  if (!after) return String(before);
+  return `${before}${sentenceGap(before, after)}${after}`;
+}
+
+/**
  * Sentences one after another, each closed with asSentence. A space goes between them,
  * except after a full-width mark (。！？), which carries its own spacing. In a right-to-left
  * language each sentence is isolated, so an English one (a city's note not translated yet)
@@ -527,7 +562,7 @@ export function asSentence(text, locale) {
 export function joinSentences(parts, locale) {
   const lang = langOf(locale);
   const sentences = parts.map((p) => asSentence(p, lang)).filter(Boolean);
-  return sentences.reduce((out, s, i) => `${out}${i && !/[\u3002\uff01\uff1f]$/u.test(sentences[i - 1]) ? ' ' : ''}${isolated(s, lang)}`, '');
+  return sentences.reduce((out, s, i) => `${out}${i ? sentenceGap(sentences[i - 1]) : ''}${isolated(s, lang)}`, '');
 }
 
 /**

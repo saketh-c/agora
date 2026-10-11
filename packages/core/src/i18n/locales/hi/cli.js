@@ -299,7 +299,7 @@ export default {
     heading: 'अपनी जगह तैयार करें',
     intro: 'अकाउंट की ज़रूरत नहीं। जवाब इसी कंप्यूटर पर सेव होते हैं, और "{cmd} setup" कभी भी फिर से चलाया जा सकता है।',
     language: 'भाषा ({codes})',
-    languageRetry: 'en, es या vi टाइप करें।',
+    languageRetry: 'इनमें से कोई एक कोड टाइप करें: {codes}।',
     q1: '1. आपको किन बातों की परवाह है?',
     pickNumbers: 'कॉमा लगाकर नंबर डालें',
     pickRetry: {

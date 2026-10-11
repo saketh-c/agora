@@ -43,4 +43,6 @@ export default {
   pending: 'Some newsrooms are still loading. Try again in a moment for more.',
   keepReading: 'More from local newsrooms',
   coverage: 'Coverage of {topic}',
+  // Under a headline: the newsroom's name (English) and the date it was published.
+  sourceDate: '{source}, {date}',
 };

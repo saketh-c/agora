@@ -3,7 +3,7 @@ export default {
   heroLead: 'Encuentra una reunión del concejo cerca de ti y aprende exactamente cómo hablar en ella.',
   where: {
     question: '¿Dónde vives o vas a la escuela?',
-    placeholder: 'Ciudad, código postal, dirección o escuela',
+    placeholder: 'Ciudad, ZIP, dirección o escuela',
     find: 'Buscar mis reuniones',
     useLocation: 'Usar mi ubicación exacta',
     finding: 'Buscando tu ubicación',

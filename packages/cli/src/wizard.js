@@ -1,5 +1,5 @@
 import readline from 'node:readline';
-import { topicList, cityPoint, defaultPrefs, setLocale, t, BRAND, LOCALES, searchFold, offeredLocales } from '@agora/core';
+import { topicList, cityPoint, defaultPrefs, setLocale, t, BRAND, LOCALES, searchFold, offeredLocales, joinItems } from '@agora/core';
 import { c, heading, safe, wrapText } from './ui.js';
 import { savePrefs } from './prefs.js';
 import { matchCity } from './data.js';
@@ -127,13 +127,14 @@ export async function runWizard(cities, existing, lang = 'en', { input = process
   try {
     const prefs = { ...defaultPrefs(), ...(existing || {}) };
 
+    const codes = joinItems(offeredLocales(lang).map((l) => l.code));
     for (;;) {
-      const code = languageFrom(await ask(t('cli.wizard.language', { codes: offeredLocales(lang).map((l) => l.code).join(', ') }), lang));
+      const code = languageFrom(await ask(t('cli.wizard.language', { codes }), lang));
       if (code) {
         prefs.lang = code;
         break;
       }
-      say(c.yellow(`${INDENT}${t('cli.wizard.languageRetry')}`));
+      say(c.yellow(`${INDENT}${t('cli.wizard.languageRetry', { codes })}`));
     }
     setLocale(prefs.lang);
 

@@ -5,7 +5,7 @@ export default {
   viewList: 'सूची',
   viewMap: 'नक्शा',
   searchLabel: 'बैठकें खोजें',
-  searchPlaceholder: 'शहर, काउंटी, विषय या दिन खोजें',
+  searchPlaceholder: 'शहर, काउंटी, विषय या दिन',
   clearSearch: 'खोज साफ़ करें',
   skipToResults: {
     one: 'सीधे नतीजे पर जाएँ',

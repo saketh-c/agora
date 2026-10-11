@@ -14,6 +14,8 @@
 
 /* the question card */
 .home-page .ask { background: var(--card); border-radius: var(--r-field); padding: var(--s4) var(--s4) var(--s3); box-shadow: 0 1px 0 rgb(21 24 43 / .06); min-width: 0; }
+/* On the narrowest phones the field keeps 8px more for its example. */
+@media (max-width: 359px) { .home-page .ask { padding-inline: var(--s3); } }
 .home-page .ask__q { display: block; margin-bottom: var(--s3); }
 .home-page .ask__do { margin-top: var(--s3); gap: var(--s2) var(--s3); }
 .home-page .ask__do .btn--primary { flex: 1 1 100%; }
@@ -147,6 +149,14 @@
 /* the city list spans the field and its button, so long names keep to one line */
 .place__row .cbx { position: static; flex: 1 1 auto; min-width: 0; }
 .place__row .place__go { flex: none; }
+/* A narrow sheet (a phone): the button goes under the field, so the field keeps the full
+   width for its example ("Ciudad, código postal, dirección o escuela"). The city list then
+   hangs from the field itself. */
+.place { container: place / inline-size; }
+@container place (max-width: 420px) {
+  .place__row { flex-wrap: wrap; }
+  .place__row .cbx { position: relative; flex-basis: 100%; }
+}
 .place .search input { background: var(--card); }
 .place__alt { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 var(--s3); margin: 2px calc(-1 * var(--s3)) 0; }
 .place__alt .btn--quiet { padding: 0 var(--s3); }

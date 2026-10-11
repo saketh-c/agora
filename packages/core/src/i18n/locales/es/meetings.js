@@ -4,7 +4,7 @@ export default {
   viewList: 'Lista',
   viewMap: 'Mapa',
   searchLabel: 'Buscar reuniones',
-  searchPlaceholder: 'Busca una ciudad, condado, tema o día',
+  searchPlaceholder: 'Ciudad, condado, tema o día',
   clearSearch: 'Borrar búsqueda',
   skipToResults: {
     one: 'Ir al resultado',

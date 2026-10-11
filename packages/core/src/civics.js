@@ -28,6 +28,25 @@ export function timeOfDayFor(time) {
   return 'evening';
 }
 
+const HAN = /\p{Script=Han}/u;
+const escapeRe = (v) => v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/**
+ * Chinese templates put one space where a {name}, {school} or {city} meets a Chinese character,
+ * since those usually hold English names ("我叫 Ana"). A value typed in Chinese closes that gap
+ * up again ("我叫李明", not "我叫 李明"), since Chinese puts no space between two characters.
+ */
+function closeHanGaps(text, values) {
+  let out = text;
+  for (const v of values) {
+    if (!v) continue;
+    const chars = [...v];
+    if (HAN.test(chars[0])) out = out.replace(new RegExp(`(\\p{Script=Han}) (?=${escapeRe(v)})`, 'gu'), '$1');
+    if (HAN.test(chars[chars.length - 1])) out = out.replace(new RegExp(`(${escapeRe(v)}) (?=\\p{Script=Han})`, 'gu'), '$1');
+  }
+  return out;
+}
+
 /**
  * Build a first-draft public comment from a few inputs. Deterministic, no AI needed,
  * in the active (or given) locale.
@@ -49,7 +68,7 @@ export function buildComment(input = {}) {
   const position = ['support', 'oppose', 'concerned', 'ask'].includes(input.position) ? input.position : 'ask';
   const greeting = { morning: tr('civics.comment.greetingMorning'), afternoon: tr('civics.comment.greetingAfternoon'), evening: tr('civics.comment.greetingEvening') }[input.timeOfDay] || tr('civics.comment.greetingEvening');
 
-  const intro = school ? tr('civics.comment.introSchool', { greeting, name, school, city }) : tr('civics.comment.introLive', { greeting, name, city });
+  const intro = closeHanGaps(school ? tr('civics.comment.introSchool', { greeting, name, school, city }) : tr('civics.comment.introLive', { greeting, name, city }), [name, school, city]);
   const subject = item ? tr('civics.comment.subjectItem', { item }) : tr('civics.comment.subjectTopic', { topic: topicPhrase });
   // Optional keys: a dictionary without them falls back to the older wording.
   const has = (key) => tr(key) !== key;

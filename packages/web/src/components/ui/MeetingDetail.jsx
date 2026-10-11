@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { formatDate, getLocale, joinItems, joinSentences, labelValue, liveMeetingFor, relativeDays, stripIsolates, t, todayStr } from '@agora/core';
+import { formatDate, getLocale, joinItems, joinSentences, labelValue, liveMeetingFor, relativeDays, sentenceGap, stripIsolates, t, todayStr } from '@agora/core';
 import Icon from './Icon.jsx';
 import Badge from './Badge.jsx';
 import Notice from './Notice.jsx';
@@ -205,14 +205,16 @@ export default function MeetingDetail({ meeting, city, today, now, headingId = '
                 <Icon name="clock" />
                 <span>
                   <strong>{asSentence(deadlineText(deadline, 'closes'))}</strong>
-                  {deadline.passed ? null : ` ${t('ui.noDoorSignup')}`}
+                  {deadline.passed ? null : `${sentenceGap(asSentence(deadlineText(deadline, 'closes')))}${t('ui.noDoorSignup')}`}
                 </span>
               </li>
             ) : pc.deadline ? (
               <li>
                 <Icon name="clock" />
                 <span>
-                  <strong>{t('ui.signupLabel')}</strong> {tidyTimes(pc.deadline)}
+                  <strong>{t('ui.signupLabel')}</strong>
+                  {sentenceGap(t('ui.signupLabel'))}
+                  {tidyTimes(pc.deadline)}
                 </span>
               </li>
             ) : null}
@@ -239,7 +241,9 @@ export default function MeetingDetail({ meeting, city, today, now, headingId = '
               <li>
                 <Icon name="mic" />
                 <span>
-                  <strong>{t('ui.nextChance')}</strong> {whenText(nextSpeakable.date, nextSpeakable.time)}
+                  <strong>{t('ui.nextChance')}</strong>
+                  {sentenceGap(t('ui.nextChance'))}
+                  {whenText(nextSpeakable.date, nextSpeakable.time)}
                 </span>
               </li>
             </ul>
@@ -347,7 +351,9 @@ export default function MeetingDetail({ meeting, city, today, now, headingId = '
           )}
           {written && (
             <p>
-              <strong>{t('ui.facts.cantGo')}</strong> <Linkified text={written} />
+              <strong>{t('ui.facts.cantGo')}</strong>
+              {sentenceGap(t('ui.facts.cantGo'))}
+              <Linkified text={written} />
             </p>
           )}
         </Disclosure>

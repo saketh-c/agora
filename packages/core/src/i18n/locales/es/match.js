@@ -20,5 +20,7 @@ export default {
   youthPrograms: 'La ciudad tiene programas juveniles a los que puedes unirte',
   scheduleChange: 'Cambio de horario: confirma en el sitio de la ciudad',
   summary: 'Tu mejor siguiente paso: {city}, {label}, {date}, {time}{why}.',
+  why: ' ({reasons})',
+  whySep: '; ',
   noMatches: 'Aún no hay reuniones próximas que coincidan. Amplía tu distancia o agrega más intereses.',
 };

@@ -371,7 +371,7 @@ export default {
     heading: 'جهّز مقعدك',
     intro: 'لا حاجة إلى حساب. تُحفظ إجاباتك على هذا الكمبيوتر، ويمكنك إعادة تشغيل «{cmd} setup» في أي وقت.',
     language: 'اللغة ({codes})',
-    languageRetry: 'اكتب en أو es أو vi.',
+    languageRetry: 'اكتب أحد هذه الرموز: {codes}.',
     q1: '1. ما الذي يهمك؟',
     pickNumbers: 'أدخل الأرقام مفصولة بفواصل',
     pickRetry: {

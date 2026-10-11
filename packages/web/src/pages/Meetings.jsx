@@ -1,6 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useNavigationType, useSearchParams } from 'react-router-dom';
-import { addDays, agendaFor, cityPoint, expandCityMeetings, formatDate, hasEnded, haversineMiles, isDateStr, joinItems, joinList, labelValue, lowerFirst, nextMeetingFor, normalizePrefs, scoreMeeting, t, tn, topicList, upcomingMeetings, weekdayNames, weekdayShortNames, compareText } from '@agora/core';
+import { addDays, agendaFor, cityPoint, compareText, expandCityMeetings, formatDate, hasEnded, haversineMiles, isDateStr, joinItems, joinList, labelValue, lowerFirst, nextMeetingFor, normalizePrefs, scoreMeeting, sentenceGap, t, tn, topicList, upcomingMeetings, weekdayNames, weekdayShortNames } from '@agora/core';
 import { nowIso, today as todayFn } from '../lib/data.js';
 import { useCities } from '../lib/DataProvider.jsx';
 import { useStore } from '../lib/store.jsx';
@@ -1062,7 +1062,8 @@ export default function Meetings() {
           <p className="mtg__hint">
             <Icon name="info" size={18} />
             <span>
-              {searchHint.text}{' '}
+              {searchHint.text}
+              {sentenceGap(searchHint.text)}
               <button type="button" className="link" onClick={searchHint.onClick}>
                 {searchHint.action}
               </button>
@@ -1073,7 +1074,8 @@ export default function Meetings() {
           <p className="mtg__hint">
             <Icon name="eye" size={18} />
             <span>
-              {tn('meetings.hint.hidden', hiddenForSearch, { q: f.q.trim() })}{' '}
+              {tn('meetings.hint.hidden', hiddenForSearch, { q: f.q.trim() })}
+              {sentenceGap(tn('meetings.hint.hidden', hiddenForSearch, { q: f.q.trim() }))}
               <button type="button" className="link" onClick={() => update({ ...clearFilters(f), when: f.when, from: f.from, to: f.to })}>
                 {t('meetings.hint.showThem')}
               </button>
@@ -1084,7 +1086,8 @@ export default function Meetings() {
           <p className="mtg__hint">
             <Icon name="info" size={18} />
             <span>
-              {countyHint.text}{' '}
+              {countyHint.text}
+              {sentenceGap(countyHint.text)}
               <button type="button" className="link" onClick={countyHint.onClick}>
                 {countyHint.action}
               </button>

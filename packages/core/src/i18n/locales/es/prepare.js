@@ -92,7 +92,7 @@ export default {
     topic: 'Tema',
     agendaItem: 'Punto de la agenda',
     optional: '(opcional)',
-    agendaItemPlaceholder: 'Punto 12, el presupuesto del centro recreativo',
+    agendaItemPlaceholder: 'Punto 12, centro recreativo',
     agendaHelp: 'Déjalo en blanco si vas a hablar de algo que no está en la agenda.',
     position: 'Tu postura',
     support: 'A favor',
@@ -104,7 +104,7 @@ export default {
     storyPlaceholder: 'Tomo el autobús de las 12:30 de la escuela a mi casa, y es la única ruta que pasa después de las 4 p.m.',
     storyHelp: 'Un momento de tu propia vida pesa más que una estadística.',
     ask: '¿Qué es exactamente lo que pides?',
-    askPlaceholder: 'Mantener el autobús nocturno en el presupuesto',
+    askPlaceholder: 'Salvar el autobús nocturno',
     askHelp: 'Una sola petición clara. Empieza con un verbo.',
     draft: 'Tu borrador',
     words: {

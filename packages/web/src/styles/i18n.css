@@ -44,6 +44,13 @@
   line-height: 1.45 !important;
 }
 
+/* Underlined links drop below the marks under the baseline (the u and uu vowel signs in
+   Devanagari, the subscript consonants in Telugu), so the line never crosses them. Every
+   component sets its own offset in px for Latin, so this one has to win. */
+:is(:lang(hi), :lang(te)) {
+  text-underline-offset: 0.42em !important;
+}
+
 /* ---------- Arabic: room for the marks above and below the baseline ---------- */
 :lang(ar):not(:is(h1, h2, h3, h4, .t-hero, .t-title, .t-heading, .unit, .next__word, .answer__a, .meetcard__t, .figure__t, .post__t, .pr-find__t), :is(h1, h2, h3, h4, .t-hero, .t-title, .t-heading) *) {
   line-height: 1.65 !important;

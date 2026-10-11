@@ -19,5 +19,7 @@ export default {
   youthPrograms: '该市有你可以参加的青少年项目',
   scheduleChange: '日程有变：请在市政府网站上确认',
   summary: '最适合你的下一步：{city}，{label}，{date} {time}{why}。',
+  why: '（{reasons}）',
+  whySep: '；',
   noMatches: '目前还没有匹配的即将召开的会议。扩大距离范围，或添加更多感兴趣的议题。',
 };

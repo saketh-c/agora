@@ -25,7 +25,9 @@ function withPluralForms(code, fn) {
   const forms = pluralCategoriesFor(code);
   const walk = (en, mine) => {
     for (const [k, v] of Object.entries(en)) {
-      if (typeof v === 'string' && COUNT.test(v) && typeof mine[k] === 'string') {
+      // The language's own value may already be plural forms (every finished language has
+      // some); it is replaced the same way, so each form is tagged with its category.
+      if (typeof v === 'string' && COUNT.test(v) && (typeof mine[k] === 'string' || isPluralForms(mine[k]))) {
         saved.push([mine, k, mine[k]]);
         mine[k] = Object.fromEntries(forms.map((c) => [c, `[${c}] ${v}`]));
       } else if (v && typeof v === 'object' && !Array.isArray(v) && !isPluralForms(v) && mine[k] && typeof mine[k] === 'object') walk(v, mine[k]);
@@ -111,13 +113,16 @@ test('coaching sentences that count two things agree with both numbers', () => {
   // The second number is its own phrase with its own plural entry, so its noun agrees with it:
   // in Arabic the sentence takes "few" from 3 sentences and the phrase "many" from 30 words.
   withPluralForms('ar', () => {
+    const shipped = DICTIONARIES.ar.rehearse.wordsN;
     DICTIONARIES.ar.rehearse.wordsN = { zero: 'z', one: 'o', two: 't', few: 'f', many: '[many] {n} words', other: 'x' };
     try {
       assert.equal(stripIsolates(t('rehearse.findings.long_sentences.title', coachParams({ n: 3, max: 30 }, 'ar'), 'ar')), '[few] 3 sentences ran past [many] 30 words');
     } finally {
-      DICTIONARIES.ar.rehearse.wordsN = { ...DICTIONARIES.en.rehearse.wordsN, zero: '{n} words', two: '{n} words', few: '{n} words', many: '{n} words' };
+      DICTIONARIES.ar.rehearse.wordsN = shipped;
     }
   });
+  // The shipped Arabic does the same: "3 جمل" (few) and "30 كلمة" (many).
+  assert.equal(stripIsolates(t('rehearse.findings.long_sentences.title', coachParams({ n: 3, max: 30 }, 'ar'), 'ar')), '3 جمل تجاوز طولها 30 كلمة');
 });
 
 test('text direction comes from the whole text, not its first letter', () => {

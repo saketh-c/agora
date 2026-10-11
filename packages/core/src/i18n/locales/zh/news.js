@@ -40,4 +40,5 @@ export default {
   pending: '部分新闻机构的报道仍在加载。稍后再试，可以看到更多。',
   keepReading: '本地新闻机构的更多报道',
   coverage: '关于{topic}的报道',
+  sourceDate: '{source}，{date}',
 };

@@ -20,5 +20,8 @@ export default {
   youthPrograms: 'City has youth programs you can join',
   scheduleChange: 'Schedule change: confirm on the city site',
   summary: 'Your best next step: {city}, {label}, {date} at {time}{why}.',
+  // {why} in summary: up to two reasons, joined with whySep (empty when there are none).
+  why: ' ({reasons})',
+  whySep: '; ',
   noMatches: 'No upcoming meetings match yet. Widen your distance or add more interests.',
 };

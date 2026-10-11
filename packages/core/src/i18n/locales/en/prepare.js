@@ -104,7 +104,7 @@ export default {
     storyPlaceholder: 'I take the 12:30 bus home from school, and it is the only route that runs after 4 PM.',
     storyHelp: 'A moment from your own life beats a statistic.',
     ask: 'What exactly are you asking for?',
-    askPlaceholder: 'Keep the evening bus in the budget',
+    askPlaceholder: 'Keep the evening bus',
     askHelp: 'One clear ask. Start with a verb.',
     draft: 'Your draft',
     words: {

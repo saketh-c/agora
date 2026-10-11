@@ -46,4 +46,5 @@ export default {
   pending: 'कुछ न्यूज़रूम अभी लोड हो रहे हैं। और खबरों के लिए थोड़ी देर में फिर से कोशिश करें।',
   keepReading: 'स्थानीय न्यूज़रूम से और खबरें',
   coverage: '{topic} पर खबरें',
+  sourceDate: '{source}, {date}',
 };

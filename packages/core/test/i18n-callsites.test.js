@@ -172,7 +172,9 @@ function withPluralForms(code, fn) {
   const forms = pluralCategoriesFor(code);
   const walk = (en, mine) => {
     for (const [k, v] of Object.entries(en)) {
-      if (typeof v === 'string' && COUNT.test(v) && typeof mine[k] === 'string') {
+      // The language's own value may already be plural forms (every finished language has
+      // some); it is replaced the same way, so each form is tagged with its category.
+      if (typeof v === 'string' && COUNT.test(v) && (typeof mine[k] === 'string' || isPluralForms(mine[k]))) {
         saved.push([mine, k, mine[k]]);
         mine[k] = Object.fromEntries(forms.map((c) => [c, `[${c}] ${v}`]));
       } else if (v && typeof v === 'object' && !Array.isArray(v) && !isPluralForms(v) && mine[k] && typeof mine[k] === 'object') walk(v, mine[k]);

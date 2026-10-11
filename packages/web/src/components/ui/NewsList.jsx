@@ -1,5 +1,7 @@
+import { Fragment } from 'react';
 import { intlLocale, t } from '@agora/core';
 import Icon from './Icon.jsx';
+import { englishOriginalProps } from '../../lib/textDir.js';
 
 /** "Sep 15" (or "Sep 15, 2025" in another year), in Central time and the app language. */
 export function newsDate(iso, lang) {
@@ -11,9 +13,19 @@ export function newsDate(iso, lang) {
 }
 
 /**
+ * The source and the date in the language's own news.sourceDate template ("{source}, {date}";
+ * "{source}，{date}" in Chinese), each param rendered as its own node.
+ */
+function SourceDate({ source, date, lang }) {
+  if (!source || !date) return source || date;
+  const pieces = t('news.sourceDate', undefined, lang).split(/\{(\w+)\}/);
+  return pieces.map((piece, i) => <Fragment key={i}>{i % 2 ? { source, date }[piece] : piece}</Fragment>);
+}
+
+/**
  * Headlines as link rows that open the source in a new tab: title, then "Source, date".
  * items: [{ title, link, sourceName, publishedAt }] as returned by api.news().
- * The headline and the source are English (lang="en"); the date is in the app's language. The
+ * The headline and the source are English (lang="en", and dir="ltr" on a right-to-left page); the date is in the app's language. The
  * source is isolated (<bdi>), so on an Arabic page "Community Impact (DFW education)" and
  * "9 أكتوبر" stay two pieces in the line's order instead of one run that splits the date.
  */
@@ -30,14 +42,12 @@ export default function NewsList({ items, limit, lang = 'en', className = '' }) 
             <a className="lrow" href={item.link} target="_blank" rel="noopener noreferrer">
               <span>
                 {/* Headlines come from English-language newsrooms: read them with an English voice. */}
-                <span className="lrow__t" lang="en">
+                <span className="lrow__t" {...englishOriginalProps(true, lang)}>
                   {item.title}
                 </span>
                 {(item.sourceName || date) && (
                   <span className="lrow__m">
-                    {item.sourceName && <bdi lang="en">{item.sourceName}</bdi>}
-                    {item.sourceName && date ? t('format.sep', undefined, lang) : ''}
-                    {date && <span className="nowrap">{date}</span>}
+                    <SourceDate lang={lang} source={item.sourceName && <bdi lang="en">{item.sourceName}</bdi>} date={date && <span className="nowrap">{date}</span>} />
                   </span>
                 )}
               </span>

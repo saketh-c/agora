@@ -81,15 +81,15 @@ function chunk(entries, n) {
 
 const sizeOf = (v) => (typeof v === 'string' ? v.length : Object.values(v).reduce((a, s) => a + s.length, 0));
 
-/** The UI units a language still needs, as { key: English value or plural template }. */
-export function uiTodo(code) {
-  const r = compareLocale(code);
+/** The UI units a language still needs, as { key: English value or plural template } (dicts: for tests). */
+export function uiTodo(code, { dicts = DICTIONARIES } = {}) {
+  const r = compareLocale(code, { dicts });
   const forms = pluralCategoriesFor(code);
   const out = {};
   const englishForm = (english, c) => (typeof english === 'string' ? english : english[c] ?? english.other);
   for (const p of r.untranslated) {
-    const english = getPath(DICTIONARIES.en, p);
-    const current = getPath(DICTIONARIES[code], p);
+    const english = getPath(dicts.en, p);
+    const current = getPath(dicts[code], p);
     // Always today's English: an old copy left behind by an English edit is not offered.
     if (typeof english === 'string' && !(isPluralizable(english) && forms.length > 1)) out[p] = english;
     else {

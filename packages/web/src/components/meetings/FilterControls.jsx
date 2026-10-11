@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { addDays, isDateStr, t, weekdayNames, weekdayShortNames } from '@agora/core';
+import { addDays, isDateStr, sentenceGap, t, weekdayNames, weekdayShortNames } from '@agora/core';
 import { Chip, CityPicker, Icon } from '../ui/index.js';
 import ChoiceChips from './ChoiceChips.jsx';
 import { MAX_DAYS_AHEAD, TIMES, WEEK_ORDER, WHEN, fold, mileChoices } from '../../lib/meetingFilters.js';
@@ -254,7 +254,8 @@ export default function FilterControls({
           />
         ) : (
           <p className="help">
-            {t('meetings.distance.needsPlace')}{' '}
+            {t('meetings.distance.needsPlace')}
+            {sentenceGap(t('meetings.distance.needsPlace'))}
             <button type="button" className="link" onClick={onAddPlace}>
               {t('meetings.from.addHome')}
             </button>

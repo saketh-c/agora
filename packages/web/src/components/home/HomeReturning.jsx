@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { formatDate, lowerFirst, normalizePrefs, t, weekdayName } from '@agora/core';
+import { formatDate, lowerFirst, normalizePrefs, sentenceGap, t, weekdayName } from '@agora/core';
 import { useCities } from '../../lib/DataProvider.jsx';
 import { useStore } from '../../lib/store.jsx';
 import { api } from '../../lib/api.js';
@@ -221,7 +221,7 @@ function Confirmation({ confirm, onUndo, onDismiss, setupLink }) {
       <Icon name="check" />
       <div>
         <p>
-          {slot === 'school' && <strong>{t('home.confirm.savedSchool')} </strong>}
+          {slot === 'school' && <strong>{`${t('home.confirm.savedSchool')}${sentenceGap(t('home.confirm.savedSchool'))}`}</strong>}
           {text}
         </p>
         <div className="act">
@@ -338,7 +338,8 @@ export default function HomeReturning({ focusHeading = false, onOpenMeeting, con
           )}
           {anyFar && (
             <p className="home-note">
-              {t('home.far', { max: t('ui.milesShort', { n: prefs.maxMiles }) })}{' '}
+              {t('home.far', { max: t('ui.milesShort', { n: prefs.maxMiles }) })}
+              {sentenceGap(t('home.far', { max: '' }))}
               <Link className="link" to={setupTo(location)} state={SETUP_STATE}>
                 {t('home.farChange')}
               </Link>

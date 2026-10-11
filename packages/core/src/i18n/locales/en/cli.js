@@ -254,7 +254,7 @@ export default {
     heading: 'Set up your seat',
     intro: 'No account needed. Answers are saved on this computer and you can rerun "{cmd} setup" any time.',
     language: 'Language ({codes})',
-    languageRetry: 'Type en, es, or vi.',
+    languageRetry: 'Type one of these codes: {codes}.',
     q1: '1. What do you care about?',
     pickNumbers: 'Enter numbers separated by commas',
     pickRetry: 'Use numbers from 1 to {n}, separated by commas.',

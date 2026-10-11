@@ -23,5 +23,7 @@ export default {
   youthPrograms: 'शहर में जुड़ने लायक युवा कार्यक्रम हैं',
   scheduleChange: 'शेड्यूल में बदलाव: शहर की साइट पर पक्का कर लें',
   summary: 'आपका सबसे अच्छा अगला कदम: {city}, {label}, {date}, {time}{why}।',
+  why: ' ({reasons})',
+  whySep: '; ',
   noMatches: 'अभी कोई आने वाली बैठक मेल नहीं खाती। दूरी बढ़ाएँ या और रुचियाँ जोड़ें।',
 };

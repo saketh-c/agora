@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { computeStats, formatMonthDay, formatTime, getTopic, hourOf, isDateStr, joinList, t, tn, upcomingMeetings, weekdayNames, weekdayShortNames, compareText } from '@agora/core';
+import { compareText, computeStats, formatMonthDay, formatTime, getTopic, hourOf, isDateStr, joinList, sentenceGap, t, tn, upcomingMeetings, weekdayNames, weekdayShortNames } from '@agora/core';
 import { SCHEDULES_VERIFIED_ON } from '../lib/data.js';
 import useClock from '../components/home/useClock.js';
 import { useCities } from '../lib/DataProvider.jsx';
@@ -203,7 +203,8 @@ export default function Insights() {
       <p className="verified dt-source">
         <Icon name="shield" />
         <span>
-          {t('insights.source', { date: monthDayYear(SCHEDULES_VERIFIED_ON) })}{' '}
+          {t('insights.source', { date: monthDayYear(SCHEDULES_VERIFIED_ON) })}
+          {sentenceGap(t('insights.source', { date: '' }))}
           <Link className="link" to="/about#data">
             {t('insights.sourceLink')}
           </Link>

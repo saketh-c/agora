@@ -11,12 +11,15 @@ import {
   getTopic,
   hasEnded,
   inferTopics,
+  joinRun,
   joinSentences,
   labelValue,
   lowerFirst,
   nextMeetingFor,
   relativeDays,
+  sentenceGap,
   t,
+  textAround,
   tn,
   windowEnd,
 } from '@agora/core';
@@ -102,17 +105,18 @@ function AgendaItem({ item, index, city }) {
       const topics = item.topics && item.topics.length ? item.topics : inferTopics(item.titleSource || item.title);
       const topic = getTopic(topics[0]);
       const lead = topic.id === 'other' ? t('drawer.itemOnAgenda', { city: city.name }) : t('drawer.itemAbout', { topic: topic.short, city: city.name });
-      const why = topic.id === 'other' ? '' : ` ${t('drawer.whyMatters', { angle: topic.youthAngle })}`;
-      setState({ status: 'open', text: `${lead} ${item.summary || ''}${why}`.replace(/\s+/g, ' ').trim() });
+      const why = topic.id === 'other' ? '' : t('drawer.whyMatters', { angle: topic.youthAngle });
+      setState({ status: 'open', text: [lead, item.summary, why].reduce(joinRun, '').replace(/\s+/g, ' ').trim() });
     }
   };
 
   // Items read from the city's agenda site stay in the city's English (core/src/agendas.js).
-  const english = item.auto && !item.titleSource && getLocale() !== 'en' ? 'en' : undefined;
+  // On a right-to-left page the English title also runs left to right (SPEC section 6).
+  const englishProps = englishOriginalProps(Boolean(item.auto && !item.titleSource), getLocale());
 
   return (
     <li className="agenda__item">
-      <p className="agenda__t" lang={english}>
+      <p className="agenda__t" {...englishProps}>
         {item.url ? (
           <a href={item.url} target="_blank" rel="noopener noreferrer">
             {item.title}
@@ -123,7 +127,7 @@ function AgendaItem({ item, index, city }) {
         )}
       </p>
       {item.summary && (
-        <p className="agenda__s" lang={english}>
+        <p className="agenda__s" {...englishProps}>
           {item.summary}
         </p>
       )}
@@ -155,11 +159,15 @@ function SchedList({ items, onOpen }) {
           const tone = cancelled ? 'stop' : o.openToPublicComment ? 'go' : 'watch';
           const icon = cancelled ? 'xc' : o.openToPublicComment ? 'mic' : 'eye';
           const label = cancelled ? t('ui.cancelled') : o.openToPublicComment ? t('ui.canSpeak') : t('ui.watchOnly');
+          // The date in bold inside the language's own "{date}, {time}" template.
+          const [beforeDate, afterDate] = o.time ? textAround('ui.dateTime', 'date', { time: timeText(o.time) }) : ['', ''];
           return (
             <li key={o.id}>
               <button type="button" className={`sched__row${cancelled ? ' is-cancelled' : ''}`} onClick={() => onOpen(o)} aria-haspopup="dialog">
                 <span className="sched__when num">
-                  <strong>{formatDate(o.date)}</strong>, {timeText(o.time)}
+                  {beforeDate}
+                  <strong>{formatDate(o.date)}</strong>
+                  {afterDate}
                   {o.movedFrom && <span className="sched__note">{t('ui.movedFrom', { date: formatDate(o.movedFrom) })}</span>}
                 </span>
                 <span className={`st st--${tone}`}>
@@ -316,6 +324,7 @@ function CityView({ id }) {
   const before = next ? upcoming.find((o) => o.date === next.date && o.time < next.time && !o.openToPublicComment && o.status !== 'cancelled') : null;
   const minutes = speakMinutes(city);
   const remote = remoteState(city);
+  const speakStep = minutes ? tn('city.stepSpeak', minutes) : t('city.stepSpeakNoLimit');
   // Step 1 in the app's own words when the city's deadline is one the app understands
   // (Plano, Dallas, Fort Worth); the city's wording then moves into "Full rules".
   const rule = parseDeadlineRule(((rawCity(city.cityId) || {}).publicComment || {}).deadline);
@@ -506,14 +515,16 @@ function CityView({ id }) {
                   <div>
                     {signupRule ? (
                       <>
-                        <strong>{signupRule}</strong> {t('ui.noDoorSignup')}
+                        <strong>{signupRule}</strong>
+                        {sentenceGap(signupRule)}
+                        {t('ui.noDoorSignup')}
                       </>
                     ) : (
                       <>
                         <strong>{t('city.stepSignup')}</strong>
                         {pc.deadline && (
                           <>
-                            {' '}
+                            {sentenceGap(t('city.stepSignup'))}
                             <Linkified text={t('city.deadline', { deadline: pc.deadline })} />
                           </>
                         )}
@@ -533,13 +544,17 @@ function CityView({ id }) {
                 </li>
                 <li>
                   <div>
-                    <strong>{minutes ? tn('city.stepSpeak', minutes) : t('city.stepSpeakNoLimit')}</strong> {t(`ui.remoteLong.${remote}`)}
+                    <strong>{speakStep}</strong>
+                    {sentenceGap(speakStep)}
+                    {t(`ui.remoteLong.${remote}`)}
                   </div>
                 </li>
                 {pc.writtenCommentMethod && (
                   <li>
                     <div>
-                      <strong>{t('city.stepWritten')}</strong> <Linkified text={pc.writtenCommentMethod} />
+                      <strong>{t('city.stepWritten')}</strong>
+                      {sentenceGap(t('city.stepWritten'))}
+                      <Linkified text={pc.writtenCommentMethod} />
                     </div>
                   </li>
                 )}
@@ -643,7 +658,7 @@ function CityView({ id }) {
                       {p.applyWindow && (
                         <p className="st st--plain">
                           <Icon name="cal" />
-                          {t('city.apply', { window: tidyTimes(String(p.applyWindow).split(/;\s*/)[0]) })}
+                          {t('city.apply', { window: tidyTimes(String(p.applyWindow).split(/\s*[;\u061B\uFF1B]\s*/)[0]) })}
                         </p>
                       )}
                     </li>

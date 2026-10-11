@@ -421,8 +421,13 @@ function cmdCity(ctx) {
   return 0;
 }
 
+/** "Mon, Oct 5, 6 days ago": a date and how long ago, joined the way the language joins a date and a time. */
+function dateAgo(date, today) {
+  return t('ui.dateTime', { date: formatDate(date), time: relativeDays(date, today).toLowerCase() });
+}
+
 function agendaLine(a, today, { past = false } = {}) {
-  const when = a.meetingDate ? (past ? `${formatDate(a.meetingDate)}, ${relativeDays(a.meetingDate, today).toLowerCase()}` : formatDate(a.meetingDate)) : t('cli.dateTbd');
+  const when = a.meetingDate ? (past ? dateAgo(a.meetingDate, today) : formatDate(a.meetingDate)) : t('cli.dateTbd');
   return `${a.title} ${c.gray(`(${when})`)}${a.topics && a.topics.length ? ` ${topicTags(a.topics)}` : ''}`.trim();
 }
 
@@ -458,7 +463,7 @@ function renderCity(ctx, city, upcoming, agenda) {
   const changes = upcoming.filter((m) => m.status !== 'scheduled' && m.note && !seen.has(`${m.date}|${m.status}|${m.note}`) && seen.add(`${m.date}|${m.status}|${m.note}`));
   if (changes.length) {
     lines.push('', c.bold(t('cli.scheduleChanges')));
-    for (const m of changes) lines.push(bullet(wrapText(`${formatDate(m.date)}, ${statusText(m.status)}: ${m.note}`, WIDTH - 4, 4).trimStart()));
+    for (const m of changes) lines.push(bullet(wrapText(labelValue(t('ui.dateTime', { date: formatDate(m.date), time: statusText(m.status) }), m.note), WIDTH - 4, 4).trimStart()));
   }
 
   lines.push('', c.bold(t('cli.speakingUp')), wrapText((city.publicComment || {}).summary || '', WIDTH, 2), c.dim(`  ${t('cli.speakHint', { cmd: `${CMD} speak ${quoteArg(city.name)}` })}`));
@@ -562,7 +567,7 @@ function cmdAgenda(ctx) {
   emit(ctx, { items, window: recent ? 'recent' : 'upcoming' }, () => {
     const lines = [heading(t(recent ? 'cli.recentAgendaHeading' : 'cli.agendaHeading', { n: items.length }))];
     for (const a of items.slice(0, SHOW)) {
-      const when = a.meetingDate ? (recent ? `${formatDate(a.meetingDate)}, ${relativeDays(a.meetingDate, today).toLowerCase()}` : formatDate(a.meetingDate)) : t('cli.dateTbd');
+      const when = a.meetingDate ? (recent ? dateAgo(a.meetingDate, today) : formatDate(a.meetingDate)) : t('cli.dateTbd');
       lines.push(wrapText(`${c.bold(a.cityName)} ${c.gray(when)}  ${topicTags(a.topics)}`.trimEnd(), WIDTH));
       lines.push(wrapText(a.title, WIDTH, 2));
       if (a.summary) lines.push(c.dim(wrapText(a.summary, WIDTH, 2)));
@@ -710,8 +715,8 @@ function renderPlan(ctx, plan) {
   const lines = [heading(t('cli.matchesHeading')), wrapText(plan.summary, WIDTH), ''];
   if (!plan.prefs.interests.length) lines.push(c.yellow(wrapText(t('cli.matchTip', { cmd: CMD }), WIDTH)), '');
   plan.meetings.forEach((m, i) => {
-    lines.push(`${c.bold(String(i + 1).padStart(2))}. ${c.bold(m.cityName)}: ${m.label}`);
-    lines.push(`    ${formatDate(m.date, { withYear: true })}, ${formatTime(m.time)} ${c.gray(`(${relativeDays(m.date, today).toLowerCase()})`)}`);
+    lines.push(`${c.bold(String(i + 1).padStart(2))}. ${labelValue(c.bold(m.cityName), m.label)}`);
+    lines.push(`    ${t('ui.dateTime', { date: formatDate(m.date, { withYear: true }), time: formatTime(m.time) })} ${c.gray(`(${relativeDays(m.date, today).toLowerCase()})`)}`);
     lines.push(detail(m.location));
     // The strongest few reasons read better than every one (--json keeps them all); the
     // ones counting against a meeting always show.

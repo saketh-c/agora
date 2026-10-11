@@ -1,5 +1,5 @@
 import { useId, useRef, useState } from 'react';
-import { searchFold, t, tn } from '@agora/core';
+import { searchFold, sentenceGap, t, tn } from '@agora/core';
 import { CityPicker, Icon, matchCities } from '../ui/index.js';
 import usePlaceFinder from './usePlaceFinder.js';
 
@@ -15,8 +15,9 @@ const OSM_COPYRIGHT = 'https://www.openstreetmap.org/copyright';
 export function PlacePrivacy({ lead, className = '' }) {
   return (
     <p className={`place__private ${className}`.trim()}>
-      {lead ? `${lead} ` : ''}
-      {t('home.where.private')}{' '}
+      {lead ? `${lead}${sentenceGap(lead)}` : ''}
+      {t('home.where.private')}
+      {sentenceGap(t('home.where.private'))}
       <a href={OSM_COPYRIGHT} target="_blank" rel="noopener noreferrer">
         {t('home.where.osm')}
         <span className="vh"> {t('ui.opensNewTab')}</span>

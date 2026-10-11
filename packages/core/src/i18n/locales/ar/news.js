@@ -62,4 +62,5 @@ export default {
   pending: 'ما زال تحميل بعض المؤسسات الإخبارية جاريًا. حاول مجددًا بعد لحظة لترى المزيد.',
   keepReading: 'المزيد من المؤسسات الإخبارية المحلية',
   coverage: 'تغطية {topic}',
+  sourceDate: '{source}، {date}',
 };

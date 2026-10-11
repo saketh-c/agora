@@ -16,8 +16,11 @@ import {
   detectLocale,
   isLocaleReady,
   joinItems,
+  joinRun,
   joinSentences,
   labelValue,
+  sentenceGap,
+  textAround,
   localeFromTag,
   offeredLocales,
   setI18nWarnings,
@@ -206,12 +209,12 @@ test('a string that counts can become plural forms in a language that needs them
 });
 
 test('Arabic sentences isolate every value; other languages do not', () => {
-  assert.equal(t('city.councilTitle', { city: 'Plano' }, 'ar'), `${FSI}Plano${PDI} City Council`);
+  assert.equal(t('city.councilTitle', { city: 'Plano' }, 'ar'), `مجلس مدينة ${FSI}Plano${PDI}`);
   assert.equal(t('city.councilTitle', { city: 'Plano' }, 'en'), 'Plano City Council');
-  assert.equal(t('city.councilTitle', { city: 'Plano' }, 'hi'), 'Plano City Council', 'left to right languages get no isolates');
-  assert.equal(stripIsolates(t('city.councilTitle', { city: 'Plano' }, 'ar')), 'Plano City Council');
+  assert.equal(t('city.councilTitle', { city: 'Plano' }, 'hi'), 'Plano सिटी काउंसिल', 'left to right languages get no isolates');
+  assert.equal(stripIsolates(t('city.councilTitle', { city: 'Plano' }, 'ar')), 'مجلس مدينة Plano');
   setBidiIsolation(false);
-  assert.equal(t('city.councilTitle', { city: 'Plano' }, 'ar'), 'Plano City Council', 'the CLI turns isolates off');
+  assert.equal(t('city.councilTitle', { city: 'Plano' }, 'ar'), 'مجلس مدينة Plano', 'the CLI turns isolates off');
 });
 
 test('lists join the way each new language does (Intl.ListFormat)', () => {
@@ -250,8 +253,35 @@ test("items, labels and sentences use the language's own punctuation", () => {
   // Arabic isolates list items, label and value, and each sentence: an English note keeps
   // its period at its own end inside an Arabic paragraph.
   assert.equal(joinSentences(['ألغي الاجتماع', 'Moved to Tuesday'], 'ar'), `${FSI}ألغي الاجتماع.${PDI} ${FSI}Moved to Tuesday.${PDI}`);
-  assert.equal(joinItems(['Plano', 'Dallas'], 'ar'), `${FSI}Plano${PDI}, ${FSI}Dallas${PDI}`);
+  assert.equal(joinItems(['Plano', 'Dallas'], 'ar'), `${FSI}Plano${PDI}، ${FSI}Dallas${PDI}`, 'the Arabic comma');
   assert.equal(labelValue('Sort', 'Soonest', 'ar'), `${FSI}Sort${PDI}: ${FSI}Soonest${PDI}`);
+  // The shipped dictionaries carry each language's own marks.
+  assert.equal(joinItems(['周一', '周三'], 'zh'), '周一、周三');
+  assert.equal(labelValue('时间', '两周内', 'zh'), '时间：两周内');
+  assert.equal(asSentence('पंजीकरण बंद', 'hi'), 'पंजीकरण बंद।');
+  assert.equal(joinSentences(['报名截止', '现场不接受报名'], 'zh'), '报名截止。现场不接受报名。');
+});
+
+test('pieces of running text take no space after a full-width mark, and templates split around a value', () => {
+  assert.equal(sentenceGap("Can't go?"), ' ');
+  assert.equal(sentenceGap('去不了？'), '', 'a full-width question mark carries its own space');
+  assert.equal(sentenceGap('报名：'), '');
+  assert.equal(sentenceGap(`请在${FSI}16:00${PDI}前报名。${PDI}`), '', 'isolates after the mark do not count');
+  assert.equal(sentenceGap('主题', '（选填）'), '', 'nor before a full-width bracket');
+  assert.equal(sentenceGap('Topics', '(optional)'), ' ');
+  assert.equal(sentenceGap('पंजीकरण बंद।'), ' ', 'Hindi puts a space after its danda');
+  assert.equal(sentenceGap('He said “yes”'), ' ', 'curly quotes are not full width');
+  assert.equal(joinRun('去不了？', '改用邮件发给 Plano'), '去不了？改用邮件发给 Plano');
+  assert.equal(joinRun('One.', 'Two.'), 'One. Two.');
+  assert.equal(joinRun('', 'Two.'), 'Two.');
+  assert.equal(joinRun('One.', undefined), 'One.');
+  assert.equal(joinSentences(['请在会议当天16:00前报名', '现场不接受报名'], 'zh'), '请在会议当天16:00前报名。现场不接受报名。');
+  // A template split around the value a page renders itself (a date in bold, a visible time).
+  assert.deepEqual(textAround('ui.dateTime', 'time', { date: 'Mon, Oct 12' }, 'en'), ['Mon, Oct 12, ', '']);
+  assert.deepEqual(textAround('ui.dateTime', 'date', { time: '7:00 PM' }, 'en'), ['', ', 7:00 PM']);
+  assert.deepEqual(textAround('ui.dateTime', 'date', { time: '19:00' }, 'zh'), ['', ' 19:00']);
+  assert.deepEqual(textAround('ui.dateTime', 'time', { date: 'الاثنين' }, 'ar'), [`${FSI}الاثنين${PDI}، `, ''], 'no isolate left open at the split');
+  assert.deepEqual(textAround('nav.home', 'x', {}, 'en'), ['Home', ''], 'a template without the param stays whole');
 });
 
 test('a message inside an Arabic message keeps its right-to-left order', () => {
@@ -263,15 +293,25 @@ test('a message inside an Arabic message keeps its right-to-left order', () => {
     assert.equal(when, `${FSI}الاثنين${PDI}، ${FSI}4:00 م${PDI}`);
     assert.equal(t('ui.signupCloses', { when }, 'ar'), `يغلق التسجيل ${RLI}${when}${PDI}`);
   });
-  // The same while the template is still the English placeholder ("{day}, {time}").
-  const placeholder = t('ui.dayTime', { day: 'Mon', time: '4:00 PM' }, 'ar');
-  assert.ok(t('ui.signupCloses', { when: placeholder }, 'ar').includes(`${RLI}${placeholder}${PDI}`));
+  // The shipped Arabic dictionary does the same.
+  const shipped = t('ui.dayTime', { day: 'الاثنين', time: '4:00 م' }, 'ar');
+  assert.equal(shipped, `${FSI}الاثنين${PDI}، ${FSI}4:00 م${PDI}`);
+  assert.ok(t('ui.signupCloses', { when: shipped }, 'ar').includes(`${RLI}${shipped}${PDI}`));
+  // The same with a Latin-comma template, as an untranslated placeholder would have it.
+  withEntries('ar', { 'ui.dayTime': '{day}, {time}' }, () => {
+    const placeholder = t('ui.dayTime', { day: 'Mon', time: '4:00 PM' }, 'ar');
+    assert.ok(t('ui.signupCloses', { when: placeholder }, 'ar').includes(`${RLI}${placeholder}${PDI}`));
+  });
   // A nested message with words of its own goes by its first letter, as before: an English
   // placeholder sentence stays left to right, an Arabic one right to left.
-  const english = t('city.councilTitle', { city: 'Plano' }, 'ar');
-  assert.ok(t('prepare.meetingLine', { council: english, when: 'x' }, 'ar').startsWith(`${FSI}${english}${PDI}`));
+  withEntries('ar', { 'city.councilTitle': '{city} City Council' }, () => {
+    const english = t('city.councilTitle', { city: 'Plano' }, 'ar');
+    assert.ok(t('prepare.meetingLine', { council: english, when: 'x' }, 'ar').startsWith(`${FSI}${english}${PDI}`));
+  });
+  const arabic = t('city.councilTitle', { city: 'Plano' }, 'ar');
+  assert.ok(t('prepare.meetingLine', { council: arabic, when: 'x' }, 'ar').startsWith(`${FSI}${arabic}${PDI}`));
   // Plain values keep FSI; other languages get nothing.
-  assert.equal(t('city.councilTitle', { city: '7:00' }, 'ar'), `${FSI}7:00${PDI} City Council`);
+  assert.equal(t('city.councilTitle', { city: '7:00' }, 'ar'), `مجلس مدينة ${FSI}7:00${PDI}`);
   assert.equal(t('ui.signupCloses', { when: 'Mon, 4:00 PM' }, 'en'), 'Sign-up closes Mon, 4:00 PM');
   assert.equal(stripIsolates(`${RLI}a${PDI}`), 'a', 'every isolate comes out of text that leaves the screen');
 });

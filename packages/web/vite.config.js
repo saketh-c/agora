@@ -20,6 +20,33 @@ const LANGS = LOCALES.map((l) => l.code).filter((code) => code !== 'en');
 const PRECACHED_UI = LOCALES.filter((l) => l.ready && l.code !== 'en').map((l) => l.code);
 const ON_DEMAND_UI = LANGS.filter((code) => !PRECACHED_UI.includes(code));
 
+/**
+ * Size budgets for the minified chunks, in kB. The app's own chunks (the first download, React,
+ * Leaflet, each language's dictionary) keep the 900 kB line. A language's city translation
+ * memory (city-i18n-<code>) is allowed more: it is fetched only by someone reading in that
+ * language, once, and then kept by the service worker, and it grows with the city data. Telugu
+ * and Hindi, whose scripts take three bytes a letter, are the largest (Telugu about 915 kB,
+ * 225 kB gzipped). Splitting a memory per city would add a request to every city page for
+ * little gain, so these chunks get their own, higher line instead.
+ */
+const APP_CHUNK_KB = 900;
+const CITY_I18N_CHUNK_KB = 1400;
+
+/** Warns about an app chunk over APP_CHUNK_KB; Vite's own warning covers CITY_I18N_CHUNK_KB. */
+function appChunkBudget() {
+  return {
+    name: 'agora-app-chunk-budget',
+    apply: 'build',
+    generateBundle(_options, bundle) {
+      for (const chunk of Object.values(bundle)) {
+        if (chunk.type !== 'chunk' || chunk.name.startsWith('city-i18n-')) continue;
+        const kb = Buffer.byteLength(chunk.code) / 1000;
+        if (kb > APP_CHUNK_KB) this.warn(`${chunk.fileName} is ${kb.toFixed(0)} kB, over the ${APP_CHUNK_KB} kB budget for app chunks (vite.config.js)`);
+      }
+    },
+  };
+}
+
 // Served from the domain root in development and from /<repo>/ on GitHub Pages, so the
 // base has to reach the manifest, the service worker scope, and the router as well as
 // the asset URLs.
@@ -29,6 +56,7 @@ export default defineConfig({
   base,
   plugins: [
     react(),
+    appChunkBudget(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png'],
@@ -119,8 +147,9 @@ export default defineConfig({
     // Kept on purpose: the first chunk carries the app, the city data and only the English
     // dictionary. Every other language's dictionary is its own chunk (ui-<code>), loaded by
     // core's loadLocale() when someone reads in it, and so is its city translation memory
-    // (city-i18n-<code>), so adding a language does not grow the first download.
-    chunkSizeWarningLimit: 900,
+    // (city-i18n-<code>), so adding a language does not grow the first download. This limit is
+    // the one for those city translation memories; app chunks keep APP_CHUNK_KB (see above).
+    chunkSizeWarningLimit: CITY_I18N_CHUNK_KB,
     rollupOptions: {
       output: {
         manualChunks: {

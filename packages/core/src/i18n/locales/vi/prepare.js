@@ -92,7 +92,7 @@ export default {
     topic: 'Chủ đề',
     agendaItem: 'Mục nghị sự',
     optional: '(không bắt buộc)',
-    agendaItemPlaceholder: 'Mục 12, ngân sách trung tâm giải trí',
+    agendaItemPlaceholder: 'Mục 12, ngân sách khu giải trí',
     agendaHelp: 'Để trống nếu bạn nói về điều không có trong chương trình nghị sự.',
     position: 'Lập trường của bạn',
     support: 'Ủng hộ',
@@ -104,7 +104,7 @@ export default {
     storyPlaceholder: 'Tôi đi chuyến xe buýt 12:30 từ trường về nhà, và đó là tuyến duy nhất còn chạy sau 16:00.',
     storyHelp: 'Một khoảnh khắc trong đời bạn thuyết phục hơn một con số thống kê.',
     ask: 'Chính xác bạn đang yêu cầu điều gì?',
-    askPlaceholder: 'Giữ xe buýt buổi tối trong ngân sách',
+    askPlaceholder: 'Giữ tuyến xe buýt buổi tối',
     askHelp: 'Một yêu cầu rõ ràng. Bắt đầu bằng một động từ.',
     draft: 'Bản nháp của bạn',
     words: {

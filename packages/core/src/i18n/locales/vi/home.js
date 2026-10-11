@@ -3,7 +3,7 @@ export default {
   heroLead: 'Tìm một cuộc họp hội đồng thành phố gần bạn và biết chính xác cách phát biểu ở đó.',
   where: {
     question: 'Bạn sống hoặc đi học ở đâu?',
-    placeholder: 'Thành phố, mã ZIP, địa chỉ hoặc trường',
+    placeholder: 'Thành phố, ZIP, địa chỉ hay trường',
     find: 'Tìm cuộc họp của tôi',
     useLocation: 'Dùng vị trí chính xác của tôi',
     finding: 'Đang tìm vị trí của bạn',

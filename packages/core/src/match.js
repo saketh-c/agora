@@ -255,7 +255,7 @@ export function buildPlan(cities, prefsInput, { today, days = 45, now } = {}) {
         .map((r) => lowerFirst(r.text))
     : [];
   const summary = top
-    ? t('match.summary', { city: top.cityName, label: top.label, date: formatDate(top.date), time: formatTime(top.time), why: why.length ? ` (${why.join('; ')})` : '' })
+    ? t('match.summary', { city: top.cityName, label: top.label, date: formatDate(top.date), time: formatTime(top.time), why: why.length ? t('match.why', { reasons: why.join(t('match.whySep')) }) : '' })
     : t('match.noMatches');
   return { prefs, meetings, agendaItems, recentAgendaItems, youthPrograms, summary };
 }

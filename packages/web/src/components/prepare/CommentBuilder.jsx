@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { buildComment, estimateSpeakingSeconds, isTopicId, joinItems, joinSentences, timeOfDayFor, t, tn, topicList, getTopic, speechUnits, speakingRate } from '@agora/core';
+import { buildComment, estimateSpeakingSeconds, getTopic, isTopicId, joinItems, joinSentences, sentenceGap, speakingRate, speechUnits, t, timeOfDayFor, tn, topicList } from '@agora/core';
 import { useStore } from '../../lib/store.jsx';
 import { api, apiAvailable } from '../../lib/api.js';
 import { copyText } from '../../lib/clipboard.js';
@@ -93,7 +93,7 @@ function Field({ id, label, optional, help, children }) {
     <div className="field">
       <label className="label" htmlFor={id}>
         {label}
-        {optional && <span className="opt">{` ${t('prepare.write.optional')}`}</span>}
+        {optional && <span className="opt">{`${sentenceGap(label, t('prepare.write.optional'))}${t('prepare.write.optional')}`}</span>}
       </label>
       {children}
       {help && (
@@ -623,7 +623,7 @@ export default function CommentBuilder({ ctx, meeting, city, practicing, heading
           <p className="draft__alt">
             <Icon name="mail" size={20} />
             <span>
-              {`${t('prepare.write.cantGo')} `}
+              {`${t('prepare.write.cantGo')}${sentenceGap(t('prepare.write.cantGo'))}`}
               {contact.kind === 'email' ? (
                 <a className="link" href={mailtoHref(contact.email, email.subject, email.lead ? `${email.lead}\n\n${shown}` : shown)} onClick={markWritten}>
                   {t('prepare.write.emailIt', { city: city.name })}

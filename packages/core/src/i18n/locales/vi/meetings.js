@@ -4,7 +4,7 @@ export default {
   viewList: 'Danh sách',
   viewMap: 'Bản đồ',
   searchLabel: 'Tìm cuộc họp',
-  searchPlaceholder: 'Tìm thành phố, quận, chủ đề hoặc ngày',
+  searchPlaceholder: 'Thành phố, quận, chủ đề, ngày',
   clearSearch: 'Xóa tìm kiếm',
   skipToResults: {
     one: 'Đến kết quả',

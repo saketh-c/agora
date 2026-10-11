@@ -43,4 +43,5 @@ export default {
   pending: 'Algunas redacciones todavía se están cargando. Inténtalo en un momento para ver más.',
   keepReading: 'Más de las redacciones locales',
   coverage: 'Cobertura de {topic}',
+  sourceDate: '{source}, {date}',
 };

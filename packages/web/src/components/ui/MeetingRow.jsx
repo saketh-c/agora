@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { textAround } from '@agora/core';
 import Icon from './Icon.jsx';
 import DateTile, { tileTone } from './DateTile.jsx';
 import MeetingStatus from './MeetingStatus.jsx';
@@ -28,7 +29,8 @@ export default function MeetingRow({ meeting, city, to, onSelect, selected = fal
           {dist && <span className="row__dist">{dist}</span>}
         </span>
         <span className="row__meta">
-          <span className="vh">{`${whenLong(meeting.date)}, `}</span>
+          {/* Heard before the time: the long date, with the language's own "{date}, {time}" joint. */}
+          <span className="vh">{textAround('ui.dateTime', 'time', { date: whenLong(meeting.date) })[0]}</span>
           <span className="t num">{timeText(meeting.time)}</span>
           <span>{typeLabel(meeting)}</span>
         </span>

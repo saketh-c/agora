@@ -9,9 +9,9 @@ import { spawnSync } from 'node:child_process';
 import { cpSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { DICTIONARIES } from '../src/i18n/index.js';
+import { DICTIONARIES, isPluralForms, pluralCategoriesFor } from '../src/i18n/index.js';
 import { editDictSource, parseDictSource, quoteString } from '../../../scripts/lib/dict-source.mjs';
-import { MUST_CONFIRM, compareLocale, needsTranslation, parseJsonPositions, pluralSelector, setJsonMember } from '../../../scripts/lib/i18n-tools.mjs';
+import { MUST_CONFIRM, compareLocale, needsTranslation, parseJsonPositions, pluralSelector, sameAsEnglish, setJsonMember } from '../../../scripts/lib/i18n-tools.mjs';
 import { scaffoldNamespace } from '../../../scripts/i18n-scaffold.mjs';
 import { formatSameAsEnglish, planCommunity, planData, planUi } from '../../../scripts/i18n-apply.mjs';
 import { uiTodo } from '../../../scripts/i18n-todo.mjs';
@@ -77,21 +77,40 @@ test('a new language starts as English with its own plural forms', () => {
   assert.equal(scaffoldNamespace(SOURCE, 'hi'), SOURCE, 'Hindi has the same forms as English');
 });
 
-test('every language passes the structural checks, and the new ones report what is untranslated', () => {
-  for (const code of ['es', 'vi', 'zh', 'hi', 'te', 'ar']) {
+/**
+ * A language as it starts out (what scripts/i18n-scaffold.mjs writes): English text, with each
+ * plural object given the forms the language uses. Every shipped language is finished, so the
+ * checks for untranslated text run against this.
+ */
+function untranslated(code, value = DICTIONARIES.en) {
+  if (isPluralForms(value)) return Object.fromEntries(pluralCategoriesFor(code).map((c) => [c, value[c] ?? value.other]));
+  if (Array.isArray(value)) return value.map((v) => untranslated(code, v));
+  if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, untranslated(code, v)]));
+  return value;
+}
+
+const NEW_LANGUAGES = ['zh', 'hi', 'te', 'ar'];
+
+test('every language passes the structural checks and is completely translated', () => {
+  for (const code of ['es', 'vi', ...NEW_LANGUAGES]) {
     const r = compareLocale(code);
     assert.deepEqual([r.missing, r.extra, r.problems], [[], [], []], code);
+    assert.deepEqual(r.untranslated, [], `${code} is complete`);
+    assert.equal(r.translated, r.total, code);
   }
-  assert.deepEqual(compareLocale('es').untranslated, [], 'Spanish stays complete');
-  assert.deepEqual(compareLocale('vi').untranslated, [], 'Vietnamese stays complete');
-  for (const code of ['zh', 'hi', 'te', 'ar']) {
-    const r = compareLocale(code);
+});
+
+test('a language that is still English reports what is untranslated', () => {
+  for (const code of NEW_LANGUAGES) {
+    const r = compareLocale(code, { dicts: { en: DICTIONARIES.en, [code]: untranslated(code) } });
+    assert.deepEqual([r.missing, r.extra, r.problems], [[], [], []], `${code}: the starting copy is well formed`);
     assert.ok(r.untranslated.includes('nav.home'), code);
     assert.ok(!r.untranslated.includes('format.weekdays[1]'), `${code}: Intl supplies weekday names`);
     assert.ok(!r.untranslated.includes('prepare.write.schoolPlaceholder'), `${code}: a sample school name stays English`);
   }
-  assert.ok(compareLocale('zh').untranslated.includes('ui.dateTime'), 'Chinese writes its own comma');
-  assert.ok(!compareLocale('hi').untranslated.includes('ui.dateTime'), 'Hindi keeps the Latin comma');
+  const start = (code) => compareLocale(code, { dicts: { en: DICTIONARIES.en, [code]: untranslated(code) } });
+  assert.ok(start('zh').untranslated.includes('ui.dateTime'), 'Chinese writes its own comma');
+  assert.ok(!start('hi').untranslated.includes('ui.dateTime'), 'Hindi keeps the Latin comma');
 });
 
 test('plural and parameter rules: required categories, extra ones allowed, counts may become plurals', () => {
@@ -155,15 +174,23 @@ test('a value still in English counts as untranslated even after English changes
 });
 
 test('every new language confirms its punctuation, and letterless templates are counted apart', () => {
-  for (const code of ['zh', 'hi', 'te', 'ar']) {
-    const r = compareLocale(code);
-    for (const key of MUST_CONFIRM) assert.ok(r.untranslated.includes(key), `${code} confirms ${key}`);
+  for (const code of NEW_LANGUAGES) {
+    // Each punctuation key is answered: translated, or kept English on purpose.
+    const done = compareLocale(code);
+    for (const key of MUST_CONFIRM) assert.ok(!done.untranslated.includes(key), `${code} confirmed ${key}`);
+    // A language that is still English must confirm each one it has not kept on purpose.
+    const r = compareLocale(code, { dicts: { en: DICTIONARIES.en, [code]: untranslated(code) } });
+    const kept = sameAsEnglish(code);
+    for (const key of MUST_CONFIRM) assert.equal(r.untranslated.includes(key), !kept.has(key), `${code} confirms ${key}`);
     assert.ok(!r.fixed.includes('rehearse.quoted'), code);
     assert.equal(r.translated + r.untranslated.length, r.total, `${code}: fixed units are in neither number`);
     assert.ok(r.fixed.every((k) => !r.untranslated.includes(k)));
   }
+  // Chinese keeps none of them English, so a fresh copy asks for all four.
+  for (const key of MUST_CONFIRM) assert.ok(!sameAsEnglish('zh').has(key), `zh translates ${key}`);
   // rehearse.quoted reaches the work files although its English is only quotes and a param.
-  assert.equal(uiTodo('zh')['rehearse.quoted'], '"{word}"');
+  assert.equal(uiTodo('zh', { dicts: { en: DICTIONARIES.en, zh: untranslated('zh') } })['rehearse.quoted'], '"{word}"');
+  assert.equal(uiTodo('zh')['rehearse.quoted'], undefined, 'the shipped Chinese has its own quotes');
   assert.ok(compareLocale('hi').fixed.includes('ui.dateTime'), 'Hindi keeps the Latin comma: nothing to write');
   assert.ok(!compareLocale('hi').untranslated.includes('ui.dateTime'));
   // A translation, or English kept on purpose, answers it.
@@ -265,7 +292,25 @@ test('todo and apply round-trip a language in chunks (in a copy of the repositor
     }
     rmSync(path.join(tmp, 'data/i18n/work'), { recursive: true, force: true });
     const run = (args) => spawnSync(process.execPath, args, { cwd: tmp, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
-    let r = run(['scripts/i18n-todo.mjs', 'ar', '--chunks', '2', '--data-chunks', '2']);
+    // Arabic ships finished, so the copy starts it over as a new language: not ready, its
+    // dictionary scaffolded from English, no city-data memory, no translated posts, and
+    // nothing kept English on purpose.
+    const runtimeFile = path.join(tmp, 'packages/core/src/i18n/runtime.js');
+    const runtime = readFileSync(runtimeFile, 'utf8');
+    const unready = runtime.replace(/(\{ code: 'ar',[^\n]*ready: )true/, '$1false');
+    assert.notEqual(unready, runtime, 'Arabic is in LOCALES');
+    writeFileSync(runtimeFile, unready);
+    rmSync(path.join(tmp, 'packages/core/src/i18n/locales/ar'), { recursive: true, force: true });
+    rmSync(path.join(tmp, 'data/i18n/ar.json'), { force: true });
+    const communityFile = path.join(tmp, 'data/community.json');
+    const community = JSON.parse(readFileSync(communityFile, 'utf8'));
+    for (const post of community.posts || []) if (post.i18n) delete post.i18n.ar;
+    writeFileSync(communityFile, `${JSON.stringify(community, null, 2)}\n`);
+    const sameFile = path.join(tmp, 'packages/core/src/i18n/same-as-english.json');
+    writeFileSync(sameFile, formatSameAsEnglish(Object.fromEntries(Object.entries(JSON.parse(readFileSync(sameFile, 'utf8'))).filter(([k]) => k !== 'ar'))));
+    let r = run(['scripts/i18n-scaffold.mjs', 'ar']);
+    assert.equal(r.status, 0, r.stderr);
+    r = run(['scripts/i18n-todo.mjs', 'ar', '--chunks', '2', '--data-chunks', '2']);
     assert.equal(r.status, 0, r.stderr);
     const files = readdirSync(path.join(tmp, 'data/i18n/work')).sort();
     assert.deepEqual(files, ['ar-community.json', 'ar-data-1.json', 'ar-data-2.json', 'ar-ui-1.json', 'ar-ui-2.json']);

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { BRAND, formatMonthDay, isDateStr, t, tn, compareText, formatNumber } from '@agora/core';
+import { BRAND, formatMonthDay, isDateStr, t, tn, compareText, formatNumber, sentenceGap } from '@agora/core';
 import seed from '@data/community.json';
 import { useCities } from '../lib/DataProvider.jsx';
 import { useStore } from '../lib/store.jsx';
@@ -875,7 +875,9 @@ function Composer({ open, onClose, profile, prefs, cities, mode, onPosted }) {
           </div>
           <div className="field">
             <label className="label" htmlFor="cm-name">
-              {t('community.nameLabel')} <span className="opt">{t('community.optional')}</span>
+              {t('community.nameLabel')}
+              {sentenceGap(t('community.nameLabel'), t('community.optional'))}
+              <span className="opt">{t('community.optional')}</span>
             </label>
             <input id="cm-name" className="input" dir={inputDir(draft.name)} value={draft.name} onChange={set('name')} maxLength={MAX_NAME} autoComplete="given-name" aria-describedby="cm-name-help" />
             <p className="help" id="cm-name-help">
@@ -886,7 +888,9 @@ function Composer({ open, onClose, profile, prefs, cities, mode, onPosted }) {
 
         <div className="field">
           <span className="label">
-            {t('community.mediaLabel')} <span className="opt">{t('community.optional')}</span>
+            {t('community.mediaLabel')}
+            {sentenceGap(t('community.mediaLabel'), t('community.optional'))}
+            <span className="opt">{t('community.optional')}</span>
           </span>
           <div className="btn-row">
             <button type="button" className="btn btn--secondary btn--sm" onClick={() => fileRef.current && fileRef.current.click()} disabled={processing || (photos.length >= MAX_PHOTOS && Boolean(video))}>
@@ -932,7 +936,9 @@ function Composer({ open, onClose, profile, prefs, cities, mode, onPosted }) {
 
         <div className="field">
           <label className="label" htmlFor="cm-video-url">
-            {t('community.videoUrlLabel')} <span className="opt">{t('community.optional')}</span>
+            {t('community.videoUrlLabel')}
+            {sentenceGap(t('community.videoUrlLabel'), t('community.optional'))}
+            <span className="opt">{t('community.optional')}</span>
           </label>
           <input id="cm-video-url" name="videoUrl" className="input" dir="ltr" value={draft.videoUrl} onChange={set('videoUrl')} inputMode="url" placeholder="https://youtu.be/" aria-invalid={Boolean(errors.videoUrl)} aria-describedby={described('videoUrl', 'cm-video-help')} />
           <p className="help" id="cm-video-help">

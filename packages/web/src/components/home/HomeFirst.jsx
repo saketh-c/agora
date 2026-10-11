@@ -1,6 +1,6 @@
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { formatTime, offeredLocales, t } from '@agora/core';
+import { formatTime, offeredLocales, sentenceGap, t } from '@agora/core';
 import { useCities } from '../../lib/DataProvider.jsx';
 import { useStore } from '../../lib/store.jsx';
 import { EmptyState, MeetingRow, Section, meetingDeadline } from '../ui/index.js';
@@ -129,7 +129,8 @@ export default function HomeFirst({ onDone, onOpenMeeting, focusPlace = false })
               <div className="statline">
                 <span className="statline__n num">{t('home.stat.n', { n: stat.inTen })}</span>
                 <p>
-                  {t('home.stat.text', { n: stat.days, time: formatTime('17:00', undefined, { compact: true }) })}{' '}
+                  {t('home.stat.text', { n: stat.days, time: formatTime('17:00', undefined, { compact: true }) })}
+                  {sentenceGap(t('home.stat.text', { n: stat.days }))}
                   <Link className="link" to="/insights">
                     {t('home.stat.see')}
                   </Link>

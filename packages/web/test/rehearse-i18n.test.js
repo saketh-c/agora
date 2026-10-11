@@ -105,7 +105,7 @@ test('coaching numbers and quoted words follow the language', () => {
   assert.equal(localeTag('xx'), 'en-US');
   assert.equal(numberText(1.5, 'ar'), '1.5', 'Latin digits in Arabic');
   assert.equal(coachParams({ list: ['um', 'like'] }, 'en').list, '"um", "like"', 'English is unchanged');
-  assert.match(coachParams({ list: ['嗯', '那个'] }, 'zh').list, /^"嗯"和"那个"$/, 'Chinese joins with its own "and" until a translator sets its quotes');
+  assert.equal(coachParams({ list: ['嗯', '那个'] }, 'zh').list, '“嗯”和“那个”', 'Chinese joins with its own "and" and its own quotes');
 });
 
 test('when a take happened, in Central time and each language', () => {

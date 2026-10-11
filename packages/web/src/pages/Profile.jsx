@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LOCALES, offeredLocales, t, tn } from '@agora/core';
+import { LOCALES, offeredLocales, t, tn, sentenceGap } from '@agora/core';
 import { useStore, displayName } from '../lib/store.jsx';
 import { useCities } from '../lib/DataProvider.jsx';
 import { cleanEmail, NAME_MAX } from '../lib/profiles.js';
@@ -312,7 +312,9 @@ function ProfileSheet({ open, profile, onClose, onSave }) {
         </div>
         <div className="field">
           <label className="label" htmlFor="pf-email">
-            {t('profile.emailLabel')} <span className="opt">{t('profile.optional')}</span>
+            {t('profile.emailLabel')}
+            {sentenceGap(t('profile.emailLabel'), t('profile.optional'))}
+            <span className="opt">{t('profile.optional')}</span>
           </label>
           <input id="pf-email" type="email" className="input" dir="ltr" value={values.email} onChange={set('email')} placeholder={t('profile.emailPlaceholder')} autoComplete="email" inputMode="email" aria-invalid={Boolean(errors.email)} aria-describedby={`pf-email-help${errors.email ? ' pf-email-err' : ''}`} />
           <p className="help" id="pf-email-help">

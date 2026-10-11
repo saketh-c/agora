@@ -251,7 +251,7 @@ export default {
     heading: '完成你的设置',
     intro: '无需账号。你的回答会保存在这台电脑上，你随时可以重新运行“{cmd} setup”。',
     language: '语言（{codes}）',
-    languageRetry: '请输入 en、es 或 vi。',
+    languageRetry: '请输入以下代码之一：{codes}。',
     q1: '1. 你关心什么？',
     pickNumbers: '输入数字，用逗号分隔',
     pickRetry: '请使用1至{n}的数字，用逗号分隔。',

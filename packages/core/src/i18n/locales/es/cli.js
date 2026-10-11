@@ -254,7 +254,7 @@ export default {
     heading: 'Prepara tu turno',
     intro: 'No necesitas cuenta. Las respuestas se guardan en esta computadora y puedes volver a ejecutar "{cmd} setup" cuando quieras.',
     language: 'Idioma ({codes})',
-    languageRetry: 'Escribe en, es o vi.',
+    languageRetry: 'Escribe uno de estos códigos: {codes}.',
     q1: '1. ¿Qué te importa?',
     pickNumbers: 'Escribe números separados por comas',
     pickRetry: 'Usa números del 1 al {n}, separados por comas.',

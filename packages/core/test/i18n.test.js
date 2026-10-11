@@ -119,6 +119,14 @@ test('topics, match reasons, and the comment draft follow the locale', () => {
   assert.notEqual(buildComment({ name: 'Ana', cityName: 'Garland', topicId: 'housing', locale: 'es' }), enDraft);
 });
 
+test('a Chinese draft spaces an English name but not a Chinese one', () => {
+  const intro = (input) => buildComment({ cityName: 'Plano', locale: 'zh', ...input }).split('\n')[0];
+  assert.match(intro({ name: 'Ana' }), /我叫 Ana，住在 Plano。/);
+  assert.match(intro({ name: '李明' }), /我叫李明，住在 Plano。/);
+  assert.match(intro({ name: '李明', school: '普莱诺高中' }), /我叫李明，是 Plano 普莱诺高中的学生。/);
+  assert.match(intro({ name: '李明', school: 'Plano Senior High' }), /是 Plano Plano Senior High 的学生。/);
+});
+
 test('city data localization swaps only known strings and only exact matches', () => {
   const strings = {
     'Fill out a speaker card.': 'Llene una tarjeta de orador.',

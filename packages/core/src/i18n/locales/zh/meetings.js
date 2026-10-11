@@ -5,7 +5,7 @@ export default {
   viewList: '列表',
   viewMap: '地图',
   searchLabel: '搜索会议',
-  searchPlaceholder: '搜索城市、县、议题或日期',
+  searchPlaceholder: '城市、县、议题或日期',
   clearSearch: '清除搜索',
   skipToResults: {
     other: '跳到{n}个结果',

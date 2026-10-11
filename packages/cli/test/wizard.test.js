@@ -108,7 +108,7 @@ test('yes and no work in Spanish and Vietnamese', async () => {
 test('an unclear answer is asked again instead of counting as no', async () => {
   const r = await wizard(['fr', 'en', '99', '1', 'maybe', 'y', 'n', 'y', 'y', 'park', 'Plno', 'Plano', '', 'far', '12', 'n', 'y']);
   assert.equal(r.code, 0);
-  assert.match(r.out, /Type en, es, or vi\./);
+  assert.match(r.out, /Type one of these codes: en, es, vi, zh, hi, te, ar\./, 'every offered language is listed');
   assert.match(r.out, /Use numbers from 1 to 17/);
   assert.match(r.out, /Please answer y \(yes\) or n \(no\)\./);
   assert.match(r.out, /"park" matches more than one city: Highland Park, University Park/);

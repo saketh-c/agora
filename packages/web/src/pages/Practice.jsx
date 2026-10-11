@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { t, tn, estimateSpeakingSeconds, compareText, speechUnits } from '@agora/core';
+import { compareText, estimateSpeakingSeconds, sentenceGap, speechUnits, t, tn } from '@agora/core';
 import { useStore } from '../lib/store.jsx';
 import { Disclosure, Icon, Notice, PageHeader } from '../components/ui/index.js';
 import MeetingPicker, { CarryNotice, ForLine, MeetingNotice, forText } from '../components/prepare/MeetingPicker.jsx';
@@ -393,7 +393,9 @@ function Setup({ setup, onChange, cities, city, limitSec, draft, session, onStar
 
         <div className="field">
           <label className="label" htmlFor="pr-script">
-            {t('rehearse.setup.script')} <span className="opt">{t('rehearse.setup.optional')}</span>
+            {t('rehearse.setup.script')}
+            {sentenceGap(t('rehearse.setup.script'), t('rehearse.setup.optional'))}
+            <span className="opt">{t('rehearse.setup.optional')}</span>
           </label>
           <textarea
             id="pr-script"
@@ -428,14 +430,16 @@ function Setup({ setup, onChange, cities, city, limitSec, draft, session, onStar
             <p className="help pr-script__help" id="pr-script-help">
               {hasDraft ? (
                 <>
-                  <span>{t('rehearse.setup.scriptHelpDraft')}</span>{' '}
+                  <span>{t('rehearse.setup.scriptHelpDraft')}</span>
+                  {sentenceGap(t('rehearse.setup.scriptHelpDraft'))}
                   <button type="button" className="link" onClick={useDraft}>
                     {tn('rehearse.setup.useDraft', wordCount(draft.text, lang))}
                   </button>
                 </>
               ) : (
                 <>
-                  <span>{t('rehearse.setup.scriptHelp')}</span>{' '}
+                  <span>{t('rehearse.setup.scriptHelp')}</span>
+                  {sentenceGap(t('rehearse.setup.scriptHelp'))}
                   <Link className="link" to="/prepare/write">
                     {t('rehearse.setup.writeOne')}
                   </Link>
@@ -872,7 +876,9 @@ function Report({ report, city, playback, lang, onAgain, onChange, focusRef, his
                             <h3 className="pr-find__t">{t(`rehearse.findings.${f.id}.title`, p)}</h3>
                             <p className="pr-find__d">{t(`rehearse.findings.${f.id}.detail`, p)}</p>
                             <p className="pr-find__try">
-                              <strong>{t('rehearse.report.tryThis')}</strong> {t(`rehearse.findings.${f.id}.drill`, p)}
+                              <strong>{t('rehearse.report.tryThis')}</strong>
+                              {sentenceGap(t('rehearse.report.tryThis'))}
+                              {t(`rehearse.findings.${f.id}.drill`, p)}
                             </p>
                           </div>
                         </li>

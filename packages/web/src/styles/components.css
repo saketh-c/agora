@@ -90,6 +90,7 @@ button.see { border: 0; background: transparent; font-family: inherit; cursor: p
   -webkit-appearance: none; appearance: none;
 }
 .search input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
+.search input { text-overflow: ellipsis; } /* an example too long for a narrow field ends in an ellipsis, not mid-word */
 .search input::placeholder { color: var(--muted); opacity: 1; }
 .search input:focus-visible { outline: 2px solid var(--ink); outline-offset: 0; border-color: var(--ink); }
 .search__clear { position: absolute; inset-inline-end: 2px; }

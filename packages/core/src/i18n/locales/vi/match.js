@@ -20,5 +20,7 @@ export default {
   youthPrograms: 'Thành phố có chương trình thanh thiếu niên bạn có thể tham gia',
   scheduleChange: 'Thay đổi lịch: xác nhận trên trang web thành phố',
   summary: 'Bước tiếp theo tốt nhất cho bạn: {city}, {label}, {date} lúc {time}{why}.',
+  why: ' ({reasons})',
+  whySep: '; ',
   noMatches: 'Chưa có cuộc họp sắp tới nào phù hợp. Hãy mở rộng khoảng cách hoặc thêm mối quan tâm.',
 };

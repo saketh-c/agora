@@ -1,3 +1,4 @@
+import { labelValue } from '@agora/core';
 import Icon from './Icon.jsx';
 
 /**
@@ -15,8 +16,15 @@ export default function ProgressLights({ steps, label, onLight = false, classNam
           <span className="prog__bar" aria-hidden="true" />
           <span className="prog__lbl">
             {s.done && <Icon name="check" />}
-            {s.label}
-            {s.stateLabel && <span className="vh">{`, ${s.stateLabel}`}</span>}
+            {s.stateLabel ? (
+              <>
+                {/* Seen: the step's name. Heard: "Sign up: not done", with the language's own colon. */}
+                <span aria-hidden="true">{s.label}</span>
+                <span className="vh">{labelValue(s.label, s.stateLabel)}</span>
+              </>
+            ) : (
+              s.label
+            )}
           </span>
         </li>
       ))}

@@ -103,7 +103,7 @@ export default {
     storyPlaceholder: '我放学后坐12:30的公交车回家，这是16:00以后唯一还在运行的线路。',
     storyHelp: '你亲身经历的一个片段，胜过一个统计数字。',
     ask: '你具体的诉求是什么？',
-    askPlaceholder: '保留预算中的晚班公交',
+    askPlaceholder: '保留晚班公交',
     askHelp: '一个明确的诉求。用动词开头。',
     draft: '你的草稿',
     words: {

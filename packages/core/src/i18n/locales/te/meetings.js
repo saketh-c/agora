@@ -5,7 +5,7 @@ export default {
   viewList: 'జాబితా',
   viewMap: 'మ్యాప్',
   searchLabel: 'సమావేశాలను వెతకండి',
-  searchPlaceholder: 'నగరం, కౌంటీ, టాపిక్ లేదా రోజు కోసం వెతకండి',
+  searchPlaceholder: 'నగరం, కౌంటీ, టాపిక్ లేదా రోజు',
   clearSearch: 'శోధన క్లియర్ చేయండి',
   skipToResults: {
     one: 'ఫలితానికి వెళ్లండి',

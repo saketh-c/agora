@@ -1,6 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { normalizePrefs, t } from '@agora/core';
+import { normalizePrefs, t, sentenceGap } from '@agora/core';
 import { useCities } from '../../lib/DataProvider.jsx';
 import { useStore } from '../../lib/store.jsx';
 import { Chip, Icon, Segmented, Sheet } from '../ui/index.js';
@@ -271,7 +271,9 @@ export default function SetupSheet({ open, onClose, onSaved }) {
 
         <fieldset className="setup__group">
           <legend className="label">
-            {t('home.setup.topics')} <span className="opt">{t('home.setup.optional')}</span>
+            {t('home.setup.topics')}
+            {sentenceGap(t('home.setup.topics'), t('home.setup.optional'))}
+            <span className="opt">{t('home.setup.optional')}</span>
           </legend>
           <TopicPicker all value={draft.interests} onChange={(interests) => patch({ interests })} label={t('home.setup.topics')} />
         </fieldset>
