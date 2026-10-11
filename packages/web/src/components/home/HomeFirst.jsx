@@ -9,6 +9,7 @@ import PlaceField from './PlaceField.jsx';
 import TopicPicker from './TopicPicker.jsx';
 import useClock from './useClock.js';
 import { eveningShare, firstVisitMeetings } from './homeData.js';
+import { withPlaces } from '../../lib/places.js';
 
 const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -40,9 +41,11 @@ function useFlip(ref, signature) {
 /**
  * Home before setup: the pitch in one line, one question (where you live or go to school), three
  * real meetings a student can speak at, and optional topics that re-sort that list in place.
- * Answering the question completes setup; `onDone` lets the page move focus to what replaces it.
+ * Answering the question completes setup; `onDone({ place, city, slot, before })` lets the page
+ * confirm it (with Undo) and move focus to what replaces it. `focusPlace` puts the cursor in the
+ * question's field (after an Undo).
  */
-export default function HomeFirst({ onDone, onOpenMeeting }) {
+export default function HomeFirst({ onDone, onOpenMeeting, focusPlace = false }) {
   const { prefs, setPrefs, completeSetup, lang, setLang } = useStore();
   const { cities, cityById } = useCities();
   const { today, now } = useClock();
@@ -54,15 +57,13 @@ export default function HomeFirst({ onDone, onOpenMeeting }) {
   const stat = useMemo(() => eveningShare(cities, { today, now }), [cities, today, now]);
   useFlip(listRef, meetings.map((m) => m.id).join('|'));
 
-  const choosePlace = (place) => {
-    const done = completeSetup((p) => ({
-      ...p,
-      homeCityId: place.city.cityId,
-      location: place.location,
-      locationLabel: place.label || '',
-      locationSource: place.source,
-    }));
-    if (done && onDone) onDone(place);
+  // The answer becomes Home, or School when the lookup found a school. `before` lets Home undo it.
+  const choosePlace = ({ place, city, school }) => {
+    if (!place) return;
+    const before = prefs;
+    const slot = school ? 'school' : 'home';
+    const done = completeSetup((p) => withPlaces(p, { [slot]: place, origin: slot }, cities));
+    if (done && onDone) onDone({ place, city, slot, before });
   };
 
   const setInterests = (interests) => {
@@ -82,7 +83,7 @@ export default function HomeFirst({ onDone, onOpenMeeting }) {
             </h1>
             <p className="hero__lead">{t('home.heroLead')}</p>
           </div>
-          <PlaceField variant="ask" cities={cities} onPlace={choosePlace} />
+          <PlaceField variant="ask" cities={cities} onPlace={choosePlace} autoFocus={focusPlace} />
         </div>
         <HeroArt />
       </section>

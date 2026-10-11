@@ -6,6 +6,9 @@
 .pf-how .disc__body p { max-width: 60ch; }
 
 .pf-cols { display: grid; gap: var(--s7); margin-top: var(--s6); }
+.pf-col { display: grid; gap: var(--s7); min-width: 0; align-content: start; }
+/* Headings line up across the two columns whether or not they carry an Edit link. */
+.pf-cols .sec-head { min-height: 44px; align-items: center; }
 @media (min-width: 1024px) { .pf-cols { grid-template-columns: minmax(0, 1fr) minmax(300px, 400px); gap: var(--s7); align-items: start; margin-top: var(--s7); } }
 
 /* The row menus hang below their row, so the list must not clip them (.group hides overflow
@@ -39,3 +42,26 @@
 .pf-toaster .toast { pointer-events: auto; max-width: 560px; padding-right: var(--s4); animation: pf-toast-in var(--d3) var(--ease-in); }
 @keyframes pf-toast-in { from { opacity: 0; transform: translateY(8px); } }
 @media (min-width: 1024px) { .pf-toaster { bottom: var(--s6); } }
+
+/* ---------- Your setup: one quiet list, a row per answer (label over value) ---------- */
+.pf-set__act { margin-top: var(--s3); }
+/* The language menu hangs below its row, so the group must not clip it. */
+.pf-set { overflow: visible; }
+.pf-set__row { position: relative; display: grid; grid-template-columns: 20px minmax(0, 1fr); column-gap: var(--s3); align-items: start; padding: var(--s3) var(--s4); min-height: 64px; }
+.pf-set__row + .pf-set__row::before { content: ""; position: absolute; top: 0; left: var(--s4); right: 0; height: 1px; background: var(--hairline); pointer-events: none; }
+.pf-set__ic { grid-row: 1 / span 2; width: 20px; height: 20px; margin-top: 2px; color: var(--slate); }
+.pf-set__l { font-size: 14px; line-height: 20px; color: var(--slate); }
+.pf-set__v { grid-column: 2; margin-top: 2px; font-weight: 600; overflow-wrap: anywhere; }
+.pf-set__sub { display: block; margin-top: 2px; font-size: 14px; line-height: 20px; font-weight: 400; color: var(--slate); }
+.pf-set__row--lang .pf-set__v { margin-top: var(--s2); }
+.pf-set__lang { font-weight: 600; }
+@media (min-width: 600px) {
+  /* Wider: label and value side by side, the label column sized to the longest label. */
+  .pf-set__row { grid-template-columns: 20px minmax(96px, 9em) minmax(0, 1fr); align-items: baseline; }
+  .pf-set__ic { grid-row: auto; align-self: start; margin-top: 2px; }
+  .pf-set__l { font-size: 16px; line-height: 24px; }
+  .pf-set__v { grid-column: 3; margin-top: 0; }
+  .pf-set__row--lang { align-items: center; }
+  .pf-set__row--lang .pf-set__ic { align-self: center; margin-top: 0; }
+  .pf-set__row--lang .pf-set__v { margin-top: 0; }
+}

@@ -70,5 +70,6 @@ export default {
   newsEmpty: 'No recent stories about {city}.',
   newsError: 'News needs a connection. Try again later.',
   verifiedLine: 'Verified {date} from official city pages. Confirm the time before you go.',
+  verifiedStale: 'Last checked {date}. Schedules may have changed since, so confirm on the city calendar before you go.',
   sources: 'Sources',
 };

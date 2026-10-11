@@ -73,6 +73,7 @@ const LINE = {
   star: [p('M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z')],
   stop: [r(5, 5, 14, 14, 3)],
   pause: [p('M9 5.5v13M15 5.5v13')],
+  mail: [r(3, 5, 18, 14, 2.5), p('m3.8 7 8.2 6.2L20.2 7')],
 };
 
 // Filled icons. Inner strokes are drawn explicitly so the shape reads at 24px.

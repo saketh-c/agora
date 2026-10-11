@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { tidyTimes, writtenContact } from '../src/components/ui/cityText.js';
+import { commentEmail, tidyTimes, writtenContact, writtenRules } from '../src/components/ui/cityText.js';
+import { setLocale } from '@agora/core';
 import { MILES, milesChoices } from '../src/lib/distance.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -41,8 +42,34 @@ test('every city with a written-comment text gives a usable link or nothing', ()
 });
 
 test('one distance scale for setup and the Meetings filters, plus a saved value off the scale', () => {
-  assert.deepEqual(MILES, [5, 10, 15, 25]);
-  assert.deepEqual(milesChoices(15), [5, 10, 15, 25]);
-  assert.deepEqual(milesChoices(40), [5, 10, 15, 25, 40]);
-  assert.deepEqual(milesChoices(null), [5, 10, 15, 25]);
+  assert.deepEqual(MILES, [5, 10, 15, 25, 40, 60]);
+  assert.deepEqual(milesChoices(15), [5, 10, 15, 25, 40, 60]);
+  assert.deepEqual(milesChoices(50), [5, 10, 15, 25, 40, 50, 60]);
+  assert.deepEqual(milesChoices(null), [5, 10, 15, 25, 40, 60]);
+  assert.deepEqual(milesChoices(15, 80, null, 'x'), [5, 10, 15, 25, 40, 60, 80]);
+});
+
+test('an emailed comment follows the city’s own subject line, in English, with the details it asks for', () => {
+  const duncanville = cities.find((c) => c.cityId === 'duncanville').publicComment.writtenCommentMethod;
+  assert.deepEqual(writtenRules(duncanville), { subject: 'Public Comment - Tuesday, [date]', fields: ['first', 'last', 'address'], readAloud: 'no' });
+  setLocale('es');
+  try {
+    const tue = commentEmail({ method: duncanville, cityName: 'Duncanville', meeting: { date: '2026-10-20' }, name: 'Ana María García' });
+    assert.equal(tue.subject, 'Public Comment - Tuesday, October 20, 2026', 'English, whatever the app language');
+    assert.equal(tue.lead, 'First name: Ana\nLast name: María García\nAddress:');
+    assert.equal(tue.readAloud, 'no');
+    // A meeting on another day keeps the city's format with the right weekday.
+    assert.equal(commentEmail({ method: duncanville, cityName: 'Duncanville', meeting: { date: '2026-10-19' } }).subject, 'Public Comment - Monday, October 19, 2026');
+    // No subject asked for: a plain English one, and nothing above the comment.
+    const plano = commentEmail({ method: 'Email councilcomments@plano.gov by 4 p.m. on meeting day', cityName: 'Plano', meeting: { date: '2026-10-12' }, name: 'Ana' });
+    assert.deepEqual([plano.subject, plano.lead, plano.readAloud], ['Public comment for Plano City Council, Oct 12', '', null]);
+    assert.equal(commentEmail({ method: '', cityName: 'Plano', meeting: null }).subject, 'Public comment for Plano City Council');
+  } finally {
+    setLocale('en');
+  }
+  const up = cities.find((c) => c.cityId === 'university-park').publicComment.writtenCommentMethod;
+  assert.equal(writtenRules(up).readAloud, 'notAlways');
+  assert.equal(writtenRules(cities.find((c) => c.cityId === 'denton').publicComment.writtenCommentMethod).readAloud, 'no');
+  // An email address is not an "address" the city asks for.
+  assert.deepEqual(writtenRules('Email the City Secretary at cs@mycity.gov; include your address if you like.').fields, []);
 });

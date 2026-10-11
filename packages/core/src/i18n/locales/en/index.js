@@ -27,6 +27,7 @@ import format from './format.js';
 import match from './match.js';
 import schedule from './schedule.js';
 import cli from './cli.js';
+import live from './live.js';
 
 export default {
   brand,
@@ -53,4 +54,5 @@ export default {
   match,
   schedule,
   cli,
+  live,
 };

@@ -30,4 +30,14 @@ export default {
     components: 'Componentes',
     notFound: 'No encontramos esta página',
   },
+  skip: {
+    results: 'Saltar a los resultados',
+    posts: 'Saltar a las publicaciones',
+    headlines: 'Saltar a los titulares',
+  },
+  update: {
+    ready: 'Ya hay información nueva de reuniones.',
+    refresh: 'Actualizar',
+    later: 'Ahora no',
+  },
 };

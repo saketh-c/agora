@@ -1,24 +1,29 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { t, tn, estimateSpeakingSeconds } from '@agora/core';
-import { useCities } from '../lib/DataProvider.jsx';
 import { useStore } from '../lib/store.jsx';
 import { Disclosure, Icon, Notice, PageHeader } from '../components/ui/index.js';
+import MeetingPicker, { CarryNotice, ForLine, MeetingNotice, forText } from '../components/prepare/MeetingPicker.jsx';
+import { draftTextOf } from '../components/prepare/CommentBuilder.jsx';
+import { usePrepMeeting } from '../components/prepare/prepMeeting.js';
 import { EyeStrip, TimeChart, TimeRuler, lightFor, warnSeconds } from '../components/timecharts.jsx';
 import { analyzeTranscript, paceSeries, PACE_TARGET } from '../lib/rehearse/speech.js';
 import { ambientFloor, estimateSyllables, loudnessSeries, paceEstimateSeries, pitchStats, summarizeEnvelope, LONG_PAUSE_SEC, SYLLABLES_PER_WORD } from '../lib/rehearse/audio.js';
 import { summarizeBody } from '../lib/rehearse/vision.js';
-import { buildFindings, timedSeconds, MIN_TAKE_SEC } from '../lib/rehearse/coach.js';
+import { buildFindings, countsAsPractice, timedSeconds, MIN_TAKE_SEC } from '../lib/rehearse/coach.js';
 import { deviceProblem, SPEECH_SUPPORTED, useRehearsalSession } from '../lib/rehearse/session.js';
 import { MODEL_BASE, VISION_AVAILABLE } from '../lib/rehearse/models.js';
 import { clock, coachParams, limitPhrase, megabytes, numberText, takeWhen } from '../lib/rehearse/format.js';
+import { SCRIPT_MAX, initialScript, isFromDraft, latestDraft, scriptParagraphs } from '../lib/rehearse/script.js';
 import { HISTORY_MAX } from '../lib/profiles.js';
+// The "Getting ready for" line and the meeting picker share Prepare's styles.
+import '../styles/pages/prepare.css';
 import '../styles/pages/practice.css';
 
 const DEFAULT_LIMIT_SEC = 180;
-const SCRIPT_MAX = 6000;
 const HISTORY_SHOWN = 5;
 const isObj = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
+const LIVE = ['ready', 'countdown', 'recording', 'processing'];
 
 /** The city's limit in seconds, or 3 minutes when it posts none (or no city is picked). */
 function limitFor(city) {
@@ -27,27 +32,25 @@ function limitFor(city) {
 }
 
 /**
- * Where the setup starts: a ?city= link, then a draft that just arrived from Write, then what
- * this person picked last time, then the meeting Prepare is getting ready for, then home.
+ * Where the setup starts. The council: a ?city= link, then the meeting being prepared for
+ * (the same one Home and Prepare show), then what this person picked last time, then home.
+ * The script: the newest draft from Write, unless the student has since typed or cleared
+ * their own (lib/rehearse/script.js).
  */
-function initialSetup({ ui, params, cityById, homeCityId, prepMeetingId }) {
+function initialSetup({ ui, params, cityById, homeCityId, ctx, draft }) {
   const saved = isObj(ui.practice) ? ui.practice : {};
-  const draft = isObj(ui.lastDraft) ? ui.lastDraft : null;
-  const draftText = draft && typeof draft.text === 'string' ? draft.text : '';
-  const newDraft = Boolean(draftText.trim()) && draftText !== saved.draftText;
   const valid = (id) => (typeof id === 'string' && id && cityById(id) ? id : null);
   let cityId = valid(params.get('city'));
-  if (cityId === null && newDraft) cityId = valid(draft.cityId);
+  if (cityId === null && ctx.meeting) cityId = valid(ctx.meeting.cityId);
   if (cityId === null && typeof saved.cityId === 'string' && (saved.cityId === '' || valid(saved.cityId))) cityId = saved.cityId;
-  if (cityId === null && prepMeetingId) cityId = valid(String(prepMeetingId).split(':')[0]);
   if (cityId === null) cityId = valid(homeCityId) || '';
-  const script = newDraft ? draftText : typeof saved.script === 'string' ? saved.script : draftText;
   return {
     cityId,
-    script: script.slice(0, SCRIPT_MAX),
+    ...initialScript({ saved, draft }),
     camera: typeof saved.camera === 'boolean' ? saved.camera : true,
     // Off unless chosen: the live transcript is the one feature that sends audio away.
     transcript: SPEECH_SUPPORTED && saved.transcript === true,
+    showScript: saved.showScript !== false,
   };
 }
 
@@ -56,24 +59,47 @@ function initialSetup({ ui, params, cityById, homeCityId, prepMeetingId }) {
  * specifically, what to fix. Audio and video are analyzed on this device and thrown away;
  * a few numbers per run are kept in the profile. The live transcript is the one exception,
  * it uses the browser's speech service, and it is off unless switched on.
+ *
+ * A run that counts (heard, and long enough to coach) is saved to the history and marks the
+ * Practice step for the meeting Prepare is getting ready for. Space starts and stops a take.
  */
 export default function Practice() {
-  const { profile, ui, setUi, lang, prepMeetingId, setPrepStep } = useStore();
-  const { cities, cityById } = useCities();
+  const { profile, ui, setUi, lang } = useStore();
+  const ctx = usePrepMeeting();
+  const { cities, cityById } = ctx;
   const [params] = useSearchParams();
-  const [setup, setSetup] = useState(() => initialSetup({ ui, params, cityById, homeCityId: profile.prefs.homeCityId, prepMeetingId }));
+  const [picking, setPicking] = useState(false);
+
+  // The newest draft from Write, composed for the meeting being prepared for.
+  const draftCity = ctx.city || ctx.homeCity;
+  const writeText = useMemo(
+    () => draftTextOf(ui.commentDraft, { meeting: ctx.meeting, city: draftCity }),
+    // lang: the template is written in the app language.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [ui.commentDraft, ctx.meeting, draftCity, lang],
+  );
+  const draft = useMemo(() => latestDraft({ commentDraft: ui.commentDraft, writeText, lastDraft: ui.lastDraft }), [ui.commentDraft, writeText, ui.lastDraft]);
+
+  const [setup, setSetup] = useState(() => initialSetup({ ui, params, cityById, homeCityId: profile.prefs.homeCityId, ctx, draft }));
   const [report, setReport] = useState(null);
   const [announce, setAnnounce] = useState('');
 
-  const draft = isObj(ui.lastDraft) ? ui.lastDraft : null;
   const city = setup.cityId ? cityById(setup.cityId) : null;
   const limitSec = limitFor(city);
   const history = Array.isArray(ui.rehearsals) ? ui.rehearsals : [];
 
+  // Picking another meeting practices against that council's limit.
+  const meetingKey = ctx.prepKey;
+  const lastKey = useRef(meetingKey);
+  useEffect(() => {
+    if (lastKey.current === meetingKey) return;
+    lastKey.current = meetingKey;
+    setSetup((s) => ({ ...s, cityId: ctx.meeting ? ctx.meeting.cityId : '' }));
+  }, [meetingKey, ctx.meeting]);
+
   // Remember the setup (debounced), so leaving for Write and coming back keeps it.
   const setUiRef = useRef(setUi);
   setUiRef.current = setUi;
-  const draftTextRef = useRef(draft && typeof draft.text === 'string' ? draft.text : '');
   const firstSave = useRef(true);
   const pendingSave = useRef(null);
   useEffect(() => {
@@ -81,14 +107,14 @@ export default function Practice() {
       firstSave.current = false;
       return undefined;
     }
-    pendingSave.current = { ...setup, draftText: draftTextRef.current };
+    pendingSave.current = { ...setup, at: new Date().toISOString() };
     const id = setTimeout(() => {
       setUiRef.current({ practice: pendingSave.current });
       pendingSave.current = null;
     }, 500);
     return () => clearTimeout(id);
   }, [setup]);
-  // Following "Write one" right after typing still keeps what was typed.
+  // Following "Edit in Write" right after typing still keeps what was typed.
   useEffect(
     () => () => {
       if (pendingSave.current) setUiRef.current({ practice: pendingSave.current });
@@ -98,11 +124,16 @@ export default function Practice() {
 
   const setupRef = useRef(setup);
   setupRef.current = setup;
+  const draftRef = useRef(draft);
+  draftRef.current = draft;
+  const ctxRef = useRef(ctx);
+  ctxRef.current = ctx;
 
-  /** Turn one finished take into the report, and keep its numbers. */
+  /** Turn one finished take into the report, and keep its numbers when it counts. */
   const onTake = useCallback(
     (take) => {
       const s = setupRef.current;
+      const d = draftRef.current;
       const takeCity = s.cityId ? cityById(s.cityId) : null;
       const limit = limitFor(takeCity);
       const perWord = SYLLABLES_PER_WORD[lang] || SYLLABLES_PER_WORD.en;
@@ -112,9 +143,8 @@ export default function Practice() {
       // Pace counts the time spent speaking, not the beat before the first word.
       const spanSec = envelope.firstSpeechSec !== null ? Math.max(1, Math.min(take.durationSec, envelope.lastSpeechSec + 0.5) - envelope.firstSpeechSec) : take.durationSec;
       const script = s.script.trim();
-      const draftText = draft && typeof draft.text === 'string' ? draft.text.trim() : '';
       // The builder's name, school, item and ask only apply to the script they came with.
-      const fields = script && draft && isObj(draft.fields) && script === draftText ? draft.fields : {};
+      const fields = script && isFromDraft(script, d) && isObj(d.fields) ? d.fields : {};
       const speech = take.transcript ? analyzeTranscript(take.transcript, { lang, durationSec: spanSec, script, fields }) : null;
       const pitch = pitchStats(take.frames);
       const fps = take.durationSec > 0 ? take.samples.length / take.durationSec : 0;
@@ -123,6 +153,8 @@ export default function Practice() {
       const estimatedWpm = spanSec > 0 ? Math.round((syllables / perWord / spanSec) * 60) : 0;
       const wpm = speech && speech.words ? speech.wpm : estimatedWpm;
       const coach = buildFindings({ speech, envelope, pitch, body, seconds, limitSec: limit, wpm, wpmEstimated: !(speech && speech.words), lang, hasScript: Boolean(script) });
+      const counted = countsAsPractice(coach);
+      const c = ctxRef.current;
       const bucket = seconds < 45 ? 2 : seconds < 120 ? 3 : 5;
       const result = {
         at: new Date().toISOString(),
@@ -141,9 +173,13 @@ export default function Practice() {
         pace: speech && speech.words ? paceSeries(take.wordsTimeline, take.durationSec, 15) : paceEstimateSeries(take.frames, take.dt, 15, opts),
         loudness: loudnessSeries(take.frames, take.dt, bucket, opts),
         coach,
+        counted,
+        // What the run counted for, said in the report.
+        countedFor: counted && c.meeting ? forText(c) : null,
       };
       setReport(result);
-      if (!coach.heard) return;
+      // A sound check, or a take where nothing was heard, is not practice: not saved, not counted.
+      if (!counted) return;
       const summary = {
         at: result.at,
         cityId: s.cityId,
@@ -157,13 +193,15 @@ export default function Practice() {
         findings: coach.findings.length,
       };
       setUi((current) => ({ rehearsals: [summary, ...(Array.isArray(current.rehearsals) ? current.rehearsals : [])].slice(0, HISTORY_MAX) }));
-      if (prepMeetingId) setPrepStep(prepMeetingId, 'practice', true);
+      c.markStep('practice', true);
     },
-    [cityById, draft, lang, prepMeetingId, setPrepStep, setUi],
+    [cityById, lang, setUi],
   );
 
   const session = useRehearsalSession({ lang, visionAvailable: VISION_AVAILABLE, modelBase: MODEL_BASE, onTake });
   const { phase } = session;
+  const sessionRef = useRef(session);
+  sessionRef.current = session;
 
   // Each phase hands focus to its main control or heading, and says what changed.
   const focusRef = useRef(null);
@@ -187,7 +225,11 @@ export default function Practice() {
       // report start from the top of the page.
       const title = document.querySelector('.pr .page-head h1');
       const phone = window.innerWidth < 900;
-      if (phone && title && (phase === 'ready' || (phase === 'countdown' && from === 'ready'))) {
+      // With the script on screen, a phone brings the timer, Stop and the script into view instead:
+      // reading matters more than watching yourself while you speak.
+      const timer = document.querySelector('.pr-stage.has-script .pr-timer');
+      if (phone && timer && phase === 'countdown') timer.scrollIntoView({ block: 'start' });
+      else if (phone && title && (phase === 'ready' || (phase === 'countdown' && from === 'ready'))) {
         title.scrollIntoView({ block: 'start' });
         // ...and the phase's main button sits above the tab bar.
         const button = document.querySelector('.pr-panel .btn--primary, .pr-panel .btn--secondary');
@@ -201,6 +243,25 @@ export default function Practice() {
     return () => cancelAnimationFrame(id);
   }, [phase, session.camera]);
 
+  // Space starts a take from the device check, cancels the countdown and stops the recording.
+  // Inside a text field or on a button or link, Space keeps its usual job.
+  useEffect(() => {
+    if (phase !== 'ready' && phase !== 'countdown' && phase !== 'recording') return undefined;
+    const onKey = (e) => {
+      if (e.key !== ' ' || e.repeat || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || e.defaultPrevented) return;
+      const el = e.target;
+      if (el && el.closest && el.closest('input, textarea, select, button, a[href], summary, [contenteditable="true"], [role="button"], [role="switch"]')) return;
+      if (document.querySelector('.sheet-layer')) return;
+      e.preventDefault();
+      const s = sessionRef.current;
+      if (s.phase === 'ready') s.begin();
+      else if (s.phase === 'countdown') s.cancel();
+      else if (s.phase === 'recording') s.stop();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [phase]);
+
   // Announce the light changing during a take, once each.
   const light = phase === 'recording' ? lightFor(Math.floor(session.elapsed), limitSec) : 'go';
   useEffect(() => {
@@ -209,24 +270,30 @@ export default function Practice() {
   }, [light]);
 
   const start = () => session.prepare({ camera: setup.camera, transcript: setup.transcript });
+  const live = LIVE.includes(phase);
 
-  const live = ['ready', 'countdown', 'recording', 'processing'].includes(phase);
   return (
     <div className="wrap pr">
-      <PageHeader title={t('rehearse.title')} crumbs={[{ to: '/prepare', label: t('nav.prepare') }, { label: t('rehearse.crumb') }]} lead={phase === 'setup' || phase === 'starting' ? t('rehearse.lead') : null} />
+      <PageHeader title={t('rehearse.title')} crumbs={[{ to: '/prepare', label: t('nav.prepare') }, { label: t('rehearse.crumb') }]} lead={phase === 'setup' || phase === 'starting' ? t('rehearse.lead') : null}>
+        {!live && <ForLine ctx={ctx} onChange={() => setPicking(true)} />}
+      </PageHeader>
       <p className="vh" role="status" aria-live="polite">
         {announce}
       </p>
+      {!live && <MeetingNotice ctx={ctx} onPick={() => setPicking(true)} />}
+      {!live && <CarryNotice ctx={ctx} />}
 
       {(phase === 'setup' || phase === 'starting') && (
         <Setup setup={setup} onChange={setSetup} cities={cities} city={city} limitSec={limitSec} draft={draft} session={session} onStart={start} focusRef={focusRef} history={history} cityById={cityById} lang={lang} onClearHistory={() => setUi({ rehearsals: [] })} />
       )}
 
-      {live && <Stage session={session} setup={setup} city={city} limitSec={limitSec} focusRef={focusRef} />}
+      {live && <Stage session={session} setup={setup} onShowScript={(on) => setSetup((s) => ({ ...s, showScript: on }))} city={city} limitSec={limitSec} focusRef={focusRef} />}
 
       {phase === 'report' && report && (
         <Report report={report} city={report.cityId ? cityById(report.cityId) : null} playback={session.playback} lang={lang} onAgain={start} onChange={session.reset} focusRef={focusRef} history={history} cityById={cityById} onClearHistory={() => setUi({ rehearsals: [] })} />
       )}
+
+      <MeetingPicker ctx={ctx} open={picking} onClose={() => setPicking(false)} />
     </div>
   );
 }
@@ -259,20 +326,47 @@ function Switch({ id, checked, onChange, title, desc, disabled = false }) {
   );
 }
 
+/** "Space to start": shown where there is a keyboard (CSS hides it on touch screens). */
+function KeyHint({ action }) {
+  return (
+    <p className="pr-keys">
+      <kbd>{t('rehearse.keys.space')}</kbd>
+      <span>{t(`rehearse.keys.${action}`)}</span>
+    </p>
+  );
+}
+
+function wordCount(text) {
+  return String(text || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length;
+}
+
 function Setup({ setup, onChange, cities, city, limitSec, draft, session, onStart, focusRef, history, cityById, lang, onClearHistory }) {
   const problem = useMemo(() => deviceProblem(), []);
   const starting = session.phase === 'starting';
   const error = session.error || problem;
   const sorted = useMemo(() => [...cities].sort((a, b) => a.name.localeCompare(b.name, lang)), [cities, lang]);
-  const draftText = draft && typeof draft.text === 'string' ? draft.text.trim() : '';
-  const fromDraft = Boolean(draftText) && setup.script.trim() === draftText;
+  const fromDraft = isFromDraft(setup.script, draft);
+  const hasDraft = Boolean(draft && draft.text.trim());
   const scriptSec = setup.script.trim() ? estimateSpeakingSeconds(setup.script) : 0;
   const update = (patch) => onChange((s) => ({ ...s, ...patch }));
+  const scriptRef = useRef(null);
   const submit = (e) => {
     e.preventDefault();
     if (!starting && !problem) onStart();
   };
+  const useDraft = () => {
+    update({ script: draft.text.slice(0, SCRIPT_MAX), scriptFrom: 'draft', draftAt: draft.at });
+    requestAnimationFrame(() => scriptRef.current && scriptRef.current.focus());
+  };
+  const clearScript = () => {
+    update({ script: '', scriptFrom: 'own', draftAt: draft ? draft.at : setup.draftAt });
+    requestAnimationFrame(() => scriptRef.current && scriptRef.current.focus());
+  };
   const limitLine = city ? t('rehearse.time.limitCity', { city: city.name, limit: limitPhrase(limitSec) }) : t('rehearse.time.limitGeneric', { limit: limitPhrase(limitSec) });
+  const fallback = clock(DEFAULT_LIMIT_SEC);
 
   return (
     <div className="pr-setup">
@@ -290,7 +384,7 @@ function Setup({ setup, onChange, cities, city, limitSec, draft, session, onStar
               const min = c.publicComment && Number(c.publicComment.timeLimitMinutes);
               return (
                 <option key={c.cityId} value={c.cityId}>
-                  {Number.isFinite(min) && min > 0 ? t('rehearse.setup.cityOption', { city: c.name, min: numberText(min, lang) }) : c.name}
+                  {Number.isFinite(min) && min > 0 ? t('rehearse.setup.cityOption', { city: c.name, min: numberText(min, lang) }) : t('rehearse.setup.cityOptionNoLimit', { city: c.name, limit: fallback })}
                 </option>
               );
             })}
@@ -302,19 +396,60 @@ function Setup({ setup, onChange, cities, city, limitSec, draft, session, onStar
           <label className="label" htmlFor="pr-script">
             {t('rehearse.setup.script')} <span className="opt">{t('rehearse.setup.optional')}</span>
           </label>
-          <textarea id="pr-script" className="textarea pr-script" value={setup.script} maxLength={SCRIPT_MAX} placeholder={t('rehearse.setup.scriptPlaceholder')} aria-describedby="pr-script-help" onChange={(e) => update({ script: e.target.value })} />
-          <p className="help" id="pr-script-help">
-            {fromDraft ? t('rehearse.setup.fromDraft') : t('rehearse.setup.scriptHelp')}{' '}
-            <Link className="link" to="/prepare/write">
-              {fromDraft ? t('rehearse.setup.editDraft') : t('rehearse.setup.writeOne')}
-            </Link>
-          </p>
+          <textarea
+            id="pr-script"
+            ref={scriptRef}
+            className="textarea pr-script"
+            value={setup.script}
+            maxLength={SCRIPT_MAX}
+            placeholder={t('rehearse.setup.scriptPlaceholder')}
+            aria-describedby={fromDraft ? 'pr-script-from' : 'pr-script-help'}
+            onChange={(e) => update({ script: e.target.value, scriptFrom: 'own' })}
+          />
+          {fromDraft && (
+            <Notice
+              icon="check"
+              className="pr-from"
+              action={
+                <>
+                  <Link className="btn btn--quiet btn--sm" to="/prepare/write">
+                    {t('rehearse.setup.editInWrite')}
+                  </Link>
+                  <button type="button" className="btn btn--quiet btn--sm" onClick={clearScript}>
+                    {t('rehearse.setup.clear')}
+                  </button>
+                </>
+              }
+            >
+              <span id="pr-script-from">{tn('rehearse.setup.usingDraft', wordCount(setup.script))}</span>
+            </Notice>
+          )}
+          {!fromDraft && (
+            <p className="help pr-script__help" id="pr-script-help">
+              {hasDraft ? (
+                <>
+                  <span>{t('rehearse.setup.scriptHelpDraft')}</span>{' '}
+                  <button type="button" className="link" onClick={useDraft}>
+                    {tn('rehearse.setup.useDraft', wordCount(draft.text))}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <span>{t('rehearse.setup.scriptHelp')}</span>{' '}
+                  <Link className="link" to="/prepare/write">
+                    {t('rehearse.setup.writeOne')}
+                  </Link>
+                </>
+              )}
+            </p>
+          )}
         </div>
 
         <fieldset className="pr-measure">
           <legend className="label">{t('rehearse.setup.measure')}</legend>
           <Switch id="pr-camera" checked={setup.camera} onChange={(v) => update({ camera: v })} title={t('rehearse.setup.camera')} desc={VISION_AVAILABLE ? t('rehearse.setup.cameraDesc') : t('rehearse.setup.cameraVideo')} />
           <Switch id="pr-transcript" checked={setup.transcript} disabled={!SPEECH_SUPPORTED} onChange={(v) => update({ transcript: v })} title={t('rehearse.setup.transcript')} desc={SPEECH_SUPPORTED ? t('rehearse.setup.transcriptDesc') : t('rehearse.setup.transcriptNone')} />
+          <Switch id="pr-show" checked={setup.showScript} onChange={(v) => update({ showScript: v })} title={t('rehearse.setup.showScript')} desc={t('rehearse.setup.showScriptDesc')} />
         </fieldset>
 
         <div className="pr-privacy">
@@ -394,7 +529,34 @@ function CheckRow({ state = 'ok', title, children }) {
   );
 }
 
-function Stage({ session, setup, city, limitSec, focusRef }) {
+/** The script on screen while recording, large and scrollable, like a teleprompter card. */
+function Prompter({ script, show, onShow }) {
+  const paras = scriptParagraphs(script);
+  if (!paras.length) return null;
+  return (
+    <section className={`card pr-prompt${show ? '' : ' is-hidden'}`} aria-labelledby="pr-prompt-h">
+      <div className="pr-prompt__head">
+        <h2 className="pr-prompt__t" id="pr-prompt-h">
+          {t('rehearse.rec.script')}
+        </h2>
+        <button type="button" className="btn btn--quiet btn--sm" aria-expanded={show} aria-controls="pr-prompt-text" onClick={() => onShow(!show)}>
+          {show ? t('rehearse.rec.hideScript') : t('rehearse.rec.showScript')}
+        </button>
+      </div>
+      {show && (
+        // Scrollable, so it can take focus and scroll with the arrow keys.
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+        <div className="pr-prompt__text" id="pr-prompt-text" tabIndex={0} role="region" aria-labelledby="pr-prompt-h">
+          {paras.map((p, i) => (
+            <p key={i}>{p}</p>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function Stage({ session, setup, onShowScript, city, limitSec, focusRef }) {
   const { phase, camera, models, level, micQuiet, elapsed, countdown, sr, faceFound, notice, videoRef } = session;
   const sec = Math.floor(elapsed);
   const light = phase === 'recording' ? lightFor(sec, limitSec) : 'wait';
@@ -404,7 +566,7 @@ function Stage({ session, setup, city, limitSec, focusRef }) {
   const transcriptOn = setup.transcript && SPEECH_SUPPORTED;
 
   return (
-    <div className={`pr-stage pr-stage--${phase}`}>
+    <div className={`pr-stage pr-stage--${phase}${setup.showScript && setup.script.trim() ? ' has-script' : ''}`}>
       <div className={`pr-view${camera ? '' : ' pr-view--audio'}`}>
         {camera ? (
           <video ref={videoRef} className="pr-view__video" muted playsInline autoPlay aria-label={t('rehearse.check.preview')} />
@@ -461,7 +623,7 @@ function Stage({ session, setup, city, limitSec, focusRef }) {
               )}
             </ul>
             <div className="btn-row">
-              <button type="button" className="btn btn--primary" onClick={session.begin}>
+              <button type="button" className="btn btn--primary" onClick={session.begin} aria-keyshortcuts="Space">
                 <Icon name="play" className="icon--fill" />
                 {t('rehearse.check.start')}
               </button>
@@ -470,6 +632,7 @@ function Stage({ session, setup, city, limitSec, focusRef }) {
               </button>
             </div>
             <p className="help">{t('rehearse.check.startHelp')}</p>
+            <KeyHint action="toStart" />
           </section>
         )}
 
@@ -491,15 +654,17 @@ function Stage({ session, setup, city, limitSec, focusRef }) {
               </div>
             </section>
             {phase === 'countdown' ? (
-              <button type="button" className="btn btn--secondary btn--block" onClick={session.cancel} ref={focusRef}>
+              <button type="button" className="btn btn--secondary btn--block" onClick={session.cancel} ref={focusRef} aria-keyshortcuts="Space">
                 {t('rehearse.rec.cancel')}
               </button>
             ) : (
-              <button type="button" className="btn btn--primary btn--block" onClick={session.stop} ref={focusRef}>
+              <button type="button" className="btn btn--primary btn--block" onClick={session.stop} ref={focusRef} aria-keyshortcuts="Space">
                 <Icon name="stop" className="icon--fill" />
                 {t('rehearse.rec.stop')}
               </button>
             )}
+            <KeyHint action={phase === 'countdown' ? 'toCancel' : 'toStop'} />
+            <Prompter script={setup.script} show={setup.showScript} onShow={onShowScript} />
             {phase === 'recording' && (transcriptOn || (camera && models === 'ready')) && (
               <section className="card pr-live" aria-label={t('rehearse.rec.transcript')}>
                 {transcriptOn && (
@@ -675,6 +840,10 @@ function Report({ report, city, playback, lang, onAgain, onChange, focusRef, his
                 ))}
               </dl>
             )}
+            <p className={`pr-result__saved${report.counted ? '' : ' is-not'}`}>
+              <Icon name={report.counted ? 'check' : 'info'} size={20} />
+              <span>{report.counted ? (report.countedFor ? t('rehearse.report.countedFor', { meeting: report.countedFor }) : t('rehearse.report.counted')) : t('rehearse.report.notSaved', { n: MIN_TAKE_SEC })}</span>
+            </p>
           </section>
 
           {!heard ? null : (
@@ -738,6 +907,9 @@ function Report({ report, city, playback, lang, onAgain, onChange, focusRef, his
             <button type="button" className="btn btn--secondary" onClick={onChange}>
               {t('rehearse.report.change')}
             </button>
+            <Link className="link pr-back" to="/prepare">
+              {t('rehearse.report.backToSteps')}
+            </Link>
           </div>
         </div>
 

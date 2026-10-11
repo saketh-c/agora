@@ -1,101 +1,95 @@
 /**
- * Which meeting Prepare is getting ready for, shared by the hub (/prepare) and Write
- * (/prepare/write).
+ * The meeting Prepare, Write and Practice are getting ready for, as a hook. The rules live in
+ * prepPick.js (pure and tested): the address, then the saved meeting, then exactly the meeting
+ * Home's "Your next meeting" card shows, so progress is always counted for the same meeting.
  *
- * Order of precedence:
- *  1. ?meeting=<id> in the address (from "Prepare to speak" on a meeting), or 'practice';
- *  2. ?city=<id> (old /learn?tab=comment&city= links): that council's next meeting you can speak at;
- *  3. the meeting saved in the profile (ui.prepMeeting), while it is at most 14 days old;
- *  4. the first of "your next meetings": the home city's next speakable meeting, then the
- *     best matches, one per council. With no home city it is "Just practicing".
- * A meeting picked from the address is saved, so coming back to /prepare keeps it.
+ * The default is saved to the profile (ui.prepMeeting) the first time the student acts on it
+ * (marks a step, checks an item, opens Write or Practice), so Home and every Prepare page keep
+ * pointing at it even after the ranking changes.
  */
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { addDays, expandCityMeetings, hasEnded, matchMeetings, nextMeetingFor, upcomingMeetings } from '@agora/core';
+import { hasEnded } from '@agora/core';
 import { useStore } from '../../lib/store.jsx';
 import { useCities } from '../../lib/DataProvider.jsx';
-import { nowIso, today } from '../../lib/data.js';
-import { PRACTICE_ONLY } from '../../lib/prep.js';
+import { PRACTICE_ONLY, carryPrep, carryableSteps, withPrepChecklist } from '../../lib/prep.js';
+import useClock from '../home/useClock.js';
+import { meetingDeadline } from '../ui/index.js';
+import { resolvePrepMeeting } from './prepPick.js';
 
-/** A saved meeting stays selected this many days after it happened (for "share how it went"). */
-const KEEP_PAST_DAYS = 14;
 /** Seconds each speaker gets when there is no meeting, or the city publishes no limit. */
 export const DEFAULT_LIMIT_SECONDS = 180;
 
-export const isSpeakable = (m) => Boolean(m && m.openToPublicComment && m.status !== 'cancelled');
-
-/** Look up one occurrence by its language-independent id (`${cityId}:${date}:${slug}`). */
-export function findMeeting(cityById, id) {
-  const [cityId, date] = String(id || '').split(':');
-  const city = cityId ? cityById(cityId) : null;
-  if (!city || !/^\d{4}-\d{2}-\d{2}$/.test(date || '')) return null;
-  return expandCityMeetings(city, date, date).find((o) => o.id === id) || null;
-}
-
-/** Up to `limit` upcoming meetings you can speak at, one per council, home city first. */
-export function nextSpeakableMeetings({ cities, cityById, prefs, day, now, limit = 3 }) {
-  const list = [];
-  const councils = new Set();
-  const add = (m) => {
-    if (list.length >= limit || !isSpeakable(m) || councils.has(m.cityId) || hasEnded(m, now)) return;
-    councils.add(m.cityId);
-    list.push(m);
-  };
-  const home = prefs.homeCityId ? cityById(prefs.homeCityId) : null;
-  if (home) add(nextMeetingFor(home, day, { publicCommentOnly: true, now }));
-  if (prefs.homeCityId || prefs.location) {
-    for (const m of matchMeetings(cities, prefs, { today: day, now, perCity: 1 })) add(m);
-  }
-  if (list.length < limit) for (const m of upcomingMeetings(cities, { from: day, days: 30, now })) add(m);
-  return list;
-}
-
 export function usePrepMeeting() {
   const [params, setParams] = useSearchParams();
-  const { prefs, prepMeetingId, setPrepMeeting } = useStore();
-  const { cities, cityById } = useCities();
-  // One "now" per visit keeps the lists stable while the page is open.
-  const [now] = useState(nowIso);
-  const day = today();
-  const urlId = params.get('meeting');
-  const cityParam = params.get('city');
+  const { prefs, ui, setUi, prepMeetingId, setPrepMeeting, setPrepStep } = useStore();
+  const { cities, cityById, liveReady } = useCities();
+  // Ticks every minute and when the tab comes back, so a meeting that ends while the page is
+  // open moves on (and its sign-up deadline closes) without a reload.
+  const { today: day, now } = useClock();
+  const deadlineOf = useCallback((m) => meetingDeadline(m, now), [now]);
+  // After a pick, the old ?meeting= or ?city= is dropped from the address. The router applies
+  // that a beat later than the saved pick, so until it does the old value is ignored (otherwise
+  // the address would win and the pick would bounce back).
+  const dropped = useRef(null);
+  const rawUrlId = params.get('meeting');
+  const rawCity = params.get('city');
+  if (dropped.current && !rawUrlId && !rawCity) dropped.current = null;
+  const urlId = dropped.current && rawUrlId === dropped.current.meeting ? null : rawUrlId;
+  const cityParam = dropped.current && rawCity === dropped.current.city ? null : rawCity;
 
-  const options = useMemo(() => nextSpeakableMeetings({ cities, cityById, prefs, day, now }), [cities, cityById, prefs, day, now]);
+  const { meeting, practicing, problem, askedId, source, pending } = useMemo(
+    () => resolvePrepMeeting({ cities, cityById, prefs, today: day, now, urlId, cityParam, savedId: prepMeetingId, deadlineOf, liveReady }),
+    [cities, cityById, prefs, day, now, urlId, cityParam, prepMeetingId, deadlineOf, liveReady],
+  );
+  const prepKey = meeting ? meeting.id : PRACTICE_ONLY;
+  const past = Boolean(meeting && hasEnded(meeting, now));
 
-  // An old builder link names only a council: use its next meeting you can speak at.
-  const fromCity = useMemo(() => {
-    if (urlId || !cityParam) return null;
-    const city = cityById(cityParam);
-    return city ? nextMeetingFor(city, day, { publicCommentOnly: true, now }) : null;
-  }, [urlId, cityParam, cityById, day, now]);
-
-  const askedId = urlId || (fromCity && fromCity.id) || null;
-  const wanted = askedId || prepMeetingId || null;
-  const found = useMemo(() => (wanted && wanted !== PRACTICE_ONLY ? findMeeting(cityById, wanted) : null), [wanted, cityById]);
-
-  let meeting = null;
-  let practicing = wanted === PRACTICE_ONLY;
-  let problem = null;
-  if (!practicing && wanted) {
-    const tooOld = !found || found.date < addDays(day, -KEEP_PAST_DAYS);
-    if (found && !tooOld && found.status !== 'cancelled') meeting = found;
-    else if (askedId === wanted || (found && found.status === 'cancelled')) problem = found && found.status === 'cancelled' ? 'cancelled' : 'notFound';
-  }
-  if (!meeting && !practicing) {
-    if (prefs.homeCityId && options[0]) meeting = options[0];
-    else practicing = true;
-  }
+  // A past meeting can point at the next one Home would suggest.
+  const upcoming = useMemo(() => {
+    if (!past) return null;
+    const r = resolvePrepMeeting({ cities, cityById, prefs, today: day, now, deadlineOf });
+    return r.meeting && r.meeting.id !== prepKey ? r.meeting : null;
+  }, [past, cities, cityById, prefs, day, now, deadlineOf, prepKey]);
 
   // Keep a meeting chosen in the address, so /prepare remembers it next time.
   useEffect(() => {
     if (askedId && askedId !== prepMeetingId && (askedId === PRACTICE_ONLY || (meeting && meeting.id === askedId))) setPrepMeeting(askedId);
   }, [askedId, prepMeetingId, meeting, setPrepMeeting]);
 
+  /** Save the meeting shown (the default included), so Home and every Prepare page agree on it. */
+  const pin = useCallback(() => {
+    if (prepKey !== prepMeetingId) setPrepMeeting(prepKey);
+  }, [prepKey, prepMeetingId, setPrepMeeting]);
+
+  /** Mark a step for this meeting (and pin the meeting). */
+  const markStep = useCallback(
+    (step, on = true) => {
+      pin();
+      setPrepStep(prepKey, step, on);
+    },
+    [pin, prepKey, setPrepStep],
+  );
+
+  /** Set the "On the day" items checked for this meeting; checking them all marks the step done. */
+  const setChecklist = useCallback(
+    (checked, total) => {
+      pin();
+      setUi((u) => ({ prep: withPrepChecklist(u.prep, prepKey, checked, total) }));
+    },
+    [pin, prepKey, setUi],
+  );
+
+  // After switching meetings: offer to carry over the steps that are not tied to one meeting.
+  const [carry, setCarry] = useState(null);
   const choose = useCallback(
     (id) => {
-      setPrepMeeting(id || PRACTICE_ONLY);
+      const target = id || PRACTICE_ONLY;
+      const steps = target === PRACTICE_ONLY ? [] : carryableSteps(ui.prep, prepKey, target);
+      setCarry(steps.length ? { from: prepKey, to: target, steps } : null);
+      setPrepMeeting(target);
       if (params.has('meeting') || params.has('city')) {
+        dropped.current = { meeting: params.get('meeting'), city: params.get('city') };
         setParams(
           (p) => {
             const next = new URLSearchParams(p);
@@ -107,26 +101,44 @@ export function usePrepMeeting() {
         );
       }
     },
-    [params, setParams, setPrepMeeting],
+    [ui.prep, prepKey, params, setParams, setPrepMeeting],
   );
+  const acceptCarry = useCallback(() => {
+    if (!carry) return;
+    setUi((u) => ({ prep: carryPrep(u.prep, carry.from, carry.to, carry.steps) }));
+    setCarry(null);
+  }, [carry, setUi]);
+  const dismissCarry = useCallback(() => setCarry(null), []);
+  // The offer only makes sense for the meeting it was made for.
+  const carryOffer = carry && carry.to === prepKey ? carry : null;
 
   const city = meeting ? cityById(meeting.cityId) : null;
   const homeCity = prefs.homeCityId ? cityById(prefs.homeCityId) : null;
-  // The meeting being prepared for, listed first in the picker even when it is not one of the next three.
-  const choices = meeting && !options.some((m) => m.id === meeting.id) && !hasEnded(meeting, now) ? [meeting, ...options] : options;
 
   return {
     meeting,
     city,
     homeCity,
     practicing,
-    past: Boolean(meeting && hasEnded(meeting, now)),
+    past,
+    upcoming,
     problem,
-    options: choices,
+    // The meeting asked for may still come with the live agendas: it is being looked for.
+    pending,
+    source,
+    prepKey,
     choose,
-    prepKey: meeting ? meeting.id : PRACTICE_ONLY,
+    pin,
+    markStep,
+    setChecklist,
+    carry: carryOffer,
+    acceptCarry,
+    dismissCarry,
     day,
     now,
+    deadlineOf,
+    cities,
     cityById,
+    prefs,
   };
 }

@@ -96,6 +96,7 @@
       "ages": "Middle and high school students (Lively Pointe Youth Center serves ages 12 to 18)",
       "description": "Student-led group that helps plan teen programs, organizes volunteer projects and represents Irving teens at community events across DFW. Meets at 6 p.m. on the first and third Thursdays of each month; run out of Lively Pointe Youth Center, 909 N. O'Connor Road, (972) 721-8090.",
       "applyWindow": "Rolling; complete the IYAC application (https://irvingtx.gov/corecode/storage/uber_resource/uploaded_pdfs/Irving-Youth-Action-Council-Application-PDF_1746333982.pdf) and return it to Lively Pointe",
+      "applyStatus": "rolling",
       "source": "https://irvingtx.gov/teen-programs"
     },
     {
@@ -104,6 +105,7 @@
       "ages": "Volunteers must be at least 14 (Irving residency not required); defendants are ages 10 to 18",
       "description": "City-run alternative justice program held one to two Tuesday evenings a month at 5:30 p.m. on the second floor of the Criminal Justice Center, 305 N. O'Connor Road. Teen volunteers serve as defense attorneys, prosecutors, jurors, bailiffs and clerks for peers' Class C misdemeanor cases; attorneys attend an all-day training held each spring and fall. Volunteer details and the online application are at https://irvingtx.gov/index.php?section=teen-court-volunteers; contact (972) 721-3601.",
       "applyWindow": "Ongoing; attorney trainings are held twice a year (spring and fall)",
+      "applyStatus": "rolling",
       "source": "https://irvingtx.gov/index.php?section=teen-court-volunteers"
     },
     {
@@ -112,6 +114,7 @@
       "ages": "Grades 9 to 12",
       "description": "Library-based council where teens earn volunteer hours for school by planning upcoming teen programs; each library location meets once a month and you must submit a completed form to take part. The listing found is for West Irving Library.",
       "applyWindow": "Ongoing; submit the participation form at the library",
+      "applyStatus": "rolling",
       "source": "https://irvingtx.gov/index.php?evtid=412&section=events-teens"
     }
   ],

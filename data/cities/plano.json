@@ -89,6 +89,7 @@
       "ages": "Jurors 14-18, attorneys 15-18",
       "description": "Teen volunteers serve as jurors and attorneys in a municipal court diversion program for teen defendants. Teen Court is usually held on Monday evenings, about twice a month, with a volunteer shift from 5:30 to 8:30 p.m. As of September 2026 the volunteer portal says the juror pool is full and not taking new juror volunteers.",
       "applyWindow": "Rolling; create an account on the city volunteer portal (volunteers.plano.gov/agency/detail/planoteencourt/) using the teen application and check the Teen Court box, or email PlanoTeenCourt@plano.gov",
+      "applyStatus": "rolling",
       "source": "https://www.plano.gov/teen-court"
     },
     {
@@ -97,6 +98,9 @@
       "ages": "Rising high school juniors and seniors enrolled in Plano ISD",
       "description": "Paid earn-and-learn summer internships with Plano businesses, nonprofits and civic organizations, run with the Mayor's office; the 2026 program ran June 8 to July 31.",
       "applyWindow": "2026 cycle opened Jan 16 and closed Feb 9 at 5 p.m.; expect a similar winter window for 2027",
+      "applyStatus": "closed",
+      "applyBy": "2026-02-09",
+      "applyOpens": "2027-01",
       "source": "https://planomayorsinterns.org/"
     },
     {
@@ -105,6 +109,8 @@
       "ages": "13-18",
       "description": "Library teen volunteer group that promotes teen library services and helps plan and present teen programs; about 5 hours per month.",
       "applyWindow": "Applications open around May 1 each year; the portal lets you sign up to be notified for 2027",
+      "applyStatus": "closed",
+      "applyOpens": "2027-05",
       "source": "https://volunteers.plano.gov/agency/detail/?agency_id=154986"
     }
   ],

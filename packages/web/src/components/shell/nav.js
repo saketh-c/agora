@@ -11,9 +11,17 @@ export const DESTINATIONS = [
   { id: 'community', to: '/community', labelKey: 'nav.community', icon: 'people' },
 ];
 
+/**
+ * A path as the router matches it: routes ignore case and a trailing slash, so "/Meetings/"
+ * is the Meetings page and must get its tab and title too.
+ */
+function routePath(pathname) {
+  return String(pathname || '/').toLowerCase().replace(/\/+$/, '') || '/';
+}
+
 /** The destination a path belongs to, or null for secondary pages (News, The data, About, Profiles). */
 export function activeDestination(pathname) {
-  const p = pathname.replace(/\/+$/, '') || '/';
+  const p = routePath(pathname);
   if (p === '/') return 'home';
   if (p === '/meetings' || p === '/cities' || p.startsWith('/city/') || p.startsWith('/meetings/')) return 'meetings';
   if (p === '/prepare' || p.startsWith('/prepare/')) return 'prepare';
@@ -39,12 +47,13 @@ const TITLES = [
 
 /** The page name for a path ("Meetings"), or the not-found title. */
 export function pageNameFor(pathname) {
-  const hit = TITLES.find(([re]) => re.test(pathname));
+  const p = routePath(pathname);
+  const hit = TITLES.find(([re]) => re.test(p));
   return t(hit ? hit[1] : 'shell.titles.notFound');
 }
 
 /** "Meetings | Agora"; Home is just the app's name and tagline. */
 export function documentTitle(name, pathname) {
-  if (pathname === '/' && !name) return t('shell.titles.homeDocument', { app: BRAND.name });
+  if (routePath(pathname) === '/' && !name) return t('shell.titles.homeDocument', { app: BRAND.name });
   return t('shell.titles.pattern', { page: name || pageNameFor(pathname), app: BRAND.name });
 }

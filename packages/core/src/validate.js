@@ -1,17 +1,20 @@
 import { isDateStr, isTimeStr, weekdayOf } from './schedule.js';
 import { isInDfw } from './geo.js';
 import { isTopicId } from './topics.js';
+import { APPLY_STATUSES, isMonthOrDate } from './youth.js';
 
 const KINDS = new Set(['nth-weekday', 'weekly', 'biweekly', 'custom']);
 const MEETING_TYPES = new Set(['regular', 'work-session', 'briefing', 'town-hall', 'committee', 'other']);
 /**
  * Exception statuses (see expandCityMeetings): cancelled and recess cancel a date's meetings,
- * rescheduled moves or retimes them, special marks or adds a special session, and note only
- * attaches information without changing the meeting.
+ * rescheduled moves or retimes them, special marks or adds a special session, added adds one
+ * of the council's ordinary meetings (from a city's agenda site), and note only attaches
+ * information without changing the meeting.
  */
-const EXCEPTION_STATUS = new Set(['cancelled', 'rescheduled', 'special', 'recess', 'note']);
-/** Fields that describe the separate meeting a special exception adds. */
+const EXCEPTION_STATUS = new Set(['cancelled', 'rescheduled', 'special', 'recess', 'note', 'added']);
+/** Fields that describe the separate meeting a special or added exception adds. */
 const SPECIAL_ONLY = ['label', 'type', 'openToPublicComment'];
+const ADDS_A_MEETING = new Set(['special', 'added']);
 
 export function isUrl(u) {
   return typeof u === 'string' && /^https?:\/\/\S+$/i.test(u);
@@ -106,7 +109,7 @@ export function validateCity(city) {
       if (ex[f] && ex.status !== 'rescheduled') err(`${tag}.${f} only applies to rescheduled exceptions`);
     }
     if (ex.time !== undefined && !isTimeStr(ex.time)) err(`${tag}.time "${ex.time}" must be HH:MM (24-hour)`);
-    for (const f of SPECIAL_ONLY) if (ex[f] !== undefined && ex.status !== 'special') err(`${tag}.${f} only applies to special exceptions`);
+    for (const f of SPECIAL_ONLY) if (ex[f] !== undefined && !ADDS_A_MEETING.has(ex.status)) err(`${tag}.${f} only applies to special and added exceptions`);
     if (ex.label !== undefined && (typeof ex.label !== 'string' || !ex.label.trim())) err(`${tag}.label must be a non-empty string`);
     if (ex.type !== undefined && !MEETING_TYPES.has(ex.type)) err(`${tag}.type "${ex.type}" is not a known meeting type`);
     if (ex.openToPublicComment !== undefined && typeof ex.openToPublicComment !== 'boolean') err(`${tag}.openToPublicComment must be true or false`);
@@ -126,6 +129,10 @@ export function validateCity(city) {
 
   arr('youthPrograms').forEach((p, i) => {
     if (!p.name) err(`youthPrograms[${i}].name is required`);
+    // Optional application status (see youth.js): open | rolling | closed | unknown.
+    if (p.applyStatus !== undefined && !APPLY_STATUSES.includes(p.applyStatus)) err(`youthPrograms[${i}].applyStatus "${p.applyStatus}" must be one of ${APPLY_STATUSES.join(', ')}`);
+    if (p.applyBy !== undefined && !isDateStr(p.applyBy)) err(`youthPrograms[${i}].applyBy must be YYYY-MM-DD`);
+    if (p.applyOpens !== undefined && !isMonthOrDate(p.applyOpens)) err(`youthPrograms[${i}].applyOpens must be YYYY-MM or YYYY-MM-DD`);
   });
 
   arr('agendaItems').forEach((a, i) => {

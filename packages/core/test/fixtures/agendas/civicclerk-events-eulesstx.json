@@ -1,0 +1,25 @@
+{
+ "value": [
+  {
+   "id": 1281,
+   "eventName": "City Council Meeting",
+   "startDateTime": "2026-10-13T16:30:00Z",
+   "agendaId": 2186,
+   "categoryName": "City Council",
+   "publishedFiles": [
+    {
+     "fileId": 3241,
+     "type": "Agenda",
+     "publishOn": "2026-10-07T16:22:23.127Z",
+     "name": "October 13, 2026 - Council Agenda"
+    },
+    {
+     "fileId": 3242,
+     "type": "Agenda Packet",
+     "publishOn": "2026-10-07T16:22:23.127Z",
+     "name": "October 13, 2026 - Council Agenda Packet"
+    }
+   ]
+  }
+ ]
+}

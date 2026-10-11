@@ -1,0 +1,205 @@
+BEGIN:VCALENDAR
+PRODID:iCalendar-Ruby
+VERSION:2.0
+X-WR-TIMEZONE:America/Chicago
+BEGIN:VTIMEZONE
+TZID:America/Chicago
+X-LIC-LOCATION:America/Chicago
+BEGIN:STANDARD
+DTSTART:20241103T020000
+RRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11
+TZNAME:CST
+TZOFFSETFROM:-0500
+TZOFFSETTO:-0600
+END:STANDARD
+BEGIN:DAYLIGHT
+DTSTART:20250309T020000
+RRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3
+TZNAME:CDT
+TZOFFSETFROM:-0600
+TZOFFSETTO:-0500
+END:DAYLIGHT
+END:VTIMEZONE
+BEGIN:VEVENT
+DESCRIPTION: https://www.cedarhilltx.com/calendar.aspx?EID=19068
+DTEND;TZID=America/Chicago:20270525T235900
+DTSTAMP;TZID=America/Chicago:20260513T132742
+DTSTART;TZID=America/Chicago:20270525T180000
+LAST-MODIFIED;TZID=America/Chicago:20260513T132742
+LOCATION:Cedar Hill Government Center - 285 Uptown Blvd. Bldg. 100  Cedar H
+ ill TX 75104
+SEQUENCE:0
+SUMMARY:City Council Meeting
+UID:19068
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=29
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.cedarhilltx.com/calendar.aspx?EID=19063
+DTEND;TZID=America/Chicago:20270511T235900
+DTSTAMP;TZID=America/Chicago:20260513T132518
+DTSTART;TZID=America/Chicago:20270511T180000
+LAST-MODIFIED;TZID=America/Chicago:20260513T132518
+LOCATION:Cedar Hill Government Center - 285 Uptown Blvd. Bldg. 100  Cedar H
+ ill TX 75104
+SEQUENCE:0
+SUMMARY:City Council Meeting
+UID:19063
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=29
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.cedarhilltx.com/calendar.aspx?EID=19067
+DTEND;TZID=America/Chicago:20270427T235900
+DTSTAMP;TZID=America/Chicago:20260513T132742
+DTSTART;TZID=America/Chicago:20270427T180000
+LAST-MODIFIED;TZID=America/Chicago:20260513T132742
+LOCATION:Cedar Hill Government Center - 285 Uptown Blvd. Bldg. 100  Cedar H
+ ill TX 75104
+SEQUENCE:0
+SUMMARY:City Council Meeting
+UID:19067
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=29
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.cedarhilltx.com/calendar.aspx?EID=19062
+DTEND;TZID=America/Chicago:20270413T235900
+DTSTAMP;TZID=America/Chicago:20260513T132518
+DTSTART;TZID=America/Chicago:20270413T180000
+LAST-MODIFIED;TZID=America/Chicago:20260513T132518
+LOCATION:Cedar Hill Government Center - 285 Uptown Blvd. Bldg. 100  Cedar H
+ ill TX 75104
+SEQUENCE:0
+SUMMARY:City Council Meeting
+UID:19062
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=29
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.cedarhilltx.com/calendar.aspx?EID=19066
+DTEND;TZID=America/Chicago:20270323T235900
+DTSTAMP;TZID=America/Chicago:20260513T132742
+DTSTART;TZID=America/Chicago:20270323T180000
+LAST-MODIFIED;TZID=America/Chicago:20260513T132742
+LOCATION:Cedar Hill Government Center - 285 Uptown Blvd. Bldg. 100  Cedar H
+ ill TX 75104
+SEQUENCE:0
+SUMMARY:City Council Meeting
+UID:19066
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=29
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.cedarhilltx.com/calendar.aspx?EID=19061
+DTEND;TZID=America/Chicago:20270309T235900
+DTSTAMP;TZID=America/Chicago:20260513T132518
+DTSTART;TZID=America/Chicago:20270309T180000
+LAST-MODIFIED;TZID=America/Chicago:20260513T132518
+LOCATION:Cedar Hill Government Center - 285 Uptown Blvd. Bldg. 100  Cedar H
+ ill TX 75104
+SEQUENCE:0
+SUMMARY:City Council Meeting
+UID:19061
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=29
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.cedarhilltx.com/calendar.aspx?EID=19065
+DTEND;TZID=America/Chicago:20270223T235900
+DTSTAMP;TZID=America/Chicago:20260513T132742
+DTSTART;TZID=America/Chicago:20270223T180000
+LAST-MODIFIED;TZID=America/Chicago:20260513T132742
+LOCATION:Cedar Hill Government Center - 285 Uptown Blvd. Bldg. 100  Cedar H
+ ill TX 75104
+SEQUENCE:0
+SUMMARY:City Council Meeting
+UID:19065
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=29
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.cedarhilltx.com/calendar.aspx?EID=19060
+DTEND;TZID=America/Chicago:20270209T235900
+DTSTAMP;TZID=America/Chicago:20260513T132518
+DTSTART;TZID=America/Chicago:20270209T180000
+LAST-MODIFIED;TZID=America/Chicago:20260513T132518
+LOCATION:Cedar Hill Government Center - 285 Uptown Blvd. Bldg. 100  Cedar H
+ ill TX 75104
+SEQUENCE:0
+SUMMARY:City Council Meeting
+UID:19060
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=29
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.cedarhilltx.com/calendar.aspx?EID=19064
+DTEND;TZID=America/Chicago:20270126T235900
+DTSTAMP;TZID=America/Chicago:20260513T132742
+DTSTART;TZID=America/Chicago:20270126T180000
+LAST-MODIFIED;TZID=America/Chicago:20260513T132742
+LOCATION:Cedar Hill Government Center - 285 Uptown Blvd. Bldg. 100  Cedar H
+ ill TX 75104
+SEQUENCE:0
+SUMMARY:City Council Meeting
+UID:19064
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=29
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.cedarhilltx.com/calendar.aspx?EID=19059
+DTEND;TZID=America/Chicago:20270112T235900
+DTSTAMP;TZID=America/Chicago:20260513T132518
+DTSTART;TZID=America/Chicago:20270112T180000
+LAST-MODIFIED;TZID=America/Chicago:20260513T132518
+LOCATION:Cedar Hill Government Center - 285 Uptown Blvd. Bldg. 100  Cedar H
+ ill TX 75104
+SEQUENCE:0
+SUMMARY:City Council Meeting
+UID:19059
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=29
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.cedarhilltx.com/calendar.aspx?EID=19058
+DTEND;TZID=America/Chicago:20261208T235900
+DTSTAMP;TZID=America/Chicago:20260513T132518
+DTSTART;TZID=America/Chicago:20261208T180000
+LAST-MODIFIED;TZID=America/Chicago:20260513T132518
+LOCATION:Cedar Hill Government Center - 285 Uptown Blvd. Bldg. 100  Cedar H
+ ill TX 75104
+SEQUENCE:0
+SUMMARY:City Council Meeting
+UID:19058
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=29
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.cedarhilltx.com/calendar.aspx?EID=19057
+DTEND;TZID=America/Chicago:20261110T235900
+DTSTAMP;TZID=America/Chicago:20260513T132518
+DTSTART;TZID=America/Chicago:20261110T180000
+LAST-MODIFIED;TZID=America/Chicago:20260513T132518
+LOCATION:Cedar Hill Government Center - 285 Uptown Blvd. Bldg. 100  Cedar H
+ ill TX 75104
+SEQUENCE:0
+SUMMARY:City Council Meeting
+UID:19057
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=29
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.cedarhilltx.com/calendar.aspx?EID=19055
+DTEND;TZID=America/Chicago:20261027T235900
+DTSTAMP;TZID=America/Chicago:20260513T132029
+DTSTART;TZID=America/Chicago:20261027T180000
+LAST-MODIFIED;TZID=America/Chicago:20260513T132029
+LOCATION:Cedar Hill Government Center - 285 Uptown Blvd. Bldg. 100  Cedar H
+ ill TX 75104
+SEQUENCE:0
+SUMMARY:City Council Meeting
+UID:19055
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=29
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.cedarhilltx.com/calendar.aspx?EID=19050
+DTEND;TZID=America/Chicago:20261013T235900
+DTSTAMP;TZID=America/Chicago:20260513T130920
+DTSTART;TZID=America/Chicago:20261013T180000
+LAST-MODIFIED;TZID=America/Chicago:20260513T130920
+LOCATION:Cedar Hill Government Center - 285 Uptown Blvd. Bldg. 100  Cedar H
+ ill TX 75104
+SEQUENCE:0
+SUMMARY:City Council Meeting
+UID:19050
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=29
+END:VEVENT
+END:VCALENDAR

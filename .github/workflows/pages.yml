@@ -2,16 +2,17 @@ name: Deploy to GitHub Pages
 
 # Publishes the web app so anyone with access to the repository can open it at a URL
 # instead of running it locally. The map, city guides, rankings, and charts all read
-# bundled data, so they work with no server. Headlines are gathered here at build time,
-# since a static site cannot run the news endpoint itself; the scheduled run below keeps
-# them current. Address lookup and the AI explanations still need the API and fall back
-# to their offline behavior.
+# bundled data, so they work with no server. Headlines and each city's posted agendas are
+# gathered here at build time, since a static site cannot run the news or agenda refresh
+# itself; the scheduled run below keeps them current. Address lookup and the AI
+# explanations still need the API and fall back to their offline behavior.
 
 on:
   push:
     branches: [main]
   schedule:
-    # A few times a day, so the published headlines do not go stale between commits.
+    # A few times a day, so the published headlines and agendas do not go stale between
+    # commits. Cities post agendas three to six days ahead, so this catches each one.
     - cron: '17 5,11,17,23 * * *'
   workflow_dispatch:
 
@@ -43,6 +44,15 @@ jobs:
       - name: Gather current headlines
         run: npm run build:news
 
+      - name: Gather upcoming meetings and agendas
+        # Reads each city's own agenda site (scripts/build-agendas.mjs), starting from the
+        # snapshot already on the live site so a city whose site is down keeps its last good
+        # entry. It never fails the build: without a snapshot the site shows its curated
+        # schedules. GITHUB_REPOSITORY is used because scheduled runs carry a different payload.
+        run: AGENDA_PREVIOUS_URL="https://${GITHUB_REPOSITORY_OWNER,,}.github.io/${GITHUB_REPOSITORY##*/}/agendas-snapshot.json" npm run build:agendas
+        continue-on-error: true
+        timeout-minutes: 8
+
       - name: Build for the repository subpath
         # GITHUB_REPOSITORY is owner/repo and is set for every trigger, including the
         # scheduled runs where the event payload differs from a push.
@@ -54,10 +64,31 @@ jobs:
 
       - name: Add the SPA fallback and disable Jekyll
         # Pages serves 404.html for any path it does not recognize, which is how a
-        # client-routed deep link such as /cities reaches the app instead of a 404.
+        # client-routed deep link to an unknown path still reaches the app.
         run: |
           cp packages/web/dist/index.html packages/web/dist/404.html
           touch packages/web/dist/.nojekyll
+
+      - name: Give every page of the app its own address
+        # The 404.html fallback renders the right page but answers with a 404 status, so
+        # shared links looked broken to link previews and crawlers. scripts/spa-routes.mjs
+        # copies index.html to <route>.html for every route and city, which Pages serves at
+        # /<route> with 200. A copy in a folder per route (<route>/index.html) is added too,
+        # so the address still ends at 200 (after a redirect to the trailing slash) if Pages
+        # looks for the folder first. 404.html stays the catch-all for anything else.
+        run: |
+          node scripts/spa-routes.mjs packages/web/dist
+          node --input-type=module -e "
+            import { copyFileSync, mkdirSync } from 'node:fs';
+            import { ROUTES, cityRoutes } from './scripts/spa-routes.mjs';
+            const dist = 'packages/web/dist';
+            const routes = [...ROUTES, ...cityRoutes()];
+            for (const route of routes) {
+              mkdirSync(dist + '/' + route, { recursive: true });
+              copyFileSync(dist + '/index.html', dist + '/' + route + '/index.html');
+            }
+            console.log('Added a folder page for ' + routes.length + ' routes');
+          "
 
       - uses: actions/upload-pages-artifact@v3
         with:

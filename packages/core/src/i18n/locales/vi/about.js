@@ -22,7 +22,7 @@ export default {
     meetingsSub: 'Mọi hội đồng ở {n} thành phố, trên danh sách và bản đồ',
     prepare: 'Chuẩn bị phát biểu',
     prepareSub: 'Đăng ký, viết ý kiến và luyện tập',
-    community: 'Đọc mẹo từ những người đã phát biểu',
+    community: 'Đọc mẹo phát biểu và chia sẻ kinh nghiệm của bạn',
     communitySub: 'Được đối chiếu với quy định từng thành phố',
     news: 'Theo dõi tin địa phương',
     newsSub: 'Tin về chủ đề của bạn từ các tòa soạn địa phương',

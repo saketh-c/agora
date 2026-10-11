@@ -2,7 +2,7 @@ import { upcomingMeetings, daysBetween, hourOf, agendaFor, parseDate, compareDat
 import { haversineMiles, cityPoint } from './geo.js';
 import { getTopic, isTopicId } from './topics.js';
 import { milesText, formatDate, formatTime } from './format.js';
-import { t, tn, tList, joinList, isLocale, lowerFirst } from './i18n/index.js';
+import { t, tn, tList, joinList, isLocale, lowerFirst } from './i18n/runtime.js';
 
 /**
  * User preferences. No account needed: the web app keeps these in localStorage and
@@ -31,7 +31,8 @@ export function normalizePrefs(input) {
   p.availability = { ...base.availability, ...(p.availability || {}) };
   // NaN or Infinity (for example from ?lat=abc) would make every distance meaningless, so such a location is dropped.
   if (p.location && !(Number.isFinite(p.location.lat) && Number.isFinite(p.location.lng))) p.location = null;
-  p.maxMiles = Number.isFinite(Number(p.maxMiles)) && Number(p.maxMiles) > 0 ? Number(p.maxMiles) : base.maxMiles;
+  // null means "any distance": no limit, no penalty, nothing dropped.
+  p.maxMiles = p.maxMiles === null ? null : Number.isFinite(Number(p.maxMiles)) && Number(p.maxMiles) > 0 ? Number(p.maxMiles) : base.maxMiles;
   p.virtualOk = p.virtualOk !== false;
   p.canSpeakOnly = p.canSpeakOnly === true;
   p.student = p.student !== false;
@@ -40,6 +41,25 @@ export function normalizePrefs(input) {
 
 function itemMatches(item, interests) {
   return (item.topics || []).some((t) => interests.includes(t));
+}
+
+/** Points for a meeting's own agenda touching the student's topics: 3 per topic it touches, at most 6. */
+export const TOPIC_POINTS = 3;
+export const TOPIC_POINTS_MAX = 6;
+
+/**
+ * Points for distance. Close by counts for a meeting (5 mi +4, 10 mi +2); past 15 mi, within the
+ * student's limit or with no limit, each further 5 mi started costs a point, down to the same -5
+ * as a meeting past the limit (from 35 mi on). So "Any distance" still lists nearer councils
+ * first: even the most topic points (+6) never lift a council 35 mi or more away above an
+ * otherwise equal one within 10 mi.
+ */
+export function distancePoints(miles, maxMiles) {
+  if (maxMiles != null && miles > maxMiles) return -5;
+  if (miles <= 5) return 4;
+  if (miles <= 10) return 2;
+  if (miles <= 15) return 0;
+  return -Math.min(5, Math.ceil((miles - 15) / 5));
 }
 
 /** Short names of the user's topics that a set of agenda items touches (at most two), joined for a sentence. */
@@ -66,11 +86,14 @@ export function scoreMeeting(meeting, city, prefs, { today } = {}) {
     reasons.push({ text, kind, points });
   };
 
-  // Topics. An item on this meeting's own agenda is the strongest signal. Without one, a recent
-  // agenda at this council that touched the user's topics is a weak hint, dated so it reads as past.
+  // Topics. An item on this meeting's own agenda is the strongest signal; it counts by topic, not
+  // by item, so a long posted agenda (a city site lists up to 12) does not outweigh distance.
+  // Without one, a recent agenda at this council that touched the user's topics is a weak hint,
+  // dated so it reads as past.
   const matchedItems = (meeting.agendaItems || []).filter((it) => itemMatches(it, prefs.interests));
   if (matchedItems.length) {
-    add(Math.min(9, matchedItems.length * 3), tn('match.itemsOn', matchedItems.length, { topics: topicsPhrase(matchedItems, prefs.interests) }), 'topic');
+    const touched = new Set(matchedItems.flatMap((it) => (it.topics || []).filter((id) => prefs.interests.includes(id))));
+    add(Math.min(TOPIC_POINTS_MAX, touched.size * TOPIC_POINTS), tn('match.itemsOn', matchedItems.length, { topics: topicsPhrase(matchedItems, prefs.interests) }), 'topic');
   } else if (prefs.interests.length && city && today) {
     const recent = agendaFor(city, today).recent.filter((it) => itemMatches(it, prefs.interests));
     if (recent.length) {
@@ -104,16 +127,15 @@ export function scoreMeeting(meeting, city, prefs, { today } = {}) {
   }
 
   // Distance and home city. Past the user's own limit always counts against a meeting, even
-  // when the limit is under the 5 and 10 mile tiers.
+  // when the limit is under the 5 and 10 mile tiers; across the region (a wide limit or none),
+  // nearer still ranks higher (see distancePoints).
   let distanceMiles = null;
   if (prefs.location) {
     distanceMiles = haversineMiles(prefs.location, cityPoint(city));
     if (distanceMiles != null) {
       const distance = milesText(distanceMiles);
-      if (distanceMiles > prefs.maxMiles) add(-5, t('match.awayPastLimit', { distance, max: prefs.maxMiles }), 'distance');
-      else if (distanceMiles <= 5) add(4, t('match.away', { distance }), 'distance');
-      else if (distanceMiles <= 10) add(2, t('match.away', { distance }), 'distance');
-      else add(0, t('match.away', { distance }), 'distance');
+      const past = prefs.maxMiles != null && distanceMiles > prefs.maxMiles;
+      add(distancePoints(distanceMiles, prefs.maxMiles), past ? t('match.awayPastLimit', { distance, max: prefs.maxMiles }) : t('match.away', { distance }), 'distance');
     }
   }
   if (prefs.homeCityId && city && prefs.homeCityId === city.cityId) add(3, t('match.yourCity'), 'distance');
@@ -141,9 +163,10 @@ export function scoreMeeting(meeting, city, prefs, { today } = {}) {
  * Rank upcoming meetings for a user over the `days` calendar days starting `today`.
  * `now` (an ISO string) drops meetings that already ended today. `perCity` caps how many
  * meetings one council may contribute, so a ranked list is not one city's calendar
- * (default: no cap).
+ * (default: no cap). Meetings farther than twice the distance limit are dropped unless
+ * `keepFar` is true (they still rank below nearer ones through the distance penalty).
  */
-export function matchMeetings(cities, prefsInput, { today, days = 45, limit = 25, now, perCity } = {}) {
+export function matchMeetings(cities, prefsInput, { today, days = 45, limit = 25, now, perCity, keepFar = false } = {}) {
   const prefs = normalizePrefs(prefsInput);
   const byId = new Map(cities.map((c) => [c.cityId, c]));
   const meetings = upcomingMeetings(cities, { from: today, days, now });
@@ -152,7 +175,7 @@ export function matchMeetings(cities, prefsInput, { today, days = 45, limit = 25
     if (prefs.canSpeakOnly && !m.openToPublicComment) continue;
     const city = byId.get(m.cityId);
     const { score, reasons, distanceMiles, matchedItems } = scoreMeeting(m, city, prefs, { today });
-    if (prefs.location && distanceMiles != null && distanceMiles > prefs.maxMiles * 2) continue;
+    if (!keepFar && prefs.location && prefs.maxMiles != null && distanceMiles != null && distanceMiles > prefs.maxMiles * 2) continue;
     scored.push({ ...m, score, reasons, distanceMiles, matchedItems });
   }
   scored.sort((a, b) => b.score - a.score || compareDates(a.date, b.date) || a.time.localeCompare(b.time) || a.cityName.localeCompare(b.cityName));
@@ -179,7 +202,7 @@ export function matchAgendaItems(cities, prefsInput, { today, limit = 30, recent
   const out = [];
   for (const city of cities) {
     const distanceMiles = prefs.location ? haversineMiles(prefs.location, cityPoint(city)) : null;
-    if (distanceMiles != null && distanceMiles > prefs.maxMiles * 2) continue;
+    if (distanceMiles != null && prefs.maxMiles != null && distanceMiles > prefs.maxMiles * 2) continue;
     const split = agendaFor(city, today);
     for (const item of recent ? split.recent : split.upcoming) {
       const hits = (item.topics || []).filter((t) => prefs.interests.includes(t));

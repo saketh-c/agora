@@ -13,8 +13,9 @@
  *   (/api), or a path relative to the app's base (api).
  * - A static deploy (VITE_STATIC_DEPLOY=1, GitHub Pages) without VITE_API_BASE has no API at
  *   all. News reads the headline snapshot shipped with the build, and geocode, explain and
- *   comment reject at once with code 'offline' instead of requesting URLs that cannot exist
- *   (and sending a typed address along with them).
+ *   comment reject at once with code 'offline' instead of requesting URLs that cannot exist.
+ *   Address lookup then happens in the browser (lib/places.js lookupPlace, which calls
+ *   OpenStreetMap Nominatim only when someone submits a place).
  */
 import { getLocale } from '@agora/core';
 
@@ -214,7 +215,11 @@ export function createApi({ env = {}, fetch: fetchImpl, now = () => Date.now(), 
         return filterSnapshot(snap, params, now());
       }
     },
-    /** A ZIP code or address in DFW. Rejects with code 'outside_area' or 'not_found' when there is none. */
+    /**
+     * A ZIP code, street address, school or other place in DFW: { label, lat, lng, cityId, kind,
+     * school? }. Rejects with code 'outside_area' or 'not_found' when there is none. Pages call
+     * lib/places.js lookupPlace, which falls back to the browser when there is no API.
+     */
     geocode: (q, { signal } = {}) => request('geocode', { query: { q }, timeoutMs: TIMEOUT_MS.geocode, signal }),
     /** Plain-language explanation of an agenda item ({ title, summary, cityId, itemIndex? }). */
     explain: (body, { signal } = {}) => request('explain', { method: 'POST', body, timeoutMs: TIMEOUT_MS.explain, signal }),

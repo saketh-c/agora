@@ -3,9 +3,11 @@ import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'reac
 import {
   agendaFor,
   calendarThrough,
+  daysBetween,
   describeRecurrence,
   expandCityMeetings,
   formatDate,
+  getLocale,
   getTopic,
   hasEnded,
   inferTopics,
@@ -16,14 +18,16 @@ import {
   tn,
   windowEnd,
 } from '@agora/core';
-import { nowIso, rawCity, today as todayFn } from '../lib/data.js';
+import { rawCity } from '../lib/data.js';
 import { parseDeadlineRule } from '../lib/deadline.js';
 import { useCities } from '../lib/DataProvider.jsx';
 import { useStore } from '../lib/store.jsx';
 import { api } from '../lib/api.js';
-import { downloadIcs, directionsUrl } from '../lib/ics.js';
+import { directionsUrl } from '../lib/ics.js';
 import { usePageTitle } from '../components/shell/PageMeta.jsx';
+import useClock from '../components/home/useClock.js';
 import {
+  AddToCalendar,
   asSentence,
   Badge,
   DateTile,
@@ -35,6 +39,7 @@ import {
   meetingDeadline,
   MeetingDetail,
   MeetingDetailBadge,
+  MeetingShare,
   MeetingStatus,
   meetingTitle,
   monthDay,
@@ -53,6 +58,8 @@ import '../styles/pages/city.css';
 
 const HORIZON = 90;
 const PER_RULE = 6;
+/** A city checked longer ago than this says so, instead of a plain "Verified" line. */
+const STALE_DAYS = 45;
 
 const hostOf = (url) => {
   try {
@@ -94,9 +101,12 @@ function AgendaItem({ item, index, city }) {
     }
   };
 
+  // Items read from the city's agenda site stay in the city's English (core/src/agendas.js).
+  const english = item.auto && !item.titleSource && getLocale() !== 'en' ? 'en' : undefined;
+
   return (
     <li className="agenda__item">
-      <p className="agenda__t">
+      <p className="agenda__t" lang={english}>
         {item.url ? (
           <a href={item.url} target="_blank" rel="noopener noreferrer">
             {item.title}
@@ -106,7 +116,11 @@ function AgendaItem({ item, index, city }) {
           item.title
         )}
       </p>
-      {item.summary && <p className="agenda__s">{item.summary}</p>}
+      {item.summary && (
+        <p className="agenda__s" lang={english}>
+          {item.summary}
+        </p>
+      )}
       <button type="button" className="btn btn--quiet btn--sm agenda__btn" onClick={toggle} aria-expanded={open} aria-controls={id} aria-busy={busy || undefined}>
         {busy ? <span className="spinner" aria-hidden="true" /> : <Icon name="bulb" />}
         {open ? t('drawer.hide') : t('drawer.explainThis')}
@@ -175,8 +189,9 @@ function CityView({ id }) {
   const [params, setParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const [now] = useState(nowIso);
-  const today = todayFn();
+  // The minute clock (also refreshed when the tab comes back): a meeting that ends while the
+  // page is open drops off, and the next one and its sign-up deadline take its place.
+  const { today, now } = useClock();
 
   const upcoming = useMemo(() => (city ? expandCityMeetings(city, today, windowEnd(today, HORIZON)).filter((o) => !hasEnded(o, now)) : []), [city, today, now]);
   const next = useMemo(() => (city ? nextMeetingFor(city, today, { publicCommentOnly: true, horizonDays: HORIZON, now }) : null), [city, today, now]);
@@ -285,7 +300,9 @@ function CityView({ id }) {
     .split(',')[0]
     .trim();
   const street = String(hall.address || '').split(',')[0].trim();
-  const place = [hallName, street].filter(Boolean).join(', ');
+  // Street names end in an abbreviation ("200 N. Fifth St."), and the sentence around the
+  // place ends with its own period, so the place gives its period up: never "St..".
+  const place = [hallName, street].filter(Boolean).join(', ').replace(/\.+$/, '');
   const members = Number(council.size) > 1 ? Number(council.size) - 1 : null;
   const lead = council.mayorName && members ? t('city.lead', { mayor: t('city.mayor', { name: council.mayorName }), n: members, place }) : t('city.meetsAt', { place });
 
@@ -330,6 +347,15 @@ function CityView({ id }) {
     groups.findIndex((g) => g.items.some((o) => o.openToPublicComment)),
   );
 
+  // Upcoming agenda items, soonest meeting first, grouped by date (undated ones last).
+  const upcomingByDate = [];
+  for (const item of agenda.upcoming) {
+    const last = upcomingByDate[upcomingByDate.length - 1];
+    const date = item.meetingDate || null;
+    if (last && last.date === date) last.items.push(item);
+    else upcomingByDate.push({ date, items: [item] });
+  }
+
   // Recent agenda items, newest meeting first, grouped by date.
   const recentByDate = [];
   for (const item of agenda.recent) {
@@ -361,6 +387,7 @@ function CityView({ id }) {
   }
 
   const youth = city.youthPrograms || [];
+  const stale = Boolean(city.lastVerified) && daysBetween(city.lastVerified, today) > STALE_DAYS;
 
   return (
     <div className="wrap city">
@@ -427,10 +454,7 @@ function CityView({ id }) {
                     {t('ui.prepareToSpeak')}
                   </Link>
                   <span className="btn-row btn-row--tight">
-                    <button type="button" className="btn btn--secondary" onClick={() => downloadIcs(next, city)}>
-                      <Icon name="cal-plus" />
-                      {t('ui.addToCalendar')}
-                    </button>
+                    <AddToCalendar meeting={next} city={city} now={now} />
                     <a className="btn btn--quiet" href={directionsUrl(next)} target="_blank" rel="noopener noreferrer">
                       <Icon name="nav" />
                       {t('ui.directions')}
@@ -548,15 +572,22 @@ function CityView({ id }) {
             ))}
             {agenda.upcoming.length > 0 && (
               <Disclosure title={t('city.upcoming')} summary={tn('city.upcomingCount', agenda.upcoming.length)} defaultOpen>
-                <ul className="agenda">
-                  {agenda.upcoming.map((item) => (
-                    <AgendaItem key={`${item.meetingDate}-${indexOf(item)}`} item={item} index={indexOf(item)} city={city} />
-                  ))}
-                </ul>
+                {lang !== 'en' && agenda.upcoming.some((item) => item.auto && !item.titleSource) && <p className="slate t-small">{t('live.englishNote')}</p>}
+                {upcomingByDate.map((day) => (
+                  <Fragment key={day.date || 'undated'}>
+                    {day.date && <h3 className="agenda__date">{formatDate(day.date)}</h3>}
+                    <ul className="agenda">
+                      {day.items.map((item) => (
+                        <AgendaItem key={`${item.meetingDate}-${indexOf(item)}`} item={item} index={indexOf(item)} city={city} />
+                      ))}
+                    </ul>
+                  </Fragment>
+                ))}
               </Disclosure>
             )}
             {agenda.recent.length > 0 && (
               <Disclosure id="agenda" title={t('city.recent')} summary={recentSummary}>
+                {lang !== 'en' && agenda.recent.some((item) => item.auto && !item.titleSource) && <p className="slate t-small">{t('live.englishNote')}</p>}
                 {recentByDate.map((day) => (
                   <Fragment key={day.date}>
                     <h3 className="agenda__date">{formatDate(day.date)}</h3>
@@ -622,10 +653,17 @@ function CityView({ id }) {
                 </li>
               ))}
             </ul>
-            <p className="verified city__verified">
-              <Icon name="shield" />
-              {t('city.verifiedLine', { date: city.lastVerified ? monthDay(city.lastVerified, { withYear: true }) : '' })}
-            </p>
+            {stale ? (
+              <p className="verified city__verified city__verified--stale">
+                <Icon name="clock" />
+                {t('city.verifiedStale', { date: monthDay(city.lastVerified, { withYear: true }) })}
+              </p>
+            ) : (
+              <p className="verified city__verified">
+                <Icon name="shield" />
+                {t('city.verifiedLine', { date: city.lastVerified ? monthDay(city.lastVerified, { withYear: true }) : '' })}
+              </p>
+            )}
             {sourceHosts.size > 0 && (
               <Disclosure variant="plain" title={t('city.sources')} className="city__sources">
                 <ul>
@@ -661,7 +699,7 @@ function CityView({ id }) {
         </aside>
       </div>
 
-      <Sheet open={Boolean(occ)} onClose={closeOcc} labelledBy="city-md-h" variant="side" barStart={occ ? <MeetingDetailBadge meeting={occ} homeCityId={prefs.homeCityId} /> : null}>
+      <Sheet open={Boolean(occ)} onClose={closeOcc} labelledBy="city-md-h" variant="side" barStart={occ ? <MeetingDetailBadge meeting={occ} homeCityId={prefs.homeCityId} /> : null} barEnd={occ ? <MeetingShare meeting={occ} /> : null}>
         {occ && <MeetingDetail key={occ.id} meeting={occ} city={city} today={today} now={now} headingId="city-md-h" nextSpeakable={occNext} onOpenMeeting={openOcc} hideCityLink />}
       </Sheet>
     </div>

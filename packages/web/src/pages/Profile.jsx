@@ -1,27 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { t, tn } from '@agora/core';
+import { Link, useLocation } from 'react-router-dom';
+import { LOCALES, t, tn } from '@agora/core';
 import { useStore, displayName } from '../lib/store.jsx';
 import { useCities } from '../lib/DataProvider.jsx';
 import { cleanEmail, NAME_MAX } from '../lib/profiles.js';
 import { downloadBlob } from '../lib/download.js';
+import { distanceSummary, profileFileName, profileMeta, timesSummary, topicsSummary } from '../lib/setupSummary.js';
 import { Avatar, Badge, Disclosure, Icon, Menu, PageHeader, Section, Sheet } from '../components/ui/index.js';
 import { SETUP_STATE, setupTo } from '../components/shell/SetupHost.jsx';
+import { originText } from '../components/home/SetupSheet.jsx';
+import { placeName, placesOf } from '../lib/places.js';
 import '../styles/pages/profile.css';
 
 const TOAST_MS = 5000;
-
-/** A file name any system accepts: "Nguyễn Văn An" -> "agora-profile-nguyen-van-an.json". */
-function fileName(name) {
-  const slug = String(name || '')
-    .normalize('NFD')
-    .replace(/\p{M}/gu, '')
-    .replace(/đ/gi, 'd')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
-  return `agora-profile-${slug || 'profile'}.json`;
-}
 
 /** "Ana" stays "Ana" unless a profile already has that name: then "Ana (2)", "Ana (3)". */
 function uniqueName(name, profiles) {
@@ -40,7 +31,7 @@ function uniqueName(name, profiles) {
  * the only way to move one, so backup sits right under the list.
  */
 export default function Profile() {
-  const { profile, profiles, switchProfile, createProfile, updateProfile, deleteProfile, exportProfile, importProfile } = useStore();
+  const { profile, profiles, prefs, setupComplete, lang, setLang, switchProfile, createProfile, updateProfile, deleteProfile, exportProfile, importProfile } = useStore();
   const { cityById } = useCities();
   const location = useLocation();
   const [editing, setEditing] = useState(null); // { id } or { id: null } to add
@@ -56,17 +47,12 @@ export default function Profile() {
   }, [toast]);
   const say = (text) => setToast({ text, at: Date.now() });
 
-  const meta = (p) => {
-    const city = p.prefs && p.prefs.homeCityId ? cityById(p.prefs.homeCityId) : null;
-    if (!p.onboarded && !city) return t('profile.notSetUp');
-    const topics = tn('profile.topicsChosen', (p.prefs.interests || []).length);
-    return city ? t('profile.meta', { city: city.name, topics }) : topics;
-  };
+  const meta = (p) => profileMeta(p, p.prefs && p.prefs.homeCityId ? cityById(p.prefs.homeCityId) : null);
 
   const download = (p) => {
     const data = exportProfile(p.id);
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    downloadBlob(fileName(displayName(p)), blob);
+    downloadBlob(profileFileName(displayName(p), p.id), blob);
     say(t('profile.exported', { name: displayName(p) }));
   };
 
@@ -113,63 +99,76 @@ export default function Profile() {
       </PageHeader>
 
       <div className="pf-cols">
-        <Section title={tn('profile.allTitle', profiles.length)} id="pf-list" className="pf-section">
-          <ul className="group pf-list">
-            {profiles.map((p) => {
-              const active = p.id === profile.id;
-              const name = displayName(p);
-              return (
-                <li key={p.id} className="pf-row">
-                  <Avatar name={p.name} size="lg" soft={!active} />
-                  <div className="pf-row__main">
-                    <p className="pf-row__name">
-                      <span className="pf-row__n">{name}</span>
-                      {active && (
-                        <Badge tone="ink" icon="check">
-                          {t('profile.inUse')}
-                        </Badge>
+        <div className="pf-col">
+          <SetupSummary
+            prefs={prefs}
+            complete={setupComplete}
+            name={profiles.length > 1 ? displayName(profile) : ''}
+            city={prefs.homeCityId ? cityById(prefs.homeCityId) : null}
+            places={placesOf(prefs, cityById)}
+            lang={lang}
+            setLang={setLang}
+            setupLink={setupTo(location)}
+          />
+
+          <Section title={tn('profile.allTitle', profiles.length)} id="pf-list" className="pf-section">
+            <ul className="group pf-list">
+              {profiles.map((p) => {
+                const active = p.id === profile.id;
+                const name = displayName(p);
+                return (
+                  <li key={p.id} className="pf-row">
+                    <Avatar name={p.name} size="lg" soft={!active} />
+                    <div className="pf-row__main">
+                      <p className="pf-row__name">
+                        <span className="pf-row__n">{name}</span>
+                        {active && (
+                          <Badge tone="ink" icon="check">
+                            {t('profile.inUse')}
+                          </Badge>
+                        )}
+                      </p>
+                      <p className="pf-row__meta">{meta(p)}</p>
+                    </div>
+                    <div className="pf-row__act">
+                      {!active && (
+                        <button
+                          type="button"
+                          className="btn btn--secondary btn--sm"
+                          onClick={() => {
+                            switchProfile(p.id);
+                            say(t('profile.switched', { name }));
+                          }}
+                          aria-label={t('profile.switchTo', { name })}
+                        >
+                          {t('profile.switch')}
+                        </button>
                       )}
-                    </p>
-                    <p className="pf-row__meta">{meta(p)}</p>
-                  </div>
-                  <div className="pf-row__act">
-                    {!active && (
-                      <button
-                        type="button"
-                        className="btn btn--secondary btn--sm"
-                        onClick={() => {
-                          switchProfile(p.id);
-                          say(t('profile.switched', { name }));
-                        }}
-                        aria-label={t('profile.switchTo', { name })}
-                      >
-                        {t('profile.switch')}
-                      </button>
-                    )}
-                    <Menu
-                      label={t('profile.moreFor', { name })}
-                      buttonClassName="iconbtn"
-                      button={<Icon name="dots" />}
-                      items={[
-                        { type: 'item', key: 'edit', icon: 'pen', label: t('profile.edit'), onSelect: () => setEditing({ id: p.id }) },
-                        ...(active ? [{ type: 'link', key: 'setup', icon: 'tune', label: t('shell.profile.setup'), to: setupTo(location), state: SETUP_STATE, refocus: true }] : []),
-                        { type: 'item', key: 'export', icon: 'download', label: t('profile.exportOne'), onSelect: () => download(p) },
-                        { type: 'separator' },
-                        { type: 'item', key: 'delete', icon: 'trash', label: t('profile.delete'), onSelect: () => setToDelete(p) },
-                      ]}
-                    />
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-          <div className="btn-row pf-add">
-            <button type="button" className="btn btn--secondary" onClick={() => setEditing({ id: null })} aria-haspopup="dialog">
-              <Icon name="plus" size={20} />
-              {t('profile.add')}
-            </button>
-          </div>
-        </Section>
+                      <Menu
+                        label={t('profile.moreFor', { name })}
+                        buttonClassName="iconbtn"
+                        button={<Icon name="dots" />}
+                        items={[
+                          { type: 'item', key: 'edit', icon: 'pen', label: t('profile.edit'), onSelect: () => setEditing({ id: p.id }) },
+                          ...(active ? [{ type: 'link', key: 'setup', icon: 'tune', label: t('shell.profile.setup'), to: setupTo(location), state: SETUP_STATE, refocus: true }] : []),
+                          { type: 'item', key: 'export', icon: 'download', label: t('profile.exportOne'), onSelect: () => download(p) },
+                          { type: 'separator' },
+                          { type: 'item', key: 'delete', icon: 'trash', label: t('profile.delete'), onSelect: () => setToDelete(p) },
+                        ]}
+                      />
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+            <div className="btn-row pf-add">
+              <button type="button" className="btn btn--secondary" onClick={() => setEditing({ id: null })} aria-haspopup="dialog">
+                <Icon name="plus" size={20} />
+                {t('profile.add')}
+              </button>
+            </div>
+          </Section>
+        </div>
 
         <Section title={t('profile.backupTitle')} id="pf-backup" className="pf-section">
           <div className="card pf-backup">
@@ -327,5 +326,80 @@ function ProfileSheet({ open, profile, onClose, onSave }) {
         </div>
       </form>
     </Sheet>
+  );
+}
+
+/**
+ * The profile in use, in words: place, distance, times, topics and language, with one way to
+ * change them (the setup sheet, over this page). Language changes right here.
+ */
+function SetupSummary({ prefs, complete, name, city, places, lang, setLang, setupLink }) {
+  const current = LOCALES.find((l) => l.code === lang) || LOCALES[0];
+  const title = name ? t('profile.setup.titleFor', { name }) : t('profile.setup.title');
+  const home = places.home ? placeName(places.home) : '';
+  const rows = [
+    {
+      key: 'home',
+      icon: 'home',
+      label: t('profile.setup.home'),
+      value: home || t('profile.setup.noPlace'),
+      sub: home && city ? t('profile.setup.council', { city: city.name }) : home ? '' : t('profile.setup.notSet'),
+      // Without a place nothing can be "near you": the one thing to do is finish setup.
+      action: complete ? null : (
+        <Link className="btn btn--primary btn--sm pf-set__act" to={setupLink} state={SETUP_STATE}>
+          {t('profile.setup.start')}
+        </Link>
+      ),
+    },
+    ...(places.school ? [{ key: 'school', icon: 'school', label: t('profile.setup.school'), value: placeName(places.school) }] : []),
+    { key: 'distance', icon: 'nav', label: t('profile.setup.distance'), value: distanceSummary(prefs), sub: originText(prefs, city) },
+    { key: 'times', icon: 'clock', label: t('profile.setup.times'), value: timesSummary(prefs) },
+    { key: 'topics', icon: 'bulb', label: t('profile.setup.topics'), value: topicsSummary(prefs) },
+  ];
+  return (
+    <section className="pf-section pf-setup" aria-labelledby="pf-setup-h">
+      <div className="sec-head">
+        <h2 className="t-heading" id="pf-setup-h">
+          {title}
+        </h2>
+        {complete && (
+          <Link className="see" to={setupLink} state={SETUP_STATE} aria-describedby="pf-setup-h">
+            {t('profile.setup.edit')}
+          </Link>
+        )}
+      </div>
+      <dl className="group pf-set">
+        {rows.map((r) => (
+          <div key={r.key} className="pf-set__row">
+            <Icon name={r.icon} className="pf-set__ic" />
+            <dt className="pf-set__l">{r.label}</dt>
+            <dd className="pf-set__v">
+              {r.value}
+              {r.sub && <span className="pf-set__sub">{r.sub}</span>}
+              {r.action}
+            </dd>
+          </div>
+        ))}
+        <div className="pf-set__row pf-set__row--lang">
+          <Icon name="globe" className="pf-set__ic" />
+          <dt className="pf-set__l">{t('profile.setup.language')}</dt>
+          <dd className="pf-set__v">
+            <Menu
+              align="start"
+              label={t('shell.languagesButton', { language: current.nativeName })}
+              menuLabel={t('shell.languages')}
+              buttonClassName="chip chip--menu pf-set__lang"
+              button={
+                <>
+                  <span lang={current.code}>{current.nativeName}</span>
+                  <Icon name="chev-d" size={20} />
+                </>
+              }
+              items={LOCALES.map((l) => ({ type: 'radio', key: l.code, label: l.nativeName, lang: l.code, checked: l.code === lang, onSelect: () => setLang(l.code) }))}
+            />
+          </dd>
+        </div>
+      </dl>
+    </section>
   );
 }

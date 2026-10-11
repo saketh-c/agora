@@ -1,16 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { formatDate, getTopic, lowerFirst, t, tn, topicList } from '@agora/core';
+import { formatDate, getTopic, isTopicId, lowerFirst, t, tn, topicList } from '@agora/core';
 import { sources as NEWSROOMS } from '@data/news.json';
 import { useStore } from '../lib/store.jsx';
 import { useCities } from '../lib/DataProvider.jsx';
 import { api } from '../lib/api.js';
-import { today as todayFn } from '../lib/data.js';
+import useClock from '../components/home/useClock.js';
+import { useSkipLink } from '../components/shell/PageMeta.jsx';
 import { EmptyState, Icon, Menu, Notice, PageHeader, Section, matchCities } from '../components/ui/index.js';
 import '../styles/pages/news.css';
 
 const PAGE = 30;
 const DEBOUNCE_MS = 400;
+/** A tab that comes back after this long fetches the headlines again. */
+const REFRESH_MS = 30 * 60 * 1000;
 const CENTRAL = 'America/Chicago';
 
 /** 'YYYY-MM-DD' of an instant, in Dallas-Fort Worth. */
@@ -45,7 +48,8 @@ export default function News() {
   const { prefs, lang } = useStore();
   const { cities, cityById } = useCities();
   const [params, setParams] = useSearchParams();
-  const today = todayFn();
+  const { today } = useClock();
+  useSkipLink('nw-results', t('shell.skip.headlines'));
   const interests = useMemo(() => (prefs.interests || []).filter((id) => id !== 'other'), [prefs.interests]);
   // ?city= (a city id from a city page's "See all", or typed text) starts the city filter, and
   // then every topic, so the stories the city page showed are the ones that open here.
@@ -56,25 +60,59 @@ export default function News() {
     // Read once, on arrival.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const [topic, setTopic] = useState(initialCity ? 'all' : interests.length ? 'yours' : 'all');
+  // ?topic= keeps the topic across a reload or Back; without it, your topics (or all of them).
+  const defaultTopic = interests.length ? 'yours' : 'all';
+  const [topic, setTopicState] = useState(() => {
+    const raw = (params.get('topic') || '').trim();
+    if (raw === 'all' || (raw === 'yours' && interests.length) || (raw !== 'other' && isTopicId(raw))) return raw;
+    return initialCity ? 'all' : defaultTopic;
+  });
+  const setTopic = (value) => {
+    setTopicState(value);
+    // From the address as it is now, so a city filter written a moment ago is kept.
+    const next = new URLSearchParams(window.location.search);
+    if (value === defaultTopic) next.delete('topic');
+    else next.set('topic', value);
+    setParams(next, { replace: true });
+  };
   const [cityInput, setCityInput] = useState(initialCity);
   const [cityQuery, setCityQuery] = useState(initialCity);
   const [state, setState] = useState({ status: 'loading', data: null, error: null });
   const [attempt, setAttempt] = useState(0);
   const [limit, setLimit] = useState(PAGE);
 
+  // `attempt` counts loads: the first, Try again, and a quiet refresh when a tab left open
+  // comes back after a while. A quiet refresh keeps the list on screen while it loads, and
+  // keeps it if the refresh fails.
+  const loadedAt = useRef(0);
+  const quiet = useRef(false);
   useEffect(() => {
     const controller = new AbortController();
-    setState((s) => ({ ...s, status: 'loading', error: null }));
+    const keep = quiet.current;
+    quiet.current = false;
+    if (!keep) setState((s) => ({ ...s, status: 'loading', error: null }));
     api
       .news({ limit: 200 }, { signal: controller.signal })
-      .then((data) => setState({ status: 'ok', data, error: null }))
+      .then((data) => {
+        loadedAt.current = Date.now();
+        setState({ status: 'ok', data, error: null });
+      })
       .catch((error) => {
         if (error && error.code === 'aborted') return;
-        setState({ status: 'error', data: null, error });
+        if (!keep) setState({ status: 'error', data: null, error });
       });
     return () => controller.abort();
   }, [attempt]);
+
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible' || !loadedAt.current || Date.now() - loadedAt.current < REFRESH_MS) return;
+      quiet.current = true;
+      setAttempt((n) => n + 1);
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, []);
 
   // The city box filters after a short pause, not on every keystroke.
   useEffect(() => {
@@ -226,7 +264,7 @@ export default function News() {
 
           {state.status === 'ok' && !unavailable && (
             <>
-              <div className="nw-listbar">
+              <div className="nw-listbar" id="nw-results">
                 <p className="nw-listbar__count" aria-live="polite">
                   {cityQuery ? tn('news.countCity', shown.length, { city: cityName }) : tn('news.headlinesShown', shown.length)}
                 </p>

@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { BRAND, t, tn, tList } from '@agora/core';
 import seed from '@data/community.json';
 import { useCities } from '../lib/DataProvider.jsx';
 import { useStore } from '../lib/store.jsx';
-import { today as todayFn } from '../lib/data.js';
+import { copyText } from '../lib/clipboard.js';
+import { communityFilterCount, readCommunityFilters, writeCommunityFilters } from '../lib/communityFilters.js';
+import useClock from '../components/home/useClock.js';
+import { useSkipLink } from '../components/shell/PageMeta.jsx';
 import { KINDS, KIND_ICON, MAX_BODY, MAX_NAME, MAX_TITLE, buildIssueUrl, filterPosts, localizePost, newPostId, normalizePost, paragraphs, parseVideoUrl, postDate, sortPosts } from '../lib/community.js';
 import { PHOTO_TYPES, downscaleImage, getMedia, isQuotaError, listPosts, removePost, savePost, storageMode } from '../lib/communityDb.js';
 import { Avatar, Badge, Chip, EmptyState, Icon, Notice, PageHeader, Section, Segmented, Sheet } from '../components/ui/index.js';
@@ -54,7 +57,9 @@ const blankDraft = (profile, prefs) => ({ kind: 'tip', title: '', body: '', city
 export default function Community() {
   const { profile, prefs, ui, setUi, lang } = useStore();
   const { cities, cityById } = useCities();
-  const today = todayFn();
+  // The date labels ("Oct 10", or with a year) follow the clock in a tab left open.
+  const { today } = useClock();
+  useSkipLink('cm-posts', t('shell.skip.posts'));
 
   // Team posts ship with the app; posts written here come from IndexedDB.
   const seeds = useMemo(() => (seed.posts || []).map((p) => normalizePost({ ...p, local: false })).filter(Boolean), []);
@@ -63,9 +68,17 @@ export default function Community() {
   const urlMap = useRef(new Map());
   const [urls, setUrls] = useState({});
 
-  const [kind, setKind] = useState('');
-  const [cityFilter, setCityFilter] = useState('');
-  const [sort, setSort] = useState('newest');
+  // Kind, city and sort live in the address, so Back, a reload or a shared link keeps them.
+  const [params, setParams] = useSearchParams();
+  const homeCityId = prefs.homeCityId || '';
+  const filters = readCommunityFilters(params, { homeCityId, hasCity: (id) => Boolean(cityById(id)) });
+  const { kind, cityId: cityFilter, sort: sortBy, defaultSort } = filters;
+  // Built from the address as it is now, not as of the last render: two quick changes (a city,
+  // then a sort) must both stick.
+  const setFilters = (patch) => setParams(writeCommunityFilters(new URLSearchParams(window.location.search), patch, { defaultSort }), { replace: true });
+  const setKind = (value) => setFilters({ kind: value });
+  const setCityFilter = (value) => setFilters({ city: value });
+  const setSort = (value) => setFilters({ sort: value });
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [composerOpen, setComposerOpen] = useState(false);
   const [toSend, setToSend] = useState(null);
@@ -144,15 +157,15 @@ export default function Community() {
   const mine = useMemo(() => local.filter((p) => !p.profileId || p.profileId === profile.id), [local, profile.id]);
   const team = useMemo(() => seeds.map((p) => localizePost(p, lang)), [seeds, lang]);
   const all = useMemo(() => [...mine, ...team], [mine, team]);
-  const homeCityId = prefs.homeCityId || '';
-  const sortBy = sort === 'city' && homeCityId ? 'city' : 'newest';
   const shown = useMemo(() => sortPosts(filterPosts(all, { kind, cityId: cityFilter }), sortBy, { homeCityId }), [all, kind, cityFilter, sortBy, homeCityId]);
 
   const cityCounts = useMemo(() => {
     const counts = new Map();
     for (const p of all) if (p.cityId && cityById(p.cityId)) counts.set(p.cityId, (counts.get(p.cityId) || 0) + 1);
+    // A city from a link that has no posts yet still shows as the choice in use.
+    if (cityFilter && !counts.has(cityFilter)) counts.set(cityFilter, 0);
     return [...counts.entries()].map(([id, n]) => ({ city: cityById(id), n })).sort((a, b) => a.city.name.localeCompare(b.city.name, lang));
-  }, [all, cityById, lang]);
+  }, [all, cityById, lang, cityFilter]);
 
   const helpful = useMemo(() => new Set(Array.isArray(ui.helpful) ? ui.helpful : []), [ui.helpful]);
   const toggleHelpful = (id) => {
@@ -162,13 +175,14 @@ export default function Community() {
     setUi({ helpful: [...next].slice(-300) });
   };
 
-  const filterCount = (cityFilter ? 1 : 0) + (sortBy === 'city' ? 1 : 0);
+  const filterCount = communityFilterCount(filters);
   const anyFilter = Boolean(kind || cityFilter);
-  const clearFilters = () => {
-    setKind('');
-    setCityFilter('');
-  };
+  const clearFilters = () => setFilters({ kind: '', city: '' });
   const filterCity = cityFilter ? cityById(cityFilter) : null;
+  const homeCity = homeCityId ? cityById(homeCityId) : null;
+  const countText = filterCity ? tn('community.countIn', shown.length, { city: filterCity.name }) : tn('community.count', shown.length);
+  // Say why the order is not by date: "9 posts, Plano first".
+  const listCount = sortBy === 'city' && homeCity && !filterCity && shown.length > 1 ? t('community.countFirst', { count: countText, city: homeCity.name }) : countText;
 
   const onPosted = (post, mediaUrls) => {
     for (const [id, u] of Object.entries(mediaUrls)) adoptUrl(id, null, u);
@@ -176,9 +190,7 @@ export default function Community() {
     setUrls((prev) => ({ ...prev, ...mediaUrls }));
     setComposerOpen(false);
     // Show the new post: every kind and city, newest first.
-    setKind('');
-    setCityFilter('');
-    setSort('newest');
+    setFilters({ kind: '', city: '', sort: 'newest' });
     focusAfter.current = `post-${post.id}`;
     say(t('community.posted'));
   };
@@ -244,7 +256,7 @@ export default function Community() {
 
           <div className="cm-listbar">
             <p className="cm-listbar__count" aria-live="polite">
-              {filterCity ? tn('community.countIn', shown.length, { city: filterCity.name }) : tn('community.count', shown.length)}
+              {listCount}
             </p>
             {anyFilter && (
               <button type="button" className="see" onClick={clearFilters}>
@@ -341,12 +353,9 @@ export default function Community() {
         setCityFilter={setCityFilter}
         sort={sortBy}
         setSort={setSort}
-        homeCity={homeCityId ? cityById(homeCityId) : null}
+        homeCity={homeCity}
         count={shown.length}
-        onClear={() => {
-          setCityFilter('');
-          setSort('newest');
-        }}
+        onClear={() => setFilters({ city: '', sort: defaultSort })}
       />
 
       <Composer
@@ -957,12 +966,8 @@ function SendSheet({ post, city, onClose, onDone }) {
   }, [p, city]);
 
   const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(`${p.title}\n\n${p.body}`);
-      onDone(t('community.copied'));
-    } catch {
-      onDone(t('community.copyFailed'));
-    }
+    const ok = await copyText(`${p.title}\n\n${p.body}`);
+    onDone(ok ? t('community.copied') : t('community.copyFailed'));
     onClose();
   };
 

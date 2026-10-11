@@ -49,6 +49,14 @@ export function wasHeard({ envelope, speech }) {
 }
 
 /**
+ * Whether a take counts as practice: saved to the history and marking the Practice step done.
+ * A take where nothing was heard, or one too short to coach (a sound check), does not.
+ */
+export function countsAsPractice(coach) {
+  return Boolean(coach && coach.heard && !(coach.findings || []).some((f) => f.id === 'too_short' || f.id === 'not_heard'));
+}
+
+/**
  * @param {object} input
  * @param {object|null} input.speech  analyzeTranscript() result, or null when there was no transcript
  * @param {object} input.envelope summarizeEnvelope() result

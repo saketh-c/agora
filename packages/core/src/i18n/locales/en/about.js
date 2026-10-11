@@ -22,7 +22,7 @@ export default {
     meetingsSub: 'Every council in {n} cities, on a list and a map',
     prepare: 'Get ready to speak',
     prepareSub: 'Sign up, write your comment, and practice it',
-    community: 'Read tips from other speakers',
+    community: 'Read speaking tips and share yours',
     communitySub: "Checked against each city's rules",
     news: 'Follow local news',
     newsSub: 'Reporting on your topics from local newsrooms',

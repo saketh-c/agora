@@ -1,0 +1,49 @@
+{
+ "value": [
+  {
+   "id": 951,
+   "eventName": "10/12/26 Regular City Council Meeting",
+   "startDateTime": "2026-10-12T13:00:00Z",
+   "agendaId": 721,
+   "categoryName": "City Council",
+   "publishedFiles": [
+    {
+     "fileId": 2409,
+     "type": "Agenda",
+     "publishOn": "2026-10-06T17:08:31.063Z",
+     "name": "10-12-26 Final Agenda"
+    },
+    {
+     "fileId": 2410,
+     "type": "Agenda Packet",
+     "publishOn": "2026-10-06T17:08:31.063Z",
+     "name": "10-12-26 Final Agenda Packet"
+    }
+   ]
+  },
+  {
+   "id": 954,
+   "eventName": "10/26/26 Regular City Council Meeting",
+   "startDateTime": "2026-10-26T14:00:00Z",
+   "agendaId": 730,
+   "categoryName": "City Council",
+   "publishedFiles": []
+  },
+  {
+   "id": 972,
+   "eventName": "11/9/26 2:00 p.m. Regular City Council Meeting",
+   "startDateTime": "2026-11-09T14:00:00Z",
+   "agendaId": 742,
+   "categoryName": "City Council",
+   "publishedFiles": []
+  },
+  {
+   "id": 973,
+   "eventName": "11/9/26 6:00 p.m. Regular City Council Meeting",
+   "startDateTime": "2026-11-09T18:00:00Z",
+   "agendaId": 743,
+   "categoryName": "City Council",
+   "publishedFiles": []
+  }
+ ]
+}

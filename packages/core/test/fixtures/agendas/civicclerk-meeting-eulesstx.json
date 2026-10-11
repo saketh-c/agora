@@ -1,0 +1,240 @@
+{
+ "id": 2186,
+ "items": [
+  {
+   "agendaObjectItemOutlineNumber": "",
+   "agendaObjectItemName": "CALL TO ORDER – CITY HALL – PRECOUNCIL ROOM",
+   "isSection": 1,
+   "childItems": []
+  },
+  {
+   "agendaObjectItemOutlineNumber": "",
+   "agendaObjectItemName": "MAYOR AND CITY COUNCIL REPORTS",
+   "isSection": 1,
+   "childItems": [
+    {
+     "agendaObjectItemOutlineNumber": "",
+     "agendaObjectItemName": "Recent Events and Items of Community Interest",
+     "isSection": 0,
+     "childItems": []
+    }
+   ]
+  },
+  {
+   "agendaObjectItemOutlineNumber": "",
+   "agendaObjectItemName": "CITY MANAGER AND STAFF REPORTS ",
+   "isSection": 1,
+   "childItems": [
+    {
+     "agendaObjectItemOutlineNumber": "",
+     "agendaObjectItemName": "Review Agenda Items &ndash; Chris Barker",
+     "isSection": 0,
+     "childItems": []
+    },
+    {
+     "agendaObjectItemOutlineNumber": "",
+     "agendaObjectItemName": "Public Works Update &ndash; Major Jones",
+     "isSection": 0,
+     "childItems": []
+    },
+    {
+     "agendaObjectItemOutlineNumber": "",
+     "agendaObjectItemName": "Pavement Condition Index &ndash; Major Jones",
+     "isSection": 0,
+     "childItems": []
+    },
+    {
+     "agendaObjectItemOutlineNumber": "",
+     "agendaObjectItemName": "Chapter 40 \"Gas Drilling and Production\" -  Reagan Rothenberger",
+     "isSection": 0,
+     "childItems": []
+    },
+    {
+     "agendaObjectItemOutlineNumber": "",
+     "agendaObjectItemName": "Finance Update – Ross Fairclo",
+     "isSection": 0,
+     "childItems": []
+    },
+    {
+     "agendaObjectItemOutlineNumber": "",
+     "agendaObjectItemName": "Capital Projects Update &ndash; Chris Barker",
+     "isSection": 0,
+     "childItems": []
+    },
+    {
+     "agendaObjectItemOutlineNumber": "",
+     "agendaObjectItemName": "Transportation Update &ndash; Chris Barker",
+     "isSection": 0,
+     "childItems": []
+    }
+   ]
+  },
+  {
+   "agendaObjectItemOutlineNumber": "",
+   "agendaObjectItemName": "CLOSED SESSION – Deliberation authorized by the Texas Government Code:",
+   "isSection": 1,
+   "childItems": [
+    {
+     "agendaObjectItemOutlineNumber": "",
+     "agendaObjectItemName": "Concerning personnel matters as authorized by Section 551.074 related to:<ul style=\"list-style-type: square;\" data-pasted=\"true\"><li>Civil Service Commission, Crime Control and Prevention District, Euless Development Corporation, Planning and Zoning Commission, and Zoning Board of Adjustment</li></ul>Seek legal advice from the City Attorney as authorized by Section 551.071 related to pending or contemplated litigation:<ul><li>Comichi v Pethel</li></ul>Deliberate the purchase, exchange, lease or value of real property as authorized by Section 551.072 related to:<ul><li>Midway Park Addition</li></ul>",
+     "isSection": 0,
+     "childItems": []
+    }
+   ]
+  },
+  {
+   "agendaObjectItemOutlineNumber": "",
+   "agendaObjectItemName": "COUNCIL CONSIDERATION OF SCHEDULED ITEMS IN COUNCIL CHAMBERS (REGULAR SESSION) ",
+   "isSection": 1,
+   "childItems": []
+  },
+  {
+   "agendaObjectItemOutlineNumber": "",
+   "agendaObjectItemName": "INVOCATION ",
+   "isSection": 1,
+   "childItems": []
+  },
+  {
+   "agendaObjectItemOutlineNumber": "",
+   "agendaObjectItemName": "PLEDGES OF ALLEGIANCE ",
+   "isSection": 1,
+   "childItems": [
+    {
+     "agendaObjectItemOutlineNumber": "1.",
+     "agendaObjectItemName": "<strong>PRESENTATION OF PROCLAMATION</strong><br>Proclaiming October as Community Planning Month.",
+     "isSection": 0,
+     "childItems": []
+    },
+    {
+     "agendaObjectItemOutlineNumber": "2.",
+     "agendaObjectItemName": "<strong>PRESENTATION OF EMPLOYEE SERVICE PINS</strong><br>5 Year Pin – Wesley Scott, Mechanic II, Fleet & Facilities<br>15 Year Pin – Mollie Myers, Library Services Supervisor, Mary Lib Saleh Euless Public Library",
+     "isSection": 0,
+     "childItems": []
+    }
+   ]
+  },
+  {
+   "agendaObjectItemOutlineNumber": "",
+   "agendaObjectItemName": "CONSENT AGENDA",
+   "isSection": 1,
+   "childItems": [
+    {
+     "agendaObjectItemOutlineNumber": "3.",
+     "agendaObjectItemName": "<strong>CONSIDER AUTHORIZING THE PURCHASE OF CONSTRUCTION MATERIAL TESTING</strong><br>From CMJ Engineering through Tarrant County RFQ No. 2022-098.",
+     "isSection": 0,
+     "childItems": []
+    },
+    {
+     "agendaObjectItemOutlineNumber": "4.",
+     "agendaObjectItemName": "<strong>CONSIDER APPROVAL OF A CONTRACT</strong><br>With Garland/DBS, Inc. through the Region 4 Education Service Center (ESC)/OMNIA Partners for roofing products, services, and job order contracting.",
+     "isSection": 0,
+     "childItems": []
+    },
+    {
+     "agendaObjectItemOutlineNumber": "5.",
+     "agendaObjectItemName": "<strong>CONSIDER AUTHORIZING THE CITY MANAGER TO EXECUTE A CONTRACT</strong><br>With GEO Surfaces for the purchase and installation of replacement artificial sports turf at the Parks at Texas Star South through the BuyBoard Purchasing Cooperative.",
+     "isSection": 0,
+     "childItems": []
+    },
+    {
+     "agendaObjectItemOutlineNumber": "6.",
+     "agendaObjectItemName": "<strong>CONSIDER AUTHORIZING THE PURCHASE OF DIGITAL LIBRARY MATERIALS</strong><br>From sole source vendor, Midwest Tape, LLC.",
+     "isSection": 0,
+     "childItems": []
+    },
+    {
+     "agendaObjectItemOutlineNumber": "7.",
+     "agendaObjectItemName": "<strong>CONSIDER AUTHORIZING THE PURCHASE OF DIGITAL LIBRARY MATERIALS</strong><br>From sole source vendor, OCLC, Inc.",
+     "isSection": 0,
+     "childItems": []
+    },
+    {
+     "agendaObjectItemOutlineNumber": "8.",
+     "agendaObjectItemName": "<strong>CONSIDER AUTHORIZING PURCHASE OF RIFLE RESISTANT BODY ARMOR PROGRAM EQUIPMENT  </strong><br>For Police Department personnel from GT Distributors, Inc. through the Buyboard Purchasing Cooperative.",
+     "isSection": 0,
+     "childItems": []
+    },
+    {
+     "agendaObjectItemOutlineNumber": "9.",
+     "agendaObjectItemName": "<strong>CONSIDER AUTHORIZING THE CITY MANAGER TO EXECUTE A CONTRACT </strong><br>With BSN Sports for the replacement of chain link backstops at the Parks at Texas Star South.",
+     "isSection": 0,
+     "childItems": []
+    },
+    {
+     "agendaObjectItemOutlineNumber": "10.",
+     "agendaObjectItemName": "<strong>CONSIDER APPROVAL OF CITY COUNCIL MINUTES</strong><br>Regular Meeting of September 22, 2026",
+     "isSection": 0,
+     "childItems": []
+    }
+   ]
+  },
+  {
+   "agendaObjectItemOutlineNumber": "",
+   "agendaObjectItemName": "REGULAR AGENDA",
+   "isSection": 1,
+   "childItems": [
+    {
+     "agendaObjectItemOutlineNumber": "11.",
+     "agendaObjectItemName": "<strong>HOLD A PUBLIC HEARING FOR SPECIFIC USE PERMIT CASE NO. 26-08-SUP AND CONSIDER APPROVAL OF ORDINANCE NO. 2466</strong><br>Receive public input regarding the request for a Specific Use Permit (SUP) to continue operating Motel 6 at Municipal Service Company of Texas Addition, Tract A-R at 110 W. Airport Freeway in the Community Business (C-2) zoning district, and consider a recommendation for approval of an Ordinance.",
+     "isSection": 0,
+     "childItems": []
+    },
+    {
+     "agendaObjectItemOutlineNumber": "12.",
+     "agendaObjectItemName": "<strong>HOLD A PUBLIC HEARING FOR SPECIFIC USE PERMIT NO. 26-09-SUP <strong data-pasted=\"true\">AND CONSIDER APPROVAL OF ORDINANCE NO. 2467</strong></strong><br>Receive public input regarding the request for a Specific Use Permit (SUP) for continued Auto Body Repair at SW Mills Addition, Block 2, Lots 4R & 5R located at 605 & 607 W. Euless Boulevard in the Texas Highway 10 Multi-Use (TX-10) zoning district, and consider recommendation for an Ordinance.",
+     "isSection": 0,
+     "childItems": []
+    },
+    {
+     "agendaObjectItemOutlineNumber": "13.",
+     "agendaObjectItemName": "<strong>HOLD A PUBLIC HEARING FOR SPECIFIC USE PERMIT CASE NO. 26-10-SUP <strong data-pasted=\"true\">AND CONSIDER APPROVAL OF ORDINANCE NO. 2468</strong></strong><br>Receive public input regarding the request for a Specific Use Permit (SUP) for a Place of Worship at Harwood / 360 Addition, Block A, Lot 1 at 901 E. Harwood Road, Suite 300 in the Community Business (C-2) zoning district, and consider recommendation for an Ordinance.",
+     "isSection": 0,
+     "childItems": []
+    },
+    {
+     "agendaObjectItemOutlineNumber": "14.",
+     "agendaObjectItemName": "<strong>PUBLIC COMMENTS</strong>",
+     "isSection": 0,
+     "childItems": []
+    },
+    {
+     "agendaObjectItemOutlineNumber": "15.",
+     "agendaObjectItemName": "<strong>REPORTS</strong>",
+     "isSection": 0,
+     "childItems": [
+      {
+       "agendaObjectItemOutlineNumber": "a.",
+       "agendaObjectItemName": "Staff Report",
+       "isSection": 0,
+       "childItems": []
+      },
+      {
+       "agendaObjectItemOutlineNumber": "b.",
+       "agendaObjectItemName": "City Attorney",
+       "isSection": 0,
+       "childItems": []
+      },
+      {
+       "agendaObjectItemOutlineNumber": "c.",
+       "agendaObjectItemName": "City Manager",
+       "isSection": 0,
+       "childItems": []
+      },
+      {
+       "agendaObjectItemOutlineNumber": "d.",
+       "agendaObjectItemName": "City Council<br>-Recent Events and Items of Community Interest",
+       "isSection": 0,
+       "childItems": []
+      }
+     ]
+    },
+    {
+     "agendaObjectItemOutlineNumber": "16.",
+     "agendaObjectItemName": "<strong>ADJOURN</strong>",
+     "isSection": 0,
+     "childItems": []
+    }
+   ]
+  }
+ ]
+}

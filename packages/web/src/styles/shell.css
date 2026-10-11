@@ -111,3 +111,21 @@ html.shot-full .tabbar { position: absolute; }
 .page-error { padding-top: var(--s7); max-width: 640px; }
 .page-error .empty { margin-top: var(--s5); }
 .page-error__detail { margin-top: var(--s4); font-size: 12px; line-height: 16px; color: var(--muted); overflow-wrap: anywhere; }
+
+/* ---------- New version ready (UpdatePrompt) ----------
+   A toast above the tab bar, like the pages' own; it stays until refreshed or dismissed. */
+.update {
+  position: fixed; left: 0; right: 0; z-index: calc(var(--z-tabbar) + 1);
+  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + var(--s3));
+  display: flex; justify-content: center; padding: 0 var(--gutter); pointer-events: none;
+}
+.update__toast { pointer-events: auto; max-width: 560px; gap: var(--s2); padding-right: var(--s1); animation: update-in var(--d3) var(--ease-in); }
+.update__toast > .icon { margin-right: var(--s1); }
+.update__text { flex: 1 1 auto; min-width: 0; }
+.update__toast .btn { flex: none; }
+.update__x { color: var(--card); }
+@media (hover: hover) { .update__x:hover { background: rgb(255 255 255 / .12); } }
+@keyframes update-in { from { opacity: 0; transform: translateY(8px); } }
+@media (min-width: 1024px) { .update { bottom: var(--s6); } }
+/* "Skip to content" focuses the whole page column; a ring around all of it is noise. */
+#main:focus { outline: none; }

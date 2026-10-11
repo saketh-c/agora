@@ -1,0 +1,75 @@
+{
+ "value": [
+  {
+   "id": 5084,
+   "eventName": "Joint Town Council and Environmental Conservation Commission Work Session",
+   "startDateTime": "2026-10-15T18:00:00Z",
+   "agendaId": 7510,
+   "categoryName": "Town Council",
+   "publishedFiles": [
+    {
+     "fileId": 5522,
+     "type": "Agenda",
+     "publishOn": "2026-10-09T14:15:07.9Z",
+     "name": "Agenda 10.15.26"
+    }
+   ]
+  },
+  {
+   "id": 4933,
+   "eventName": "Town Council Meeting",
+   "startDateTime": "2026-10-19T18:00:00Z",
+   "agendaId": 7499,
+   "categoryName": "Town Council",
+   "publishedFiles": []
+  },
+  {
+   "id": 5113,
+   "eventName": "Town Council Meeting",
+   "startDateTime": "2026-11-02T18:00:00Z",
+   "agendaId": 7500,
+   "categoryName": "Town Council",
+   "publishedFiles": []
+  },
+  {
+   "id": 4947,
+   "eventName": "Town Council Meeting",
+   "startDateTime": "2026-11-16T18:00:00Z",
+   "agendaId": 7517,
+   "categoryName": "Town Council",
+   "publishedFiles": []
+  },
+  {
+   "id": 5073,
+   "eventName": "Town Council Work Session",
+   "startDateTime": "2026-11-19T18:00:00Z",
+   "agendaId": 7518,
+   "categoryName": "Town Council",
+   "publishedFiles": []
+  },
+  {
+   "id": 5114,
+   "eventName": "Town Council Meeting",
+   "startDateTime": "2026-12-07T18:00:00Z",
+   "agendaId": 7519,
+   "categoryName": "Town Council",
+   "publishedFiles": []
+  },
+  {
+   "id": 5086,
+   "eventName": "Town Council Work Session",
+   "startDateTime": "2026-12-17T18:00:00Z",
+   "agendaId": 0,
+   "categoryName": "Town Council",
+   "publishedFiles": []
+  },
+  {
+   "id": 4948,
+   "eventName": "CANCELED - Town Council Meeting",
+   "startDateTime": "2026-12-21T18:00:00Z",
+   "agendaId": 0,
+   "categoryName": "Town Council",
+   "publishedFiles": []
+  }
+ ]
+}

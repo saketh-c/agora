@@ -93,6 +93,7 @@
       "ages": "Middle and high school students volunteer as jurors and attorneys; the program handles defendants ages 12 to 19",
       "description": "Joint Grapevine, Southlake, Colleyville and Keller program in which juvenile Class C misdemeanor defendants work off citations through community service; cases are argued by volunteer teen attorneys before a jury of volunteers from local secondary schools and returning former defendants, giving students hands-on experience with the justice system.",
       "applyWindow": "Rolling; register as a volunteer through the City of Southlake volunteer website, then email Teen Court staff once approved (the Grapevine page directs questions to the Teen Court coordinator at 817-748-8346). A volunteer waitlist was in place as of September 2026.",
+      "applyStatus": "rolling",
       "source": "https://www.grapevinetexas.gov/329/Metroport-Teen-Court"
     },
     {
@@ -101,6 +102,7 @@
       "ages": "Adult appointees (one Council Member and two at-large representatives per city, three-year terms)",
       "description": "Twelve-member advisory board representing Grapevine, Southlake, Colleyville and Keller that advises Teen Court on the alternative judicial process; it meets every other month on the first Monday at 5:30 p.m. at Southlake DPS Headquarters, 600 State Street, Southlake. It is not a youth-seat body but is the governance link between Council and the teen program.",
       "applyWindow": "City board application process; contact Teen Court at 817-748-8346",
+      "applyStatus": "unknown",
       "source": "https://www.grapevinetexas.gov/558/Metroport-Teen-Court-Advisory-Board"
     }
   ],

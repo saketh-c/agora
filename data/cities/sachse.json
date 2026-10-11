@@ -88,10 +88,12 @@
       "ages": "Sachse residents in high school grades 9-12",
       "description": "Two non-voting youth advisor seats on the Parks & Recreation Board; advisors join discussions, evaluate issues relevant to youth and make recommendations to the board. One seat is currently vacant (term expiring 2027); the other seat's term expires in 2026.",
       "applyWindow": "Applications are being accepted now on a rolling basis; return the Youth Advisor Application (with parent or guardian waiver for minors) to the City Secretary's Office, 3815 Sachse Rd., Building B, or call 469-429-4773",
+      "applyStatus": "rolling",
       "source": "https://www.cityofsachse.com/DocumentCenter/View/2621"
     },
     {
       "name": "Teen R.I.S.E. (Responsibility, Integrity, Success, and Empowerment)",
+      "applyStatus": "unknown",
       "url": "https://www.cityofsachse.com/837/Teen-RISE",
       "ages": "12-17",
       "description": "Parks & Recreation program where teens socialize, learn life skills and volunteer (board game and crochet night, decorating at Oxford Glen Memory Care, Heritage Park clean-up). Not a governance board, but a city-run youth service program; register online by activity number.",

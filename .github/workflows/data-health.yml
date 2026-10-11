@@ -1,0 +1,42 @@
+name: Data health
+
+# Once a week, list what in the curated city data needs a person's attention before it goes
+# stale: meeting calendars that end within 45 days, youth program application windows that
+# have passed, official pages and news feeds that stopped answering, and agenda sources that
+# failed in the deployed snapshot. scripts/data-health.mjs keeps one issue titled
+# "Data health" up to date with that list (and closes it when everything is clear). It never
+# fails the run: a check that cannot finish says so in the issue instead.
+
+on:
+  schedule:
+    # Mondays at 8:41 AM Central (13:41 UTC in daylight time), early in the week.
+    - cron: '41 13 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: data-health
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Check calendars, youth programs, links and agenda sources
+        run: node scripts/data-health.mjs
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

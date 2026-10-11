@@ -6,7 +6,8 @@ import { BrowserRouter } from 'react-router-dom';
 import '@fontsource-variable/mona-sans/wdth.css';
 import '@fontsource-variable/public-sans/wght.css';
 import './styles/index.css';
-import { StoreProvider } from './lib/store.jsx';
+import { loadLocale } from '@agora/core';
+import { StoreProvider, initialLang } from './lib/store.jsx';
 import { reloadOnce } from './lib/recover.js';
 import App from './App.jsx';
 
@@ -21,12 +22,16 @@ window.addEventListener('vite:preloadError', () => {
 // Strip the trailing slash so the router treats "/agora/" and "/" the same way.
 const basename = import.meta.env.BASE_URL.replace(/\/$/, '');
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <BrowserRouter basename={basename}>
-      <StoreProvider>
-        <App />
-      </StoreProvider>
-    </BrowserRouter>
-  </StrictMode>,
-);
+// The first language's dictionary comes before the first render (English is built in; the
+// others are small chunks, fetched once), so the app never flashes in English first.
+loadLocale(initialLang()).finally(() => {
+  createRoot(document.getElementById('root')).render(
+    <StrictMode>
+      <BrowserRouter basename={basename}>
+        <StoreProvider>
+          <App />
+        </StoreProvider>
+      </BrowserRouter>
+    </StrictMode>,
+  );
+});

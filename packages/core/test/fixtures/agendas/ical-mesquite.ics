@@ -1,0 +1,685 @@
+BEGIN:VCALENDAR
+PRODID:iCalendar-Ruby
+VERSION:2.0
+X-WR-TIMEZONE:America/Chicago
+BEGIN:VTIMEZONE
+TZID:America/Chicago
+X-LIC-LOCATION:America/Chicago
+BEGIN:STANDARD
+DTSTART:20241103T020000
+RRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11
+TZNAME:CST
+TZOFFSETFROM:-0500
+TZOFFSETTO:-0600
+END:STANDARD
+BEGIN:DAYLIGHT
+DTSTART:20250309T020000
+RRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3
+TZNAME:CDT
+TZOFFSETFROM:-0600
+TZOFFSETTO:-0500
+END:DAYLIGHT
+END:VTIMEZONE
+BEGIN:VEVENT
+DESCRIPTION:City Council meetings are held on the first and third Monday of
+  each month. The meetings are re-scheduled to the next Tuesday when it con
+ flicts with a City holiday that falls on a Monday meeting date. The start 
+ time is published once the agenda is finalized and posted online. Per Stat
+ e law\, agendas are posted at least three business days prior to the date 
+ of the meeting. Residents may sign-up through the “Mesquite Messenger”
+  function on the City’s website to receive email notification when a new
+  City Council agenda is posted. https://www.cityofmesquite.com/calendar.as
+ px?EID=11929
+DTEND;TZID=America/Chicago:20271220T235900
+DTSTAMP;TZID=America/Chicago:20260930T115243
+DTSTART;TZID=America/Chicago:20271220T190000
+LAST-MODIFIED;TZID=America/Chicago:20260930T115243
+LOCATION:<p><span style='font-size:15px\;font-family:"Times New Roman"\,ser
+ if\;' data-pasted="true">City Hall | City Council Chamber</span></p> - 757
+  N. Galloway Avenue  Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:December 20\, 2027\, City Council Meeting 
+UID:11929
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:City Council meetings are held on the first and third Monday of
+  each month. The meetings are re-scheduled to the next Tuesday when it con
+ flicts with a City holiday that falls on a Monday meeting date. The start 
+ time is published once the agenda is finalized and posted online. Per Stat
+ e law\, agendas are posted at least three business days prior to the date 
+ of the meeting. Residents may sign-up through the “Mesquite Messenger”
+  function on the City’s website to receive email notification when a new
+  City Council agenda is posted. https://www.cityofmesquite.com/calendar.as
+ px?EID=11928
+DTEND;TZID=America/Chicago:20271206T235900
+DTSTAMP;TZID=America/Chicago:20260930T115107
+DTSTART;TZID=America/Chicago:20271206T190000
+LAST-MODIFIED;TZID=America/Chicago:20260930T115107
+LOCATION:<p><span style='font-size:15px\;font-family:"Times New Roman"\,ser
+ if\;' data-pasted="true">City Hall | City Council Chamber</span></p> - 757
+  N. Galloway Avenue  Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:December 6\, 2027\, City Council Meeting 
+UID:11928
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:City Council meetings are held on the first and third Monday of
+  each month. The meetings are re-scheduled to the next Tuesday when it con
+ flicts with a City holiday that falls on a Monday meeting date. The start 
+ time is published once the agenda is finalized and posted online. Per Stat
+ e law\, agendas are posted at least three business days prior to the date 
+ of the meeting. Residents may sign-up through the “Mesquite Messenger”
+  function on the City’s website to receive email notification when a new
+  City Council agenda is posted. https://www.cityofmesquite.com/calendar.as
+ px?EID=11927
+DTEND;TZID=America/Chicago:20271115T235900
+DTSTAMP;TZID=America/Chicago:20260930T114914
+DTSTART;TZID=America/Chicago:20271115T190000
+LAST-MODIFIED;TZID=America/Chicago:20260930T114914
+LOCATION:<p><span style='font-size:15px\;font-family:"Times New Roman"\,ser
+ if\;' data-pasted="true">City Hall | City Council Chamber</span></p> - 757
+  N. Galloway Avenue  Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:January 4\, 2027\, City Council Meeting 
+UID:11927
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:City Council meetings are held on the first and third Monday of
+  each month. The meetings are re-scheduled to the next Tuesday when it con
+ flicts with a City holiday that falls on a Monday meeting date. The start 
+ time is published once the agenda is finalized and posted online. Per Stat
+ e law\, agendas are posted at least three business days prior to the date 
+ of the meeting. Residents may sign-up through the “Mesquite Messenger”
+  function on the City’s website to receive email notification when a new
+  City Council agenda is posted. https://www.cityofmesquite.com/calendar.as
+ px?EID=11926
+DTEND;TZID=America/Chicago:20271101T235900
+DTSTAMP;TZID=America/Chicago:20260930T114753
+DTSTART;TZID=America/Chicago:20271101T190000
+LAST-MODIFIED;TZID=America/Chicago:20260930T114753
+LOCATION:<p><span style='font-size:15px\;font-family:"Times New Roman"\,ser
+ if\;' data-pasted="true">City Hall | City Council Chamber</span></p> - 757
+  N. Galloway Avenue  Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:November 1\, 2027\, City Council Meeting 
+UID:11926
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:City Council meetings are held on the first and third Monday of
+  each month. The meetings are re-scheduled to the next Tuesday when it con
+ flicts with a City holiday that falls on a Monday meeting date. The start 
+ time is published once the agenda is finalized and posted online. Per Stat
+ e law\, agendas are posted at least three business days prior to the date 
+ of the meeting. Residents may sign-up through the “Mesquite Messenger”
+  function on the City’s website to receive email notification when a new
+  City Council agenda is posted. https://www.cityofmesquite.com/calendar.as
+ px?EID=11925
+DTEND;TZID=America/Chicago:20271018T235900
+DTSTAMP;TZID=America/Chicago:20260930T114611
+DTSTART;TZID=America/Chicago:20271018T190000
+LAST-MODIFIED;TZID=America/Chicago:20260930T114611
+LOCATION:<p><span style='font-size:15px\;font-family:"Times New Roman"\,ser
+ if\;' data-pasted="true">City Hall | City Council Chamber</span></p> - 757
+  N. Galloway Avenue  Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:October 18\, 2027\, City Council Meeting 
+UID:11925
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:City Council meetings are held on the first and third Monday of
+  each month. The meetings are re-scheduled to the next Tuesday when it con
+ flicts with a City holiday that falls on a Monday meeting date. The start 
+ time is published once the agenda is finalized and posted online. Per Stat
+ e law\, agendas are posted at least three business days prior to the date 
+ of the meeting. Residents may sign-up through the “Mesquite Messenger”
+  function on the City’s website to receive email notification when a new
+  City Council agenda is posted. https://www.cityofmesquite.com/calendar.as
+ px?EID=11924
+DTEND;TZID=America/Chicago:20271004T235900
+DTSTAMP;TZID=America/Chicago:20260930T114438
+DTSTART;TZID=America/Chicago:20271004T190000
+LAST-MODIFIED;TZID=America/Chicago:20260930T114438
+LOCATION:<p><span style='font-size:15px\;font-family:"Times New Roman"\,ser
+ if\;' data-pasted="true">City Hall | City Council Chamber</span></p> - 757
+  N. Galloway Avenue  Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:October 4\, 2027\, City Council Meeting 
+UID:11924
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:City Council meetings are held on the first and third Monday of
+  each month. The meetings are re-scheduled to the next Tuesday when it con
+ flicts with a City holiday that falls on a Monday meeting date. The start 
+ time is published once the agenda is finalized and posted online. Per Stat
+ e law\, agendas are posted at least three business days prior to the date 
+ of the meeting. Residents may sign-up through the “Mesquite Messenger”
+  function on the City’s website to receive email notification when a new
+  City Council agenda is posted. https://www.cityofmesquite.com/calendar.as
+ px?EID=11923
+DTEND;TZID=America/Chicago:20270920T235900
+DTSTAMP;TZID=America/Chicago:20260930T114220
+DTSTART;TZID=America/Chicago:20270920T190000
+LAST-MODIFIED;TZID=America/Chicago:20260930T114220
+LOCATION:<p><span style='font-size:15px\;font-family:"Times New Roman"\,ser
+ if\;' data-pasted="true">City Hall | City Council Chamber</span></p> - 757
+  N. Galloway Avenue  Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:September 20\, 2027\, City Council Meeting 
+UID:11923
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:City Council meetings are held on the first and third Monday of
+  each month. The meetings are re-scheduled to the next Tuesday when it con
+ flicts with a City holiday that falls on a Monday meeting date. The start 
+ time is published once the agenda is finalized and posted online. Per Stat
+ e law\, agendas are posted at least three business days prior to the date 
+ of the meeting. Residents may sign-up through the “Mesquite Messenger”
+  function on the City’s website to receive email notification when a new
+  City Council agenda is posted. https://www.cityofmesquite.com/calendar.as
+ px?EID=11922
+DTEND;TZID=America/Chicago:20270907T235900
+DTSTAMP;TZID=America/Chicago:20260930T112211
+DTSTART;TZID=America/Chicago:20270907T190000
+LAST-MODIFIED;TZID=America/Chicago:20260930T112211
+LOCATION:<p><span style='font-size:15px\;font-family:"Times New Roman"\,ser
+ if\;' data-pasted="true">City Hall | City Council Chamber</span></p> - 757
+  N. Galloway Avenue  Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:September 7\, 2027\, City Council Meeting 
+UID:11922
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:City Council meetings are held on the first and third Monday of
+  each month. The meetings are re-scheduled to the next Tuesday when it con
+ flicts with a City holiday that falls on a Monday meeting date. The start 
+ time is published once the agenda is finalized and posted online. Per Stat
+ e law\, agendas are posted at least three business days prior to the date 
+ of the meeting. Residents may sign-up through the “Mesquite Messenger”
+  function on the City’s website to receive email notification when a new
+  City Council agenda is posted. https://www.cityofmesquite.com/calendar.as
+ px?EID=11921
+DTEND;TZID=America/Chicago:20270816T235900
+DTSTAMP;TZID=America/Chicago:20260930T111432
+DTSTART;TZID=America/Chicago:20270816T190000
+LAST-MODIFIED;TZID=America/Chicago:20260930T111432
+LOCATION:<p><span style='font-size:15px\;font-family:"Times New Roman"\,ser
+ if\;' data-pasted="true">City Hall | City Council Chamber</span></p> - 757
+  N. Galloway Avenue  Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:August 16\, 2027\, City Council Meeting 
+UID:11921
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:City Council meetings are held on the first and third Monday of
+  each month. The meetings are re-scheduled to the next Tuesday when it con
+ flicts with a City holiday that falls on a Monday meeting date. The start 
+ time is published once the agenda is finalized and posted online. Per Stat
+ e law\, agendas are posted at least three business days prior to the date 
+ of the meeting. Residents may sign-up through the “Mesquite Messenger”
+  function on the City’s website to receive email notification when a new
+  City Council agenda is posted. https://www.cityofmesquite.com/calendar.as
+ px?EID=11920
+DTEND;TZID=America/Chicago:20270802T235900
+DTSTAMP;TZID=America/Chicago:20260930T110804
+DTSTART;TZID=America/Chicago:20270802T190000
+LAST-MODIFIED;TZID=America/Chicago:20260930T110804
+LOCATION:<p><span style='font-size:15px\;font-family:"Times New Roman"\,ser
+ if\;' data-pasted="true">City Hall | City Council Chamber</span></p> - 757
+  N. Galloway Avenue  Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:August 2\, 2027\, City Council Meeting 
+UID:11920
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:City Council meetings are held on the first and third Monday of
+  each month. The meetings are re-scheduled to the next Tuesday when it con
+ flicts with a City holiday that falls on a Monday meeting date. The start 
+ time is published once the agenda is finalized and posted online. Per Stat
+ e law\, agendas are posted at least three business days prior to the date 
+ of the meeting. Residents may sign-up through the “Mesquite Messenger”
+  function on the City’s website to receive email notification when a new
+  City Council agenda is posted. https://www.cityofmesquite.com/calendar.as
+ px?EID=11919
+DTEND;TZID=America/Chicago:20270719T235900
+DTSTAMP;TZID=America/Chicago:20260930T110534
+DTSTART;TZID=America/Chicago:20270719T190000
+LAST-MODIFIED;TZID=America/Chicago:20260930T110534
+LOCATION:<p><span style='font-size:15px\;font-family:"Times New Roman"\,ser
+ if\;' data-pasted="true">City Hall | City Council Chamber</span></p> - 757
+  N. Galloway Avenue  Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:July 19\, 2027\, City Council Meeting 
+UID:11919
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:City Council meetings are held on the first and third Monday of
+  each month. The meetings are re-scheduled to the next Tuesday when it con
+ flicts with a City holiday that falls on a Monday meeting date. The start 
+ time is published once the agenda is finalized and posted online. Per Stat
+ e law\, agendas are posted at least three business days prior to the date 
+ of the meeting. Residents may sign-up through the “Mesquite Messenger”
+  function on the City’s website to receive email notification when a new
+  City Council agenda is posted. https://www.cityofmesquite.com/calendar.as
+ px?EID=11918
+DTEND;TZID=America/Chicago:20270706T235900
+DTSTAMP;TZID=America/Chicago:20260930T110340
+DTSTART;TZID=America/Chicago:20270706T190000
+LAST-MODIFIED;TZID=America/Chicago:20260930T110340
+LOCATION:<p><span style='font-size:15px\;font-family:"Times New Roman"\,ser
+ if\;' data-pasted="true">City Hall | City Council Chamber</span></p> - 757
+  N. Galloway Avenue  Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:July 6\, 2027\, City Council Meeting 
+UID:11918
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:City Council meetings are held on the first and third Monday of
+  each month. The meetings are re-scheduled to the next Tuesday when it con
+ flicts with a City holiday that falls on a Monday meeting date. The start 
+ time is published once the agenda is finalized and posted online. Per Stat
+ e law\, agendas are posted at least three business days prior to the date 
+ of the meeting. Residents may sign-up through the “Mesquite Messenger”
+  function on the City’s website to receive email notification when a new
+  City Council agenda is posted. https://www.cityofmesquite.com/calendar.as
+ px?EID=11917
+DTEND;TZID=America/Chicago:20270621T235900
+DTSTAMP;TZID=America/Chicago:20260930T110205
+DTSTART;TZID=America/Chicago:20270621T190000
+LAST-MODIFIED;TZID=America/Chicago:20260930T110205
+LOCATION:<p><span style='font-size:15px\;font-family:"Times New Roman"\,ser
+ if\;' data-pasted="true">City Hall | City Council Chamber</span></p> - 757
+  N. Galloway Avenue  Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:June 21\, 2027\, City Council Meeting 
+UID:11917
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:City Council meetings are held on the first and third Monday of
+  each month. The meetings are re-scheduled to the next Tuesday when it con
+ flicts with a City holiday that falls on a Monday meeting date. The start 
+ time is published once the agenda is finalized and posted online. Per Stat
+ e law\, agendas are posted at least three business days prior to the date 
+ of the meeting. Residents may sign-up through the “Mesquite Messenger”
+  function on the City’s website to receive email notification when a new
+  City Council agenda is posted. https://www.cityofmesquite.com/calendar.as
+ px?EID=11916
+DTEND;TZID=America/Chicago:20270607T235900
+DTSTAMP;TZID=America/Chicago:20260930T105954
+DTSTART;TZID=America/Chicago:20270607T190000
+LAST-MODIFIED;TZID=America/Chicago:20260930T105954
+LOCATION:<p><span style='font-size:15px\;font-family:"Times New Roman"\,ser
+ if\;' data-pasted="true">City Hall | City Council Chamber</span></p> - 757
+  N. Galloway Avenue  Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:June 7\, 2027\, City Council Meeting 
+UID:11916
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:City Council meetings are held on the first and third Monday of
+  each month. The meetings are re-scheduled to the next Tuesday when it con
+ flicts with a City holiday that falls on a Monday meeting date. The start 
+ time is published once the agenda is finalized and posted online. Per Stat
+ e law\, agendas are posted at least three business days prior to the date 
+ of the meeting. Residents may sign-up through the “Mesquite Messenger”
+  function on the City’s website to receive email notification when a new
+  City Council agenda is posted. https://www.cityofmesquite.com/calendar.as
+ px?EID=11915
+DTEND;TZID=America/Chicago:20270517T235900
+DTSTAMP;TZID=America/Chicago:20260930T105735
+DTSTART;TZID=America/Chicago:20270517T190000
+LAST-MODIFIED;TZID=America/Chicago:20260930T105735
+LOCATION:<p><span style='font-size:15px\;font-family:"Times New Roman"\,ser
+ if\;' data-pasted="true">City Hall | City Council Chamber</span></p> - 757
+  N. Galloway Avenue  Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:May 17\, 2027\, City Council Meeting 
+UID:11915
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:City Council meetings are held on the first and third Monday of
+  each month. The meetings are re-scheduled to the next Tuesday when it con
+ flicts with a City holiday that falls on a Monday meeting date. The start 
+ time is published once the agenda is finalized and posted online. Per Stat
+ e law\, agendas are posted at least three business days prior to the date 
+ of the meeting. Residents may sign-up through the “Mesquite Messenger”
+  function on the City’s website to receive email notification when a new
+  City Council agenda is posted. https://www.cityofmesquite.com/calendar.as
+ px?EID=11914
+DTEND;TZID=America/Chicago:20270503T235900
+DTSTAMP;TZID=America/Chicago:20260930T104218
+DTSTART;TZID=America/Chicago:20270503T190000
+LAST-MODIFIED;TZID=America/Chicago:20260930T104218
+LOCATION:<p><span style='font-size:15px\;font-family:"Times New Roman"\,ser
+ if\;' data-pasted="true">City Hall | City Council Chamber</span></p> - 757
+  N. Galloway Avenue  Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:May 3\, 2027\, City Council Meeting 
+UID:11914
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:City Council meetings are held on the first and third Monday of
+  each month. The meetings are re-scheduled to the next Tuesday when it con
+ flicts with a City holiday that falls on a Monday meeting date. The start 
+ time is published once the agenda is finalized and posted online. Per Stat
+ e law\, agendas are posted at least three business days prior to the date 
+ of the meeting. Residents may sign-up through the “Mesquite Messenger”
+  function on the City’s website to receive email notification when a new
+  City Council agenda is posted. https://www.cityofmesquite.com/calendar.as
+ px?EID=11913
+DTEND;TZID=America/Chicago:20270419T235900
+DTSTAMP;TZID=America/Chicago:20260930T103044
+DTSTART;TZID=America/Chicago:20270419T190000
+LAST-MODIFIED;TZID=America/Chicago:20260930T103044
+LOCATION:<p><span style='font-size:15px\;font-family:"Times New Roman"\,ser
+ if\;' data-pasted="true">City Hall | City Council Chamber</span></p> - 757
+  N. Galloway Avenue  Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:April 19\, 2027\, City Council Meeting 
+UID:11913
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:City Council meetings are held on the first and third Monday of
+  each month. The meetings are re-scheduled to the next Tuesday when it con
+ flicts with a City holiday that falls on a Monday meeting date. The start 
+ time is published once the agenda is finalized and posted online. Per Stat
+ e law\, agendas are posted at least three business days prior to the date 
+ of the meeting. Residents may sign-up through the “Mesquite Messenger”
+  function on the City’s website to receive email notification when a new
+  City Council agenda is posted. https://www.cityofmesquite.com/calendar.as
+ px?EID=11912
+DTEND;TZID=America/Chicago:20270405T235900
+DTSTAMP;TZID=America/Chicago:20260930T102913
+DTSTART;TZID=America/Chicago:20270405T190000
+LAST-MODIFIED;TZID=America/Chicago:20260930T102913
+LOCATION:<p><span style='font-size:15px\;font-family:"Times New Roman"\,ser
+ if\;' data-pasted="true">City Hall | City Council Chamber</span></p> - 757
+  N. Galloway Avenue  Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:April 5\, 2027\, City Council Meeting 
+UID:11912
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:City Council meetings are held on the first and third Monday of
+  each month. The meetings are re-scheduled to the next Tuesday when it con
+ flicts with a City holiday that falls on a Monday meeting date. The start 
+ time is published once the agenda is finalized and posted online. Per Stat
+ e law\, agendas are posted at least three business days prior to the date 
+ of the meeting. Residents may sign-up through the “Mesquite Messenger”
+  function on the City’s website to receive email notification when a new
+  City Council agenda is posted. https://www.cityofmesquite.com/calendar.as
+ px?EID=11911
+DTEND;TZID=America/Chicago:20270315T235900
+DTSTAMP;TZID=America/Chicago:20260930T102743
+DTSTART;TZID=America/Chicago:20270315T190000
+LAST-MODIFIED;TZID=America/Chicago:20260930T102743
+LOCATION:<p><span style='font-size:15px\;font-family:"Times New Roman"\,ser
+ if\;' data-pasted="true">City Hall | City Council Chamber</span></p> - 757
+  N. Galloway Avenue  Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:March 15\, 2027\, City Council Meeting 
+UID:11911
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:City Council meetings are held on the first and third Monday of
+  each month. The meetings are re-scheduled to the next Tuesday when it con
+ flicts with a City holiday that falls on a Monday meeting date. The start 
+ time is published once the agenda is finalized and posted online. Per Stat
+ e law\, agendas are posted at least three business days prior to the date 
+ of the meeting. Residents may sign-up through the “Mesquite Messenger”
+  function on the City’s website to receive email notification when a new
+  City Council agenda is posted. https://www.cityofmesquite.com/calendar.as
+ px?EID=11910
+DTEND;TZID=America/Chicago:20270301T235900
+DTSTAMP;TZID=America/Chicago:20260930T102554
+DTSTART;TZID=America/Chicago:20270301T190000
+LAST-MODIFIED;TZID=America/Chicago:20260930T102554
+LOCATION:<p><span style='font-size:15px\;font-family:"Times New Roman"\,ser
+ if\;' data-pasted="true">City Hall | City Council Chamber</span></p> - 757
+  N. Galloway Avenue  Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:March 1\, 2027\, City Council Meeting 
+UID:11910
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:City Council meetings are held on the first and third Monday of
+  each month. The meetings are re-scheduled to the next Tuesday when it con
+ flicts with a City holiday that falls on a Monday meeting date. The start 
+ time is published once the agenda is finalized and posted online. Per Stat
+ e law\, agendas are posted at least three business days prior to the date 
+ of the meeting. Residents may sign-up through the “Mesquite Messenger”
+  function on the City’s website to receive email notification when a new
+  City Council agenda is posted. https://www.cityofmesquite.com/calendar.as
+ px?EID=11909
+DTEND;TZID=America/Chicago:20270215T235900
+DTSTAMP;TZID=America/Chicago:20260930T101056
+DTSTART;TZID=America/Chicago:20270215T190000
+LAST-MODIFIED;TZID=America/Chicago:20260930T101056
+LOCATION:<p><span style='font-size:15px\;font-family:"Times New Roman"\,ser
+ if\;' data-pasted="true">City Hall | City Council Chamber</span></p> - 757
+  N. Galloway Avenue  Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:February 15\, 2027\, City Council Meeting 
+UID:11909
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:City Council meetings are held on the first and third Monday of
+  each month. The meetings are re-scheduled to the next Tuesday when it con
+ flicts with a City holiday that falls on a Monday meeting date. The start 
+ time is published once the agenda is finalized and posted online. Per Stat
+ e law\, agendas are posted at least three business days prior to the date 
+ of the meeting. Residents may sign-up through the “Mesquite Messenger”
+  function on the City’s website to receive email notification when a new
+  City Council agenda is posted. https://www.cityofmesquite.com/calendar.as
+ px?EID=11908
+DTEND;TZID=America/Chicago:20270201T235900
+DTSTAMP;TZID=America/Chicago:20260930T095810
+DTSTART;TZID=America/Chicago:20270201T190000
+LAST-MODIFIED;TZID=America/Chicago:20260930T095810
+LOCATION:<p><span style='font-size:15px\;font-family:"Times New Roman"\,ser
+ if\;' data-pasted="true">City Hall | City Council Chamber</span></p> - 757
+  N. Galloway Avenue  Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:February 1\, 2027\, City Council Meeting 
+UID:11908
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:City Council meetings are held on the first and third Monday of
+  each month. The meetings are re-scheduled to the next Tuesday when it con
+ flicts with a City holiday that falls on a Monday meeting date. The start 
+ time is published once the agenda is finalized and posted online. Per Stat
+ e law\, agendas are posted at least three business days prior to the date 
+ of the meeting. Residents may sign-up through the “Mesquite Messenger”
+  function on the City’s website to receive email notification when a new
+  City Council agenda is posted. https://www.cityofmesquite.com/calendar.as
+ px?EID=11907
+DTEND;TZID=America/Chicago:20270119T235900
+DTSTAMP;TZID=America/Chicago:20260930T095130
+DTSTART;TZID=America/Chicago:20270119T190000
+LAST-MODIFIED;TZID=America/Chicago:20260930T095130
+LOCATION:<p><span style='font-size:15px\;font-family:"Times New Roman"\,ser
+ if\;' data-pasted="true">City Hall | City Council Chamber</span></p> - 757
+  N. Galloway Avenue  Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:January 19\, 2027\, City Council Meeting 
+UID:11907
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:City Council meetings are held on the first and third Monday of
+  each month. The meetings are re-scheduled to the next Tuesday when it con
+ flicts with a City holiday that falls on a Monday meeting date. The start 
+ time is published once the agenda is finalized and posted online. Per Stat
+ e law\, agendas are posted at least three business days prior to the date 
+ of the meeting. Residents may sign-up through the “Mesquite Messenger”
+  function on the City’s website to receive email notification when a new
+  City Council agenda is posted. https://www.cityofmesquite.com/calendar.as
+ px?EID=11906
+DTEND;TZID=America/Chicago:20270104T235900
+DTSTAMP;TZID=America/Chicago:20260930T115249
+DTSTART;TZID=America/Chicago:20270104T190000
+LAST-MODIFIED;TZID=America/Chicago:20260930T115249
+LOCATION:<p><span style='font-size:15px\;font-family:"Times New Roman"\,ser
+ if\;' data-pasted="true">City Hall | City Council Chamber</span></p> - 757
+  N. Galloway Avenue  Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:January 4\, 2027\, City Council Meeting 
+UID:11906
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:City Council meetings are held on the first and third Monday of
+  each month. The meetings are re-scheduled to the next Tuesday when it con
+ flicts with a City holiday that falls on a Monday meeting date. The start 
+ time is published once the agenda is finalized and posted online. Per Stat
+ e law\, agendas are posted at least three business days prior to the date 
+ of the meeting. Residents may sign-up through the “Mesquite Messenger”
+  function on the City’s website to receive email notification when a new
+  City Council agenda is posted. https://www.cityofmesquite.com/calendar.as
+ px?EID=10810
+DTEND;TZID=America/Chicago:20261221T235900
+DTSTAMP;TZID=America/Chicago:20260930T094008
+DTSTART;TZID=America/Chicago:20261221T190000
+LAST-MODIFIED;TZID=America/Chicago:20260930T094008
+LOCATION:<p><span style='font-size:15px\;font-family:"Times New Roman"\,ser
+ if\;' id="isPasted">City Hall | City Council Chamber</span></p> - 757 N. G
+ alloway Avenue  Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:December 21\, 2026\, City Council Meeting 
+UID:10810
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:City Council meetings are held on the first and third Monday of
+  each month. The meetings are re-scheduled to the next Tuesday when it con
+ flicts with a City holiday that falls on a Monday meeting date. The start 
+ time is published once the agenda is finalized and posted online. Per Stat
+ e law\, agendas are posted at least three business days prior to the date 
+ of the meeting. Residents may sign-up through the “Mesquite Messenger”
+  function on the City’s website to receive email notification when a new
+  City Council agenda is posted. https://www.cityofmesquite.com/calendar.as
+ px?EID=10809
+DTEND;TZID=America/Chicago:20261207T235900
+DTSTAMP;TZID=America/Chicago:20260930T093929
+DTSTART;TZID=America/Chicago:20261207T190000
+LAST-MODIFIED;TZID=America/Chicago:20260930T093929
+LOCATION:<p><span style='font-size:15px\;font-family:"Times New Roman"\,ser
+ if\;' id="isPasted">City Hall | City Council Chamber</span></p> - 757 N. G
+ alloway Avenue  Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:December 7\, 2026\, City Council Meeting 
+UID:10809
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:City Council meetings are held on the first and third Monday of
+  each month. The meetings are re-scheduled to the next Tuesday when it con
+ flicts with a City holiday that falls on a Monday meeting date. The start 
+ time is published once the agenda is finalized and posted online. Per Stat
+ e law\, agendas are posted at least three business days prior to the date 
+ of the meeting. Residents may sign-up through the “Mesquite Messenger”
+  function on the City’s website to receive email notification when a new
+  City Council agenda is posted. https://www.cityofmesquite.com/calendar.as
+ px?EID=10808
+DTEND;TZID=America/Chicago:20261116T235900
+DTSTAMP;TZID=America/Chicago:20260930T093845
+DTSTART;TZID=America/Chicago:20261116T190000
+LAST-MODIFIED;TZID=America/Chicago:20260930T093845
+LOCATION:<p><span style='font-size:15px\;font-family:"Times New Roman"\,ser
+ if\;' id="isPasted">City Hall | City Council Chamber</span></p> - 757 N. G
+ alloway Avenue  Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:November 16\, 2026\, City Council Meeting 
+UID:10808
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.cityofmesquite.com/calendar.aspx?EID=11942
+DTEND;TZID=America/Chicago:20261110T193000
+DTSTAMP;TZID=America/Chicago:20261006T124652
+DTSTART;TZID=America/Chicago:20261110T180000
+LAST-MODIFIED;TZID=America/Chicago:20261006T124652
+LOCATION: - 757 N. Galloway Ave.   Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:Town Hall Tuesday: Public Works Open House & Presentation
+UID:11942
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.cityofmesquite.com/calendar.aspx?EID=11943
+DTEND;VALUE=DATE:20261110
+DTSTAMP;TZID=America/Chicago:20261006T123407
+DTSTART;VALUE=DATE:20261110
+LAST-MODIFIED;TZID=America/Chicago:20261006T123407
+LOCATION: - 757 N. Galloway Ave.   Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:Town Hall Tuesday: Public Works Open House & Presentation
+UID:11943
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:City Council meetings are held on the first and third Monday of
+  each month. The meetings are re-scheduled to the next Tuesday when it con
+ flicts with a City holiday that falls on a Monday meeting date. The start 
+ time is published once the agenda is finalized and posted online. Per Stat
+ e law\, agendas are posted at least three business days prior to the date 
+ of the meeting. Residents may sign-up through the “Mesquite Messenger”
+  function on the City’s website to receive email notification when a new
+  City Council agenda is posted. https://www.cityofmesquite.com/calendar.as
+ px?EID=10807
+DTEND;TZID=America/Chicago:20261102T235900
+DTSTAMP;TZID=America/Chicago:20260930T093825
+DTSTART;TZID=America/Chicago:20261102T190000
+LAST-MODIFIED;TZID=America/Chicago:20260930T093825
+LOCATION:<p><span style='font-size:15px\;font-family:"Times New Roman"\,ser
+ if\;' id="isPasted">City Hall | City Council Chamber</span></p> - 757 N. G
+ alloway Avenue  Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:November 2\, 2026\, City Council Meeting 
+UID:10807
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:City Council meetings are held on the first and third Monday of
+  each month. The meetings are re-scheduled to the next Tuesday when it con
+ flicts with a City holiday that falls on a Monday meeting date. The start 
+ time is published once the agenda is finalized and posted online. Per Stat
+ e law\, agendas are posted at least three business days prior to the date 
+ of the meeting. Residents may sign-up through the “Mesquite Messenger”
+  function on the City’s website to receive email notification when a new
+  City Council agenda is posted. https://www.cityofmesquite.com/calendar.as
+ px?EID=10806
+DTEND;TZID=America/Chicago:20261019T235900
+DTSTAMP;TZID=America/Chicago:20260930T093803
+DTSTART;TZID=America/Chicago:20261019T190000
+LAST-MODIFIED;TZID=America/Chicago:20260930T093803
+LOCATION:<p><span style='font-size:15px\;font-family:"Times New Roman"\,ser
+ if\;' id="isPasted">City Hall | City Council Chamber</span></p> - 757 N. G
+ alloway Avenue  Mesquite TX 75149
+SEQUENCE:0
+SUMMARY:October 19\, 2026\, City Council Meeting 
+UID:10806
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=31
+END:VEVENT
+END:VCALENDAR

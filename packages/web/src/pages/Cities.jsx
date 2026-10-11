@@ -1,7 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { calendarThrough, cityPoint, describeRecurrence, haversineMiles, nextMeetingFor, normalizePrefs, t, tn } from '@agora/core';
-import { nowIso, today as todayFn } from '../lib/data.js';
+import { cityMatches, fold } from '../lib/cityMatch.js';
+import useClock from '../components/home/useClock.js';
+import { useSkipLink } from '../components/shell/PageMeta.jsx';
 import { useCities } from '../lib/DataProvider.jsx';
 import { useStore } from '../lib/store.jsx';
 import CityEmblem from '../components/CityEmblem.jsx';
@@ -9,22 +11,6 @@ import { Chip, distanceText, EmptyState, Icon, Menu, PageHeader, whenText } from
 // The list bar and sort button are shared with Meetings, so this page loads its styles too.
 import '../styles/pages/meetings.css';
 import '../styles/pages/cities.css';
-
-const fold = (s) =>
-  String(s || '')
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .trim();
-
-/** A city name match: the name or one of its words starts with the query, then initials, partial names and the county. */
-function matches(city, q) {
-  const name = fold(city.name);
-  const words = name.split(/[\s-]+/);
-  if (city.cityId === q || name.startsWith(q) || words.some((w) => w.startsWith(q))) return true;
-  const bare = q.replace(/\s+/g, '');
-  return (words.length > 1 && words.map((w) => w[0]).join('').startsWith(bare)) || name.includes(q) || fold(city.county).startsWith(q);
-}
 
 /** The meeting rule that produced an occurrence, so the schedule line describes the meeting shown above it. */
 function ruleFor(city, occurrence) {
@@ -36,8 +22,9 @@ export default function Cities() {
   const { prefs, lang } = useStore();
   const { cities } = useCities();
   const [params, setParams] = useSearchParams();
-  const [now] = useState(nowIso);
-  const today = todayFn();
+  // The next meeting moves on when one ends, also in a tab left open.
+  const { today, now } = useClock();
+  useSkipLink('cities-list', t('shell.skip.results'));
   const P = useMemo(() => normalizePrefs(prefs), [prefs]);
 
   const q = params.get('q') || '';
@@ -78,7 +65,7 @@ export default function Cities() {
 
   const shown = useMemo(() => {
     const query = fold(q);
-    const list = rows.filter((r) => (!query || matches(r.city, query)) && (!picked.length || picked.includes(r.city.county)));
+    const list = rows.filter((r) => (!query || cityMatches(r.city, query)) && (!picked.length || picked.includes(r.city.county)));
     const when = (r) => (r.next ? `${r.next.date} ${r.next.time}` : '9');
     list.sort((a, b) => {
       if (sort === 'near' && a.miles != null && b.miles != null && a.miles !== b.miles) return a.miles - b.miles;
@@ -136,7 +123,7 @@ export default function Cities() {
       </div>
 
       {shown.length ? (
-        <ul className="group cities__list">
+        <ul className="group cities__list" id="cities-list">
           {shown.map(({ city, next, through, schedule, miles }) => {
             const dist = distanceText({ cityId: city.cityId }, { homeCityId: P.homeCityId, distanceMiles: miles });
             return (

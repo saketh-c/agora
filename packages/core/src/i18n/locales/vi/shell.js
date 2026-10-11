@@ -30,4 +30,14 @@ export default {
     components: 'Thành phần giao diện',
     notFound: 'Không tìm thấy trang',
   },
+  skip: {
+    results: 'Bỏ qua để đến kết quả',
+    posts: 'Bỏ qua để đến các bài đăng',
+    headlines: 'Bỏ qua để đến các tin',
+  },
+  update: {
+    ready: 'Đã có thông tin cuộc họp mới.',
+    refresh: 'Tải lại',
+    later: 'Để sau',
+  },
 };

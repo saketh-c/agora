@@ -18,6 +18,7 @@ import {
   ICON_NAMES,
   MeetingDetail,
   MeetingDetailBadge,
+  MeetingShare,
   MeetingRow,
   MeetingStatus,
   Menu,
@@ -923,7 +924,7 @@ export default function UiGallery() {
         </div>
       </Spec>
 
-      <Sheet open={sheet === 'detail'} onClose={() => setSheet(null)} labelledBy="sheet-md-h" barStart={<MeetingDetailBadge meeting={sample.go} homeCityId="plano" />}>
+      <Sheet open={sheet === 'detail'} onClose={() => setSheet(null)} labelledBy="sheet-md-h" barStart={<MeetingDetailBadge meeting={sample.go} homeCityId="plano" />} barEnd={<MeetingShare meeting={sample.go} />}>
         <MeetingDetail meeting={sample.go} city={city(sample.go)} today={today} now={now} headingId="sheet-md-h" />
       </Sheet>
       <Sheet

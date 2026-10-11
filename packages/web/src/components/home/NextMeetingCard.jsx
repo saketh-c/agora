@@ -1,8 +1,7 @@
 import { Link } from 'react-router-dom';
 import { getLocale, lowerFirst, t, tn } from '@agora/core';
 import { PREP_STEPS } from '../../lib/prep.js';
-import { downloadIcs } from '../../lib/ics.js';
-import { Badge, Icon, ProgressLights, councilName, deadlineText, meetingDeadline, meetingTitle, speakMinutes, timeText, whenText } from '../ui/index.js';
+import { AddToCalendar, Badge, Icon, ProgressLights, councilName, deadlineText, meetingDeadline, meetingTitle, speakMinutes, timeText, whenText } from '../ui/index.js';
 import { HOME_DAYS, daysUntil } from './homeData.js';
 
 /** The step after "Continue:". English capitalizes after the colon; Spanish and Vietnamese do not. */
@@ -38,11 +37,12 @@ export function shortTitle(title) {
 
 /**
  * "Your next meeting": the screen's one bold moment (the Go color field). A countdown, when and
- * which council, the two facts that decide whether you can speak (time limit, sign-up deadline),
- * prep progress for this meeting, and the next step. With no meeting to point at, a quiet card
- * that says so and offers Meetings.
+ * which council, how far it is (`where`, a sentence), the two facts that decide whether you can
+ * speak (time limit, sign-up deadline), prep progress for this meeting, and the next step.
+ * `onDetails` opens the meeting's details; `onPick` offers other meetings. With no meeting to
+ * point at, a quiet card that says so and offers Meetings.
  */
-export default function NextMeetingCard({ meeting, city, today, now, prep, onContinue, setupLink }) {
+export default function NextMeetingCard({ meeting, city, today, now, prep, onContinue, setupLink, where, onDetails, onPick }) {
   if (!meeting) {
     return (
       <section className="next next--none" aria-labelledby="next-h">
@@ -106,6 +106,26 @@ export default function NextMeetingCard({ meeting, city, today, now, prep, onCon
           </p>
           <p className="next__when num">{whenText(meeting.date, meeting.time)}</p>
           <p className="next__who">{who}</p>
+          {where && (
+            <p className="next__where">
+              <Icon name="pin" size={20} />
+              <span>{where}</span>
+            </p>
+          )}
+          {(onDetails || onPick) && (
+            <p className="next__links">
+              {onDetails && (
+                <button type="button" className="next__link" onClick={() => onDetails(meeting)} aria-haspopup="dialog">
+                  {t('home.next.details')}
+                </button>
+              )}
+              {onPick && (
+                <button type="button" className="next__link" onClick={onPick} aria-haspopup="dialog">
+                  {t('home.next.pick')}
+                </button>
+              )}
+            </p>
+          )}
         </div>
         <div className="next__facts">
           <Badge tone="ink" icon="mic">
@@ -125,10 +145,8 @@ export default function NextMeetingCard({ meeting, city, today, now, prep, onCon
           <Link className="btn btn--primary" to={prepRoute(prep.next, meeting.id)} onClick={onContinue}>
             {allDone ? t('home.next.review') : t('ui.prep.continue', { step: continueStep(prep.next) })}
           </Link>
-          <button type="button" className="btn btn--secondary" onClick={() => downloadIcs(meeting, city)}>
-            <Icon name="cal-plus" />
-            {t('ui.addToCalendar')}
-          </button>
+          {/* Google Calendar, Outlook or an .ics file, like the meeting details (works on a Chromebook). */}
+          <AddToCalendar meeting={meeting} city={city} now={now} className="btn btn--secondary" />
         </div>
       </div>
     </section>

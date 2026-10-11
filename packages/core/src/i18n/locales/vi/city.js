@@ -69,5 +69,6 @@ export default {
   newsEmpty: 'Chưa có tin gần đây về {city}.',
   newsError: 'Cần kết nối mạng để xem tin. Hãy thử lại sau.',
   verifiedLine: 'Đã kiểm tra ngày {date} từ trang chính thức của thành phố. Hãy xác nhận giờ họp trước khi đi.',
+  verifiedStale: 'Kiểm tra lần cuối ngày {date}. Lịch họp có thể đã thay đổi từ đó, hãy xác nhận trên lịch của thành phố trước khi đi.',
   sources: 'Nguồn',
 };

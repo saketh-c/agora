@@ -106,6 +106,7 @@
       "ages": "11th and 12th graders who attend a Frisco ISD or private Frisco high school, or homeschooled Frisco residents",
       "description": "High school students learn about local government and city services and work on community projects; meets 6 to 7:30 p.m. on the second Tuesday of the month, October through May.",
       "applyWindow": "Program is on hold as of September 2026; the city says to watch its social media and e-news for future announcements (staff liaison 972-292-5107).",
+      "applyStatus": "closed",
       "source": "https://www.friscotexas.gov/754/Mayors-Youth-Council"
     },
     {
@@ -114,6 +115,7 @@
       "ages": "Students who have completed 6th or 7th grade and live in Frisco or attend Frisco ISD schools",
       "description": "Free four-day summer sessions (8:15 a.m. to 4:15 p.m.) at Boals and Tadlock elementary schools where students learn how a police department works, including SWAT, 911, crime scene and K9 units.",
       "applyWindow": "Eight sessions run early June through late July; all 2026 sessions are full and registration is closed (confirmation letters are usually sent by early May).",
+      "applyStatus": "closed",
       "source": "https://www.friscotexas.gov/317/Junior-Police-Academy"
     },
     {
@@ -122,6 +124,7 @@
       "ages": "Grades 9-12, ages 15-19 (must turn 15 by Sept. 1 of the application year); live in Frisco, attend a Frisco ISD high school, or be sponsored by a city employee",
       "description": "Hands-on fire service career program with two monthly meetings, ride-alongs and station time; requires a 3.0 GPA, background check and physical.",
       "applyWindow": "The 2026-2027 application period is closed; the application link is posted on the page when the next period opens (Community Education 972-292-6351).",
+      "applyStatus": "closed",
       "source": "https://www.friscotexas.gov/1850/Fire-Explorers"
     },
     {
@@ -130,6 +133,8 @@
       "ages": "Middle school students (grades 6-8) who live in Frisco or attend school in Frisco; first-time participants only",
       "description": "Free one-week fire department academy for middle schoolers (9 a.m. to 3 p.m. Monday through Thursday, 9 a.m. to 1 p.m. Friday with graduation); two sessions each June (June 1-5 and June 8-12 in 2026).",
       "applyWindow": "Applications open in April for June sessions; the 2026 sessions and waitlist are full.",
+      "applyStatus": "closed",
+      "applyOpens": "2027-04",
       "source": "https://www.friscotexas.gov/1827/Get-Involved"
     }
   ],

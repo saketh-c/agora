@@ -147,3 +147,15 @@ test('Nominatim errors become busy or unavailable, never a result', async () => 
   });
   await assert.rejects(down.resolvePlace('Main Street', cities), (e) => e instanceof GeocodeError && e.code === 'unavailable');
 });
+
+test('a school is marked as one, so the app can save it as School', async () => {
+  const nominatim = fakeNominatim({ 'Sam Houston High School': [ROWS.samHouston], 'Klyde Warren Park': [ROWS.klyde] });
+  const g = createGeocoder({ fetch: nominatim.fetch, minGapMs: 0 });
+  const school = await g.resolvePlace('Sam Houston High School', cities);
+  assert.equal(school.status, 'found');
+  assert.equal(school.place.school, true);
+  assert.equal(school.place.label, 'Sam Houston High School, Arlington');
+  assert.equal(school.place.cityId, 'arlington');
+  const park = await g.resolvePlace('Klyde Warren Park', cities);
+  assert.equal(park.place.school, undefined);
+});

@@ -87,6 +87,7 @@
       "ages": "12 to 19 and enrolled in middle school or high school",
       "description": "Regional teen court funded by Keller, Southlake, Grapevine and Colleyville. Teens who received a Class C ticket can keep it off their record by doing service hours and jury duty; other teens volunteer as jurors or as teen attorneys coached by real lawyers. Trials are Tuesday evenings between 5 and 8 p.m. at Southlake Municipal Court, 600 State Street, Southlake. To volunteer, register on the Southlake volunteer website, then email the Teen Court office (there is currently a waitlist). Phone 817-748-8346. Keller appoints one council member and two residents to the Metroport Teen Court Advisory Board that oversees the program.",
       "applyWindow": "Volunteer registration accepted year-round through Southlake; waitlist in effect",
+      "applyStatus": "rolling",
       "source": "https://www.cityofkeller.com/services/boards-commissions"
     },
     {
@@ -95,6 +96,7 @@
       "ages": "Teens and tweens",
       "description": "Library-run board for young people who want to be active in the community; members help plan teen programs and events and earn up to 1.5 volunteer hours per meeting. Meets the third Tuesday of the month at 4:30 p.m. at Keller Public Library, 1100 Bear Creek Parkway; snacks provided. Contact library@cityofkeller.com or 817-743-4840.",
       "applyWindow": "Ongoing; attend a meeting",
+      "applyStatus": "rolling",
       "source": "https://www.cityofkeller.com/services/library/teens/teen-advisory-board"
     },
     {
@@ -103,6 +105,7 @@
       "ages": "High school sophomores, juniors and seniors",
       "description": "Selected students meet six to nine times a year at Keller High School with Police Chief Brad Fortune to represent Keller's teen community; parent or guardian permission required.",
       "applyWindow": "The application page still lists a deadline of 8 a.m. Monday, Nov. 4 with no year (Nov. 4 falls on a Wednesday in 2026, so the page appears to be from a prior cycle); confirm the current cycle with Keller Police at 817-743-4500",
+      "applyStatus": "unknown",
       "source": "https://www.cityofkeller.com/about-us/departments-h-z/police/who-we-are/chief-s-student-forum-application-keller"
     }
   ],

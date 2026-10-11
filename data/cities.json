@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-11T07:38:40.898Z",
+  "generatedAt": "2026-10-11T08:23:22.594Z",
   "cityCount": 39,
   "cities": [
     {
@@ -196,6 +196,7 @@
           "ages": "13-17 (some 18-year-olds still in school); must be enrolled in a public, private or home school",
           "description": "Teens volunteer as jurors and attorneys to hear real Class C misdemeanor cases involving their peers; defendants who complete the program have charges dismissed. Attorney volunteers must first finish the Teen Court Academy, which meets on three Mondays, and missing the orientation or a lecture means not graduating as an attorney.",
           "applyWindow": "Next Teen Court Academy begins fall 2026 (attorneys apply through the city's Teen Court Academy application, then register on Eventbrite after finishing); jurors register directly on Eventbrite (https://www.eventbrite.com/o/allen-teen-court-93669457303). Coordinator: 214-509-4393.",
+          "applyStatus": "rolling",
           "source": "https://www.cityofallen.org/departments/municipal_court/teen_court.php"
         }
       ],
@@ -343,6 +344,7 @@
           "ages": "Students entering grades 7 to 12 who live in Arlington or attend Arlington ISD schools",
           "description": "Advisory group to the Mayor and city staff on issues affecting youth, founded 2006; members do service projects and leadership development and meet the first Thursday of each month at 6:30 p.m., September through May (dates subject to change). Application: https://forms.arlingtontx.gov/Forms/MYCApplication",
           "applyWindow": "Applications for the 2026-27 school year opened July 14, 2026; no deadline is stated on the city page",
+          "applyStatus": "open",
           "source": "https://www.arlingtontx.gov/News-Articles/2026/July/Applications-Open-for-2026-27-Arlington-Mayors-Youth-Commission"
         },
         {
@@ -351,6 +353,7 @@
           "ages": "Teen volunteers currently enrolled in secondary school serve as jurors and teen attorneys; defendants are 14 to 17",
           "description": "Voluntary juvenile justice program inside the Arlington Municipal Court where teen volunteers act as prosecutors, defense attorneys and jurors and earn community service credit; adults volunteer as jury monitors, clerks and judges. Coordinator Russell Fiorella, 817-459-6496.",
           "applyWindow": "Rolling volunteer application at https://app.betterimpact.com/PublicOrganization/d4edf706-d6a6-4a73-9e57-5b5eea2eb485/1",
+          "applyStatus": "rolling",
           "source": "https://www.arlingtontx.gov/Government/Municipal-Court/Court-Information/Teen-Court"
         }
       ],
@@ -479,6 +482,7 @@
           "ages": "Defendants 11 to 17 (or 18 if enrolled in an accredited high school); teen volunteers 13 to 18 (teen attorneys 15 and older); first-offender educational program for ages 11 to 13",
           "description": "Hurst-Euless-Bedford diversion program run out of the Bedford Municipal Court, 2000 Forest Ridge Drive (City Hall bottom floor). Teen defendants with Class C misdemeanors have their cases heard by a jury of peers who assign community service and jury terms; on completion the case is dismissed. Teens ages 13 to 18 can volunteer as jurors, attorneys, bailiffs and clerks by submitting a Teen Court volunteer application by mail, in person or email; volunteers arrive by 5 p.m. on session nights. Defendants doing their assigned jury duty must call ahead (no walk-ins) and sign in by 5:15 p.m.",
           "applyWindow": "Ongoing; sessions are held once a month on Monday evenings and dates are posted on the city calendar; call 817-952-2468 or email teen.court@bedfordtx.gov",
+          "applyStatus": "rolling",
           "source": "https://bedfordtx.gov/172/Teen-Court-Volunteers"
         }
       ],
@@ -618,7 +622,9 @@
           "url": "https://www.cityofcarrollton.com/government/city-manager-s-office/city-secretary/youth-in-government-commission",
           "ages": "Grades 9 to 12; must live in Carrollton, attend a public or private high school in the city and be in good academic standing",
           "description": "Selected students serve as an advisory board member for one scheduled meeting each of the Parks & Recreation Board, Library Board, Neighborhood Advisory Commission and Museum and Historic Advisory Committee, then attend a City Council meeting where they are formally recognized.",
-          "applyWindow": "Application open online via SurveyMonkey (https://www.surveymonkey.com/r/K63JHBC); no deadline listed",
+          "applyWindow": "The 2026-27 application (on SurveyMonkey) closed Sept. 24, 2026; watch the city page for the next cycle",
+          "applyStatus": "closed",
+          "applyBy": "2026-09-24",
           "source": "https://www.cityofcarrollton.com/government/city-manager-s-office/city-secretary/youth-in-government-commission"
         },
         {
@@ -627,6 +633,9 @@
           "ages": "Ages 13 to 18",
           "description": "Group of teens that meets once a month with the Teen Librarian to plan teen programs, shape library services and materials for teens, and volunteer at youth events; members earn volunteer hours. Requires about 4 hours per month and one recommendation letter from a non-relative adult. Membership runs September through May.",
           "applyWindow": "June 1 to August 1 each year (the 2026-2027 application closed Aug. 1, 2026); interviews are held in August",
+          "applyStatus": "closed",
+          "applyBy": "2026-08-01",
+          "applyOpens": "2027-06-01",
           "source": "https://www.cityofcarrollton.com/departments/departments-g-p/library/about/support-the-library/teen-advisory-council"
         }
       ],
@@ -836,6 +845,7 @@
           "ages": "Students going into grades 10 to 12 for the 2026-2027 school year who live in Cedar Hill or attend a school located in Cedar Hill",
           "description": "High school students who work with Mayor Stephen Mason and city staff through discussions, tours and interactive projects to address youth concerns, run community service projects, learn how city government works, plan events and fundraisers, and make recommendations to the mayor on issues affecting teens. Meets the first and third Monday of each month at the Traphene Hickman Public Library (dates and locations can change).",
           "applyWindow": "Applications for the 2026-2027 school year are closed; watch the page for next year's application. Contact teen librarian Chelsey Randel, chelsey.randel@cedarhilltx.com, 972-291-7323 ext. 1324, or Mayor Stephen Mason, stephen.mason@cedarhilltx.com, 972-291-5100 ext. 1012.",
+          "applyStatus": "closed",
           "source": "https://www.cedarhilltx.com/1969/Mayors-Teen-Council"
         }
       ],
@@ -992,6 +1002,7 @@
           "ages": "Teens from local secondary schools volunteer as jurors and attorneys; the joint program (run by Southlake) handles defendants ages 12 to 19",
           "description": "Colleyville participates in the joint Grapevine, Southlake, Colleyville and Keller teen court, a voluntary program where juvenile Class C misdemeanor offenders work off citations through community service; volunteer teen attorneys present cases to a jury of peers from local secondary schools and previously adjudicated youth, described by the city as a hands-on way for teens to understand the judicial system.",
           "applyWindow": "Rolling; the Colleyville page links to the program site hosted by Southlake, where you register through the City of Southlake volunteer website and then email Teen Court staff (817-748-8346). A volunteer waitlist was in effect as of September 2026.",
+          "applyStatus": "rolling",
           "source": "https://www.colleyville.com/government/departments-m-z/municipal-court/metroport-teen-court"
         },
         {
@@ -1000,6 +1011,7 @@
           "ages": "Adult appointees (Colleyville City Council appoints two members to two-year terms)",
           "description": "Joint advisory board (established August 16, 1994) with Grapevine, Southlake and Keller that guides Teen Court staff on the alternative judicial process; it meets the first Monday of every other month and is the Council-level oversight body for the teen program rather than a seat for students.",
           "applyWindow": "Apply with the city's Application for Appointment form, emailed to CSOffice@colleyville.com, only during the advertised application period; questions to the City Secretary at 817-503-1130",
+          "applyStatus": "unknown",
           "source": "https://www.colleyville.com/government/boards-commissions-committees"
         }
       ],
@@ -1267,6 +1279,7 @@
           "ages": "Volunteers 14 to 18 enrolled in middle or high school and living in Coppell ISD",
           "description": "Peer-jury alternative sentencing program in Coppell Municipal Court where teens serve as attorneys, bailiffs, clerks or jurors. The city's Teen Court and Volunteers pages both state the program is not currently active (placed on hold indefinitely when the court closed during the pandemic).",
           "applyWindow": "Not accepting volunteers while the program is inactive; contact 972-462-0022 or info@coppelltx.gov",
+          "applyStatus": "closed",
           "source": "https://www.coppelltx.gov/661/Volunteers"
         },
         {
@@ -1275,6 +1288,7 @@
           "ages": "7th to 11th grade students who live in Coppell and attend Coppell ISD (per the city's October 2023 recruitment notice)",
           "description": "Student advisor seats on the Library Board, the Parks and Recreation Board and the Smart City Board, filled through the city's boards and commissions application at coppelltx.gov/boards. The city's news release says the positions are not ceremonial and appointees are expected to attend meetings regularly. The Boards and Commissions page itself does not currently mention the youth seats, so confirm current openings and grade requirements with the City Secretary's Office (972-304-3669).",
           "applyWindow": "Adult board recruitment runs August through September each year with interviews in October and appointments in November; youth advisor openings have been announced separately (the last published notice had an October 20, 2023 deadline), so ask the City Secretary about the next round",
+          "applyStatus": "unknown",
           "source": "https://www.coppelltx.gov/CivicAlerts.aspx?AID=1213&ARC=1876"
         }
       ],
@@ -1440,6 +1454,7 @@
           "ages": "Full-time students in good standing in grades 9 through 12 who have lived in Dallas at least six months before appointment and reside in the appointing council member's district",
           "description": "A 15-member advisory body (one appointee per council district plus the mayor) that gives Dallas youth a voice on city issues, meets monthly (Mondays at 6 p.m. in the Council Chambers) with working committees, and expects roughly four hours a month of service.",
           "applyWindow": "Rolling; apply through the city's boards and commissions portal (https://cityofdallas.granicus.com/boards/forms/845/apply/). One of 15 seats was vacant as of Sept 2026. Coordinator: Jacob Rayner, jacob.rayner@dallas.gov, 469-849-1008.",
+          "applyStatus": "rolling",
           "source": "https://cityofdallas.granicus.com/boards/forms/845/apply/"
         }
       ],
@@ -1759,6 +1774,7 @@
           "ages": "Open to all teens who live in the City of Denton or attend Denton ISD (specific age range not stated)",
           "description": "City-run youth leadership group that learns about local government, commits to service projects, plans events and represents peers, run through Parks and Recreation (contact Jodi McClaren).",
           "applyWindow": "Applications accepted until all spots are filled; register through the Parks and Recreation catalog link at https://bit.ly/DentonTeenCouncil",
+          "applyStatus": "open",
           "source": "https://www.cityofdenton.com/1032/Denton-Teen-Council"
         }
       ],
@@ -1982,10 +1998,12 @@
           "source": "https://public.destinyhosted.com/agenda_publish.cfm?id=33768&mt=ALL&get_month=9&get_year=2026&dsp=ag&seq=3939"
         },
         {
-          "date": "2026-09-21",
+          "date": "2026-09-25",
           "status": "special",
-          "note": "Listed on the city calendar as 'City Council Special Meeting' (all-day placeholder in the third-Monday work session slot). No agenda was posted as of Sept 10; confirm the time on the agenda portal.",
-          "source": "https://www.desototexas.gov/Calendar.aspx?EID=1437&month=9&year=2026&day=10&calType=0"
+          "time": "17:00",
+          "label": "City Council Special Called Meeting",
+          "note": "Listed on the city calendar as 'City Council Special Called Meeting' at 5 p.m. in the Council Chambers.",
+          "source": "https://www.desototexas.gov/calendar.aspx?view=list&year=2026&month=9&CID=0"
         },
         {
           "date": "2026-10-06",
@@ -2033,6 +2051,7 @@
           "ages": "Teens who are DeSoto residents (specific age range not stated on the page)",
           "description": "Parks and Recreation program that gives teens a formal look at municipal operations plus education, wellness, life-skills and career-readiness experiences. General board members attend monthly meetings and help plan youth programs; executive board members hold officer positions and represent the council at city events. Benefits include community service hours (subject to school approval), business etiquette training, internship and employment opportunities, and a letter of recommendation from City Administration.",
           "applyWindow": "Rolling; apply through the online application linked from the page (no deadline is stated). Contact Sydney Elliott, Administrative Superintendent, 972-230-9651, selliott@desototexas.gov.",
+          "applyStatus": "rolling",
           "source": "https://www.desototexas.gov/652/Teen-Council"
         },
         {
@@ -2041,6 +2060,7 @@
           "ages": "At least 13 years old or entering grades 8 to 12",
           "description": "Library volunteer program giving teens confidence-building volunteer experience, practical job skills, and customer and public service experience during the school year. Volunteers are expected to be dependable, flexible and self-disciplined. The page still describes the September 2025 to May 2026 program year, so ask the library about the current year.",
           "applyWindow": "Not stated on the page; contact the DeSoto Public Library, 211 E. Pleasant Run Road, 972-274-2489, actioncenter@desototexas.gov.",
+          "applyStatus": "unknown",
           "source": "https://www.desototexas.gov/608/Teen-School-Year-Volunteer-Program"
         }
       ],
@@ -2185,7 +2205,6 @@
         "https://www.desototexas.gov/calendar.aspx?view=list&year=2026&month=9&CID=0",
         "https://www.desototexas.gov/calendar.aspx?view=list&year=2026&month=10&CID=0",
         "https://www.desototexas.gov/calendar.aspx?view=list&year=2026&month=11&CID=0",
-        "https://www.desototexas.gov/Calendar.aspx?EID=1437&month=9&year=2026&day=10&calType=0",
         "https://www.desototexas.gov/Calendar.aspx?EID=914&month=10&year=2026&day=10&calType=0",
         "https://www.desototexas.gov/Calendar.aspx?EID=1438&month=10&year=2026&day=10&calType=0",
         "https://www.desototexas.gov/176/DeSoto-TX-TV",
@@ -2315,6 +2334,7 @@
           "ages": "14 to 18",
           "description": "Library-based teen group where members share ideas, plan events for teens and earn volunteer hours. Sessions have run on Wednesdays from 5 to 6 p.m. at the Duncanville Public Library, 201 James Collins Blvd (for example June 10 and 24, 2026); the library does not keep a permanent web page for the group, so check the city's weekly updates or call for the next dates.",
           "applyWindow": "Ongoing; contact the library at 972-780-5050",
+          "applyStatus": "rolling",
           "source": "https://www.duncanvilletx.gov/CivicAlerts.aspx?AID=21"
         },
         {
@@ -2323,6 +2343,7 @@
           "ages": "Teens (details not yet published)",
           "description": "A resolution establishing a Duncanville Teen Council is item 7.M on the Sept 15, 2026 City Council consent agenda; membership details and applications should follow if it is adopted.",
           "applyWindow": "Not yet announced",
+          "applyStatus": "unknown",
           "source": "https://duncanvilletx.api.civicclerk.com/v1/Meetings/GetMeetingFileStream(fileId=7098,plainText=false)"
         }
       ],
@@ -2569,6 +2590,7 @@
           "ages": "Defendants 11 to 17 (or 18 if still in high school); teen volunteers 13 to 18 (teen attorneys must be 15 or older)",
           "description": "Joint Hurst-Euless-Bedford diversion program in which teen volunteer attorneys present first-offender Class C misdemeanor cases to a jury of peers, who assign community service; on completion the case is dismissed. Euless teens can volunteer as jurors, attorneys, bailiffs or clerks by submitting a Teen Court volunteer application to teen.court@bedfordtx.gov. Sessions are held once a month on Monday evenings at the Bedford Municipal Court, 2000 Forest Ridge Dr., Bedford (817-952-2468); volunteers arrive by 5 p.m. to sign in.",
           "applyWindow": "Ongoing; submit the volunteer application (https://bedfordtx.gov/172/Teen-Court-Volunteers) by mail, in person or email, then attend a session",
+          "applyStatus": "rolling",
           "source": "https://bedfordtx.gov/172/Teen-Court-Volunteers"
         }
       ],
@@ -2714,7 +2736,7 @@
         "timeLimitMinutes": 3,
         "virtualAllowed": false,
         "writtenCommentMethod": "No written-comment form is listed on the agenda; email the Mayor at Mayor@farmersbranchtx.gov or your district council member (District1@ through District5@farmersbranchtx.gov, listed on the Mayor & City Council page).",
-        "notes": "The printed agenda still says the online form is at https://www.farmersbranchtx.gov/101/City-Council, but that address now returns Page Not Found; the working form is linked from the Mayor & City Council page under 'Sign Up to Speak at a City Council Meeting'. Speakers must follow the city's Rules of Decorum and Conduct for Public Hearings and Citizen Comments (the agenda links them from the Mayor & City Council page) and direct comments to the council, not the audience. The agenda states the city will not tolerate unruly behavior, intimidation or remarks not relevant to policy issues within the city's authority. No remote or virtual speaking option is described. Accessibility requests go to the City Secretary at (972) 919-2520 at least 72 hours before the meeting.",
+        "notes": "The printed agenda still points to an old City Council page for the online form, but that page has been taken down; the working form is linked from the Mayor & City Council page under 'Sign Up to Speak at a City Council Meeting'. Speakers must follow the city's Rules of Decorum and Conduct for Public Hearings and Citizen Comments (the agenda links them from the Mayor & City Council page) and direct comments to the council, not the audience. The agenda states the city will not tolerate unruly behavior, intimidation or remarks not relevant to policy issues within the city's authority. No remote or virtual speaking option is described. Accessibility requests go to the City Secretary at (972) 919-2520 at least 72 hours before the meeting.",
         "source": "https://legistar.granicus.com/FarmersBranch/meetings/2026/9/2724_A_City_Council_26-09-15_Meeting_Agenda.pdf"
       },
       "youthPrograms": [
@@ -2724,6 +2746,7 @@
           "ages": "13 to 15",
           "description": "Summer weekday day camp (7:30 a.m. to 6 p.m.) at the Farmers Branch Community Recreation Center, 14050 Heartside Place, combining recreation with community service and projects with the Animal Adoption Center, Historical Park and Parks; $15 per week for residents, $40 for non-residents. Teens completing about 80 service hours earn a free end-of-summer lock-in.",
           "applyWindow": "The 2026 session ran May 26 to Aug. 10 with resident registration from March 1 and non-resident registration from May 15; the city says 2027 details will be posted in January 2027",
+          "applyStatus": "closed",
           "source": "https://content.civicplus.com/api/assets/tx-farmersbranch/b6b87ed3-622e-406f-bb01-c18e59b21e26"
         },
         {
@@ -2732,6 +2755,8 @@
           "ages": "13 to 18 (residents and non-residents)",
           "description": "One-week summer academy run by Farmers Branch Fire and Parks and Recreation where teens learn firefighting equipment, basic emergency response, search-and-rescue skills and fitness challenges alongside city firefighters; the 2026 academy has ended and a 2027 session is planned.",
           "applyWindow": "Summer 2027; resident registration opens May 3, 2027 and non-resident registration May 17, 2027, with full details posted in spring 2027",
+          "applyStatus": "closed",
+          "applyOpens": "2027-05-03",
           "source": "https://www.farmersbranchtx.gov/teen-fire-rescue-academy"
         }
       ],
@@ -3024,6 +3049,7 @@
           "ages": "Flower Mound residents ages 14 to 19 in grades 9 to 12 (Flower Mound High, Marcus High, private or homeschool)",
           "description": "Up to 22 students serve one-year terms as an advisory group to the Town Council, Parks Board, Executive Team and Parks & Recreation on issues affecting youth, through problem solving, education, social activities and service projects; selection is based on leadership, community involvement and vision.",
           "applyWindow": "Not stated on the program page; apply through the online Form Center application (contact Kimberly Cheek, kimberly.cheek@flowermound.gov, 972-874-6300, or the program line 972-874-6276)",
+          "applyStatus": "unknown",
           "source": "https://www.flowermound.gov/892/Youth-Action-Council"
         },
         {
@@ -3032,6 +3058,7 @@
           "ages": "Teens cited for a Class C misdemeanor in town limits; volunteers must be middle or high school students ages 13 to 18 who attend school or live in the greater Lewisville area",
           "description": "Voluntary alternative to paying a fine: after pleading guilty or no contest in Municipal Court and paying a $20 fee, the teen is sentenced by a jury of peers to community service and jury duty, and the case is dismissed on completion. Court alternates between Lewisville and Flower Mound, generally on 1st and 3rd Tuesdays; fall 2026 Flower Mound dates are Sept. 22, Oct. 20, Nov. 17 and Dec. 15 (Lewisville: Sept. 8, Oct. 6, Nov. 3, Dec. 1). Contact teencourt@cityoflewisville.com or 972-219-3799.",
           "applyWindow": "Rolling; volunteers observe a session first, then sign a volunteer agreement (sign-ups at volunteer.cityoflewisville.com)",
+          "applyStatus": "rolling",
           "source": "https://www.flowermound.gov/461/Youth-Services"
         }
       ],
@@ -3220,6 +3247,7 @@
           "ages": "10 to 17, or currently enrolled in high school",
           "description": "Municipal Court diversion program in which teens who receive Class C citations appear before a jury of their peers; teen volunteers serve as jurors and can earn community service credit. Office: A.D. Marshall Public Safety and Courts Building, 1000 Throckmorton St., 4th floor. Contact 817-392-8681 or teencourt@fortworthtexas.gov.",
           "applyWindow": "Rolling; use the Register to Volunteer link on the Teen Court page (Galaxy Digital volunteer portal: https://fortworthtexas.galaxydigital.com/agency/detail/Teen_Court/)",
+          "applyStatus": "rolling",
           "source": "https://www.fortworthtexas.gov/departments/municipal-court/teen-court"
         }
       ],
@@ -3490,6 +3518,7 @@
           "ages": "11th and 12th graders who attend a Frisco ISD or private Frisco high school, or homeschooled Frisco residents",
           "description": "High school students learn about local government and city services and work on community projects; meets 6 to 7:30 p.m. on the second Tuesday of the month, October through May.",
           "applyWindow": "Program is on hold as of September 2026; the city says to watch its social media and e-news for future announcements (staff liaison 972-292-5107).",
+          "applyStatus": "closed",
           "source": "https://www.friscotexas.gov/754/Mayors-Youth-Council"
         },
         {
@@ -3498,6 +3527,7 @@
           "ages": "Students who have completed 6th or 7th grade and live in Frisco or attend Frisco ISD schools",
           "description": "Free four-day summer sessions (8:15 a.m. to 4:15 p.m.) at Boals and Tadlock elementary schools where students learn how a police department works, including SWAT, 911, crime scene and K9 units.",
           "applyWindow": "Eight sessions run early June through late July; all 2026 sessions are full and registration is closed (confirmation letters are usually sent by early May).",
+          "applyStatus": "closed",
           "source": "https://www.friscotexas.gov/317/Junior-Police-Academy"
         },
         {
@@ -3506,6 +3536,7 @@
           "ages": "Grades 9-12, ages 15-19 (must turn 15 by Sept. 1 of the application year); live in Frisco, attend a Frisco ISD high school, or be sponsored by a city employee",
           "description": "Hands-on fire service career program with two monthly meetings, ride-alongs and station time; requires a 3.0 GPA, background check and physical.",
           "applyWindow": "The 2026-2027 application period is closed; the application link is posted on the page when the next period opens (Community Education 972-292-6351).",
+          "applyStatus": "closed",
           "source": "https://www.friscotexas.gov/1850/Fire-Explorers"
         },
         {
@@ -3514,6 +3545,8 @@
           "ages": "Middle school students (grades 6-8) who live in Frisco or attend school in Frisco; first-time participants only",
           "description": "Free one-week fire department academy for middle schoolers (9 a.m. to 3 p.m. Monday through Thursday, 9 a.m. to 1 p.m. Friday with graduation); two sessions each June (June 1-5 and June 8-12 in 2026).",
           "applyWindow": "Applications open in April for June sessions; the 2026 sessions and waitlist are full.",
+          "applyStatus": "closed",
+          "applyOpens": "2027-04",
           "source": "https://www.friscotexas.gov/1827/Get-Involved"
         }
       ],
@@ -3826,10 +3859,13 @@
           "ages": "High school students (grades 9-12), no older than 19 at appointment; must live in Garland and/or attend a Garland ISD school",
           "description": "Advisory commission of up to 36 teens appointed by the Mayor and Council (up to four each) that advises Council on youth needs, learns the local political process, and runs service and social projects. Meets 5:30 p.m. on the 2nd Tuesday of each month at Fields Recreation Center, 1701 Dairy Road, September through May, after an August retreat and induction. Applicants need one letter of recommendation.",
           "applyWindow": "Applications for the 2026-27 class were due 11:59 p.m. May 31, 2026; applications typically open in spring for the following school year",
+          "applyStatus": "closed",
+          "applyBy": "2026-05-31",
           "source": "https://www.garlandtx.gov/DocumentCenter/View/22766/Garland-Youth-Council-Application_2026-27"
         },
         {
           "name": "Teen Advisory Board (Garland Public Library)",
+          "applyStatus": "unknown",
           "url": "https://www.garlandtx.gov/calendar.aspx?EID=12974",
           "ages": "13-17",
           "description": "Library teen board that helps plan teen events and gives input on library programming while earning volunteer hours toward graduation. The Central Library group (625 Austin St.) next meets Wednesday Sept. 16, 2026, 6 to 7 p.m., with snacks provided; the North Garland and South Garland branches run their own TAB groups. Check the library calendar for dates.",
@@ -4245,6 +4281,7 @@
           "ages": "Middle and high school students volunteer as jurors and attorneys; the program handles defendants ages 12 to 19",
           "description": "Joint Grapevine, Southlake, Colleyville and Keller program in which juvenile Class C misdemeanor defendants work off citations through community service; cases are argued by volunteer teen attorneys before a jury of volunteers from local secondary schools and returning former defendants, giving students hands-on experience with the justice system.",
           "applyWindow": "Rolling; register as a volunteer through the City of Southlake volunteer website, then email Teen Court staff once approved (the Grapevine page directs questions to the Teen Court coordinator at 817-748-8346). A volunteer waitlist was in place as of September 2026.",
+          "applyStatus": "rolling",
           "source": "https://www.grapevinetexas.gov/329/Metroport-Teen-Court"
         },
         {
@@ -4253,6 +4290,7 @@
           "ages": "Adult appointees (one Council Member and two at-large representatives per city, three-year terms)",
           "description": "Twelve-member advisory board representing Grapevine, Southlake, Colleyville and Keller that advises Teen Court on the alternative judicial process; it meets every other month on the first Monday at 5:30 p.m. at Southlake DPS Headquarters, 600 State Street, Southlake. It is not a youth-seat body but is the governance link between Council and the teen program.",
           "applyWindow": "City board application process; contact Teen Court at 817-748-8346",
+          "applyStatus": "unknown",
           "source": "https://www.grapevinetexas.gov/558/Metroport-Teen-Court-Advisory-Board"
         }
       ],
@@ -4510,6 +4548,8 @@
           "ages": "Highland Park residents in grades 9 through 12 at the start of the academic year",
           "description": "An eight-month youth leadership program (up to 16 students) with seven school-year meetings plus orientation, lectures, discussion groups, site visits and volunteering that expose students to local government and give youth a voice in town services.",
           "applyWindow": "Applications for the 2026-27 academic year were accepted until August 31, 2026 (closed for this cycle). Contacts: Joanna Mekeal, Town Secretary, 214-559-9457; Kortney Nelson, Town Librarian, 214-559-9404.",
+          "applyStatus": "closed",
+          "applyBy": "2026-08-31",
           "source": "https://www.hptx.org/828/IMPACT-Committee"
         }
       ],
@@ -4753,6 +4793,8 @@
           "ages": "High school juniors and seniors (by January 2027) who live in Hurst, Euless or Bedford",
           "description": "Joint program of the HEB Chamber of Commerce and the cities of Hurst, Euless and Bedford that teaches students how local government works and encourages community involvement. Classes meet Mondays 5:30 to 7 p.m. at locations around the three cities with a light dinner; no transportation provided. Apply through heb.org.",
           "applyWindow": "Applications for the 2027 program open in November 2026",
+          "applyStatus": "closed",
+          "applyOpens": "2026-11",
           "source": "https://www.hursttx.gov/about-us/city-council/youth-in-government-program"
         },
         {
@@ -4761,6 +4803,7 @@
           "ages": "11 to 17, or 18 if still in high school",
           "description": "Diversion program run jointly by Hurst, Euless and Bedford that lets teens with Class C misdemeanor tickets resolve them outside the regular court system; cases are dismissed on completion. Teens without a ticket can volunteer as jurors (arrive by 5:15 p.m., pre-register by phone, dress code applies). Court meets Monday evenings at Bedford Municipal Court, 2000 Forest Ridge Drive, Bedford. Coordinator Mindy Eichorst, 817-952-2468, teen.court@bedfordtx.gov. Details at https://www.bedfordtx.gov/163/Teen-Court.",
           "applyWindow": "Juror volunteers pre-register by phone before a session",
+          "applyStatus": "rolling",
           "source": "https://www.bedfordtx.gov/163/Teen-Court"
         }
       ],
@@ -4883,6 +4926,7 @@
           "ages": "Middle and high school students (Lively Pointe Youth Center serves ages 12 to 18)",
           "description": "Student-led group that helps plan teen programs, organizes volunteer projects and represents Irving teens at community events across DFW. Meets at 6 p.m. on the first and third Thursdays of each month; run out of Lively Pointe Youth Center, 909 N. O'Connor Road, (972) 721-8090.",
           "applyWindow": "Rolling; complete the IYAC application (https://irvingtx.gov/corecode/storage/uber_resource/uploaded_pdfs/Irving-Youth-Action-Council-Application-PDF_1746333982.pdf) and return it to Lively Pointe",
+          "applyStatus": "rolling",
           "source": "https://irvingtx.gov/teen-programs"
         },
         {
@@ -4891,6 +4935,7 @@
           "ages": "Volunteers must be at least 14 (Irving residency not required); defendants are ages 10 to 18",
           "description": "City-run alternative justice program held one to two Tuesday evenings a month at 5:30 p.m. on the second floor of the Criminal Justice Center, 305 N. O'Connor Road. Teen volunteers serve as defense attorneys, prosecutors, jurors, bailiffs and clerks for peers' Class C misdemeanor cases; attorneys attend an all-day training held each spring and fall. Volunteer details and the online application are at https://irvingtx.gov/index.php?section=teen-court-volunteers; contact (972) 721-3601.",
           "applyWindow": "Ongoing; attorney trainings are held twice a year (spring and fall)",
+          "applyStatus": "rolling",
           "source": "https://irvingtx.gov/index.php?section=teen-court-volunteers"
         },
         {
@@ -4899,6 +4944,7 @@
           "ages": "Grades 9 to 12",
           "description": "Library-based council where teens earn volunteer hours for school by planning upcoming teen programs; each library location meets once a month and you must submit a completed form to take part. The listing found is for West Irving Library.",
           "applyWindow": "Ongoing; submit the participation form at the library",
+          "applyStatus": "rolling",
           "source": "https://irvingtx.gov/index.php?evtid=412&section=events-teens"
         }
       ],
@@ -5141,6 +5187,7 @@
           "ages": "12 to 19 and enrolled in middle school or high school",
           "description": "Regional teen court funded by Keller, Southlake, Grapevine and Colleyville. Teens who received a Class C ticket can keep it off their record by doing service hours and jury duty; other teens volunteer as jurors or as teen attorneys coached by real lawyers. Trials are Tuesday evenings between 5 and 8 p.m. at Southlake Municipal Court, 600 State Street, Southlake. To volunteer, register on the Southlake volunteer website, then email the Teen Court office (there is currently a waitlist). Phone 817-748-8346. Keller appoints one council member and two residents to the Metroport Teen Court Advisory Board that oversees the program.",
           "applyWindow": "Volunteer registration accepted year-round through Southlake; waitlist in effect",
+          "applyStatus": "rolling",
           "source": "https://www.cityofkeller.com/services/boards-commissions"
         },
         {
@@ -5149,6 +5196,7 @@
           "ages": "Teens and tweens",
           "description": "Library-run board for young people who want to be active in the community; members help plan teen programs and events and earn up to 1.5 volunteer hours per meeting. Meets the third Tuesday of the month at 4:30 p.m. at Keller Public Library, 1100 Bear Creek Parkway; snacks provided. Contact library@cityofkeller.com or 817-743-4840.",
           "applyWindow": "Ongoing; attend a meeting",
+          "applyStatus": "rolling",
           "source": "https://www.cityofkeller.com/services/library/teens/teen-advisory-board"
         },
         {
@@ -5157,6 +5205,7 @@
           "ages": "High school sophomores, juniors and seniors",
           "description": "Selected students meet six to nine times a year at Keller High School with Police Chief Brad Fortune to represent Keller's teen community; parent or guardian permission required.",
           "applyWindow": "The application page still lists a deadline of 8 a.m. Monday, Nov. 4 with no year (Nov. 4 falls on a Wednesday in 2026, so the page appears to be from a prior cycle); confirm the current cycle with Keller Police at 817-743-4500",
+          "applyStatus": "unknown",
           "source": "https://www.cityofkeller.com/about-us/departments-h-z/police/who-we-are/chief-s-student-forum-application-keller"
         }
       ],
@@ -5430,6 +5479,8 @@
           "ages": "Lewisville residents in grades 10 to 12, ages 15 to 18 as of Sept. 1",
           "description": "Teens advise the City Council on youth issues, help with special projects and events, evaluate youth programs and plan new activities; monthly meetings over a nine-month term (September to May) with no more than three absences allowed. New members take oaths of office at a joint workshop with council on Sept. 14, 2026.",
           "applyWindow": "Applications due in early August before the term starts (Aug. 4 for the 2026-2027 cohort); apply via the Google Form linked on the program page; contact 972-219-3460",
+          "applyStatus": "closed",
+          "applyBy": "2026-08-04",
           "source": "https://www.cityoflewisville.com/city-hall/city-council-and-mayor/youth-action-council"
         },
         {
@@ -5438,6 +5489,7 @@
           "ages": "Teen defendants cited for Class C misdemeanors; volunteers must be middle or high school students ages 13 to 18 who attend school or live in the greater Lewisville area",
           "description": "Municipal Court program where teens who plead guilty or no contest have their case heard by a jury of peers and complete community service instead of paying a fine. Volunteers first observe a court session, then sign a volunteer agreement; most start as jurors and can move up to bailiff, court clerk, prosecutor, defense attorney and master jury judge. Court sits twice a month from 5:30 to 8 p.m., alternating between Lewisville and Flower Mound, generally on 1st and 3rd Tuesdays (fall 2026: Lewisville Sept. 8, Oct. 6, Nov. 3, Dec. 1; Flower Mound Sept. 22, Oct. 20, Nov. 17, Dec. 15). Contact teencourt@cityoflewisville.com or 972-219-3799.",
           "applyWindow": "Rolling; sign up for specific court dates through the Lewisville United Volunteers portal at volunteer.cityoflewisville.com",
+          "applyStatus": "rolling",
           "source": "https://www.flowermound.gov/461/Youth-Services"
         }
       ],
@@ -5686,6 +5738,7 @@
           "ages": "Little Elm residents in grades 9 to 12",
           "description": "A liaison between the Town Council and local youth on issues affecting young people; members learn how town government works and do community projects. Meets the second Monday of each month at 6 p.m.; one-year terms. Staff liaison Colin Giusti (Colin.Giusti@littleelm.gov); council liaison Idalia Maria Amaya (idalia.amaya@littleelm.gov).",
           "applyWindow": "Not published on the town page; the town recruited members for the current term in summer 2026, so contact the staff liaison about the next cycle",
+          "applyStatus": "unknown",
           "source": "https://www.littleelm.gov/1525/Little-Elm-Youth-Council"
         }
       ],
@@ -5928,6 +5981,7 @@
           "ages": "Mansfield residents in grades 9 to 12 with at least a 2.0 GPA",
           "description": "Group of about 11 to 15 high school students who advise city leaders on youth issues, represent their peers, and plan service projects. Terms run Aug. 1 to July 31; members meet during the first week of each month of the school year at a time set at the August orientation. Applicants complete an application, interview and orientation.",
           "applyWindow": "Main recruitment each spring for the coming school year; 2026-27 applications are closed, but applications are accepted year-round for future openings",
+          "applyStatus": "rolling",
           "source": "https://www.mansfieldtexas.gov/1976/Mansfield-Youth-Council-MYC"
         },
         {
@@ -5936,6 +5990,7 @@
           "ages": "Students entering grades 9 to 12 who live in Mansfield or attend Mansfield ISD schools",
           "description": "Three-day summer teen civic academy (2026 session: July 7 to 9, 8:30 a.m. to 1:30 p.m.) with tours of city facilities such as a fire station and the water treatment plant, plus interactive sessions with city staff on economic development and parks; a feeder for the Mansfield Youth Council.",
           "applyWindow": "Summer 2026 applications closed; check the program page or call 817-276-4200 for the 2027 window",
+          "applyStatus": "closed",
           "source": "https://www.mansfieldtexas.gov/2098/My-Mansfield-Mini-Versity"
         }
       ],
@@ -6247,6 +6302,8 @@
           "ages": "Students entering grades 10-12 who live in McKinney or attend a McKinney-area school",
           "description": "Tech-savvy high school students work with city staff over a three-month term to build digital tools for residents; biweekly meetings at City Hall or virtually; parental consent required for members under 18.",
           "applyWindow": "The page still shows the last cycle (applications Nov. 17 to Dec. 19, 2025 for a January to March 2026 term) and says the current application window is closed; watch the page for the next cohort.",
+          "applyStatus": "closed",
+          "applyBy": "2025-12-19",
           "source": "https://www.mckinneytexas.org/3425/Participate"
         }
       ],
@@ -6501,6 +6558,8 @@
           "ages": "Rising 9th to 12th graders (public, private or homeschool) living inside Mesquite city limits",
           "description": "A city-run council of high school students that promotes youth resources, builds leadership skills, learns how city government works and addresses challenges facing their peers. General body meetings are August through May on the second Monday of each month from 6 to 8 p.m., with team-building sessions in June and July. Run by the Community Services Department, 1616 N. Galloway Ave., 972-216-6424.",
           "applyWindow": "Applications for 2027-28 open in March 2027, with the application and selection timeline posted in January 2027. The usual cycle is: applications open and close in March, interviews and decisions in April, waivers due in May, first meeting in June. Applications for Summer 2026 are closed.",
+          "applyStatus": "closed",
+          "applyOpens": "2027-03",
           "source": "https://www.cityofmesquite.com/4082/Youth-Council-Application"
         },
         {
@@ -6509,6 +6568,7 @@
           "ages": "Adult board (school district staff, business community and residents); positions 6 to 11 require Mesquite residency",
           "description": "An 11-member board created by the City Council to advise on Mesquite Youth Council initiatives and other youth programming: three MISD seats, two business-community seats and six resident seats. Meets at 5:30 p.m. on the second Tuesday every other month starting in January at the Community Services Building, 1616 N. Galloway Ave. Position 5 (business community) is currently vacant. Staff contact: Anthony Cao, Director of Housing and Community Services, 972-216-6427.",
           "applyWindow": "Apply now through the city's online boards application or the City Secretary's Office, 972-216-6244",
+          "applyStatus": "open",
           "source": "https://www.cityofmesquite.com/4083/Youth-Advisory-Board"
         },
         {
@@ -6517,6 +6577,8 @@
           "ages": "Teens ages 16 to 18",
           "description": "Places Mesquite teens in paid summer internships ($13 per hour) to build college and career skills; finishers get a letter of recommendation, a certificate of completion and a City of Mesquite leadership recognition. Run by Youth Services (Sheridan Hodges, youthservices@cityofmesquite.com, 972-329-8738).",
           "applyWindow": "Applications are closed for the 2026-27 school year; the 2026 cycle took applications March 1 to 31, so watch the Youth Services page for the next window",
+          "applyStatus": "closed",
+          "applyBy": "2026-03-31",
           "source": "https://www.cityofmesquite.com/m/newsflash/home/detail/2516"
         }
       ],
@@ -6613,11 +6675,12 @@
       "youthPrograms": [
         {
           "name": "Murphy Youth Advisory Committee",
-          "url": "https://www.murphytx.org/935/Youth-Advisory-Committee",
+          "url": "https://murphytx.civicweb.net/Portal/MeetingInformation.aspx?type=31",
           "ages": "Murphy resident teens in grades 9 to 12 (ages 14 to 18)",
           "description": "A city board of teens that meets once a month on the third Monday at the Murphy Community Center, 205 N. Murphy Road, to discuss ideas that help the city serve its youth. Terms run Aug 1 through May 31 and members can be reappointed until they graduate from high school. Applicants submit the online application through the city's CivicWeb portal, a signed parent waiver, an essay of 500 words or less explaining why they want to serve, and one letter of reference (essay and reference letter for first-time applicants only). Supporting materials go to the City Secretary at kjackson@murphytx.org.",
-          "applyWindow": "The page says applications are being accepted, with no closing date posted; terms begin Aug 1",
-          "source": "https://www.murphytx.org/935/Youth-Advisory-Committee"
+          "applyWindow": "Not confirmed: the city took down this committee's page in 2026 and no longer lists it among its boards, so ask the City Secretary (kjackson@murphytx.org) whether it is taking members",
+          "applyStatus": "unknown",
+          "source": "https://murphytx.civicweb.net/Portal/MeetingInformation.aspx?type=31"
         }
       ],
       "agendaItems": [
@@ -6727,7 +6790,6 @@
         "https://www.murphytx.org/calendar.aspx?view=list&year=2026&month=11&day=17",
         "https://www.murphytx.org/calendar.aspx?view=list&year=2026&month=12&day=1",
         "https://www.murphytx.org/calendar.aspx?view=list&year=2026&month=12&day=15",
-        "https://www.murphytx.org/935/Youth-Advisory-Committee",
         "https://www.cognitoforms.com/CityOfMurphy1/PublicCommentForm",
         "https://censusreporter.org/profiles/16000US4850100-murphy-tx/",
         "https://nominatim.openstreetmap.org/search?format=json&q=206+N+Murphy+Road+Murphy+TX+75094"
@@ -6842,6 +6904,7 @@
           "ages": "High school students who live in North Richland Hills",
           "description": "Liaison between the City Council and local youth: members learn how city government works, hear guest speakers, organize a community service project each semester and report to council yearly. Appointed by the mayor and council to one-year terms (members in good standing are reappointed). Meets the second Wednesday of the month at 6 p.m. at City Hall during the school year.",
           "applyWindow": "Applications for 2026-27 have closed; the next cycle typically opens before the school year. Contact Christy Hardy, 817-427-6004.",
+          "applyStatus": "closed",
           "source": "https://www.nrhtx.com/523/Youth-Advisory-Committee"
         },
         {
@@ -6850,6 +6913,7 @@
           "ages": "12 to 18",
           "description": "Teen court serving North Richland Hills, Watauga and Richland Hills for middle and high school students who received a citation; students without a citation can volunteer as jurors or teen attorneys. Sessions are on Mondays at City Hall, 4301 City Point Drive (use the west parking lot); upcoming dates include Sept. 14, Sept. 28 and Oct. 5, 2026. Coordinator Rafael Martinez, 817-427-6734.",
           "applyWindow": "Volunteer application accepted online year-round",
+          "applyStatus": "rolling",
           "source": "https://www.nrhtx.com/331/Teen-Court"
         }
       ],
@@ -7077,6 +7141,7 @@
           "ages": "Jurors 14-18, attorneys 15-18",
           "description": "Teen volunteers serve as jurors and attorneys in a municipal court diversion program for teen defendants. Teen Court is usually held on Monday evenings, about twice a month, with a volunteer shift from 5:30 to 8:30 p.m. As of September 2026 the volunteer portal says the juror pool is full and not taking new juror volunteers.",
           "applyWindow": "Rolling; create an account on the city volunteer portal (volunteers.plano.gov/agency/detail/planoteencourt/) using the teen application and check the Teen Court box, or email PlanoTeenCourt@plano.gov",
+          "applyStatus": "rolling",
           "source": "https://www.plano.gov/teen-court"
         },
         {
@@ -7085,6 +7150,9 @@
           "ages": "Rising high school juniors and seniors enrolled in Plano ISD",
           "description": "Paid earn-and-learn summer internships with Plano businesses, nonprofits and civic organizations, run with the Mayor's office; the 2026 program ran June 8 to July 31.",
           "applyWindow": "2026 cycle opened Jan 16 and closed Feb 9 at 5 p.m.; expect a similar winter window for 2027",
+          "applyStatus": "closed",
+          "applyBy": "2026-02-09",
+          "applyOpens": "2027-01",
           "source": "https://planomayorsinterns.org/"
         },
         {
@@ -7093,6 +7161,8 @@
           "ages": "13-18",
           "description": "Library teen volunteer group that promotes teen library services and helps plan and present teen programs; about 5 hours per month.",
           "applyWindow": "Applications open around May 1 each year; the portal lets you sign up to be notified for 2027",
+          "applyStatus": "closed",
+          "applyOpens": "2027-05",
           "source": "https://volunteers.plano.gov/agency/detail/?agency_id=154986"
         }
       ],
@@ -7361,6 +7431,7 @@
           "ages": "13-18",
           "description": "Library teen board that plans teen events, advises staff on teen interests, and earns volunteer hours; meets once a month before or after teen programs, and graduating seniors may apply for the Friends of the Library Dot McCalpin scholarship.",
           "applyWindow": "Rolling: return the application and liability waiver (with parent signature) to the Youth Services desk or email richardsonteenadvisoryboard@gmail.com",
+          "applyStatus": "rolling",
           "source": "https://www.cor.net/departments/public-library/teens/teen-advisory-board"
         }
       ],
@@ -7541,6 +7612,7 @@
           "ages": "High school sophomores, juniors and seniors",
           "description": "Seven regular members plus five alternates appointed by the City Council advise Council on the needs of Rowlett youth, learn the local political process, serve as city ambassadors, and volunteer at city events. Meets 6 p.m. on the second Monday of each month at the Rowlett Community Centre, 5300 Main St., for a one-year term running August through July. Applicants under 18 need a notarized waiver of liability.",
           "applyWindow": "Applications are available from the City Secretary's Office (City Hall, 4000 Main St., 972-412-6109) or by email and can be dropped off or emailed back; the City Council makes appointments in July for the August-to-July term. Contact Recreation Supervisor Erin Mudry (emudry@rowlett.com, 972-463-3948) for timing.",
+          "applyStatus": "unknown",
           "source": "https://www.rowletttx.gov/1598/Rowlett-Youth-Advisory-Council"
         },
         {
@@ -7549,6 +7621,8 @@
           "ages": "Rowlett residents in grades 9-12",
           "description": "High school students can be appointed as non-voting junior alternate members of Rowlett's advisory boards and commissions to take part in discussions. The Junior Alternate Member application must be completed, printed and notarized, then delivered to the City Secretary's Office or emailed to citysec@rowlett.com.",
           "applyWindow": "Applications are accepted from Sept. 1 through Oct. 15 each year",
+          "applyStatus": "open",
+          "applyBy": "2026-10-15",
           "source": "https://www.rowletttx.gov/321/Boards-and-Commissions"
         }
       ],
@@ -7828,10 +7902,12 @@
           "ages": "Sachse residents in high school grades 9-12",
           "description": "Two non-voting youth advisor seats on the Parks & Recreation Board; advisors join discussions, evaluate issues relevant to youth and make recommendations to the board. One seat is currently vacant (term expiring 2027); the other seat's term expires in 2026.",
           "applyWindow": "Applications are being accepted now on a rolling basis; return the Youth Advisor Application (with parent or guardian waiver for minors) to the City Secretary's Office, 3815 Sachse Rd., Building B, or call 469-429-4773",
+          "applyStatus": "rolling",
           "source": "https://www.cityofsachse.com/DocumentCenter/View/2621"
         },
         {
           "name": "Teen R.I.S.E. (Responsibility, Integrity, Success, and Empowerment)",
+          "applyStatus": "unknown",
           "url": "https://www.cityofsachse.com/837/Teen-RISE",
           "ages": "12-17",
           "description": "Parks & Recreation program where teens socialize, learn life skills and volunteer (board game and crochet night, decorating at Oxford Glen Memory Care, Heritage Park clean-up). Not a governance board, but a city-run youth service program; register online by activity number.",
@@ -7929,6 +8005,8 @@
           "ages": "Grades 9 to 12; must live in Southlake or attend a Carroll ISD school",
           "description": "City youth commission whose members advise the City Council on youth-related issues, work alongside city staff, take on community service projects, help at city events and represent Southlake's youth voice. Seven students serve as full members with additional alternates; the group meets the second Monday of each month at 4:15 p.m. from October through May at The Marq Southlake, 285 Shady Oaks Drive, and meetings are open to the public.",
           "applyWindow": "Applications for the 2026-27 term (October to May) were due August 21, 2026; the application requires an online form, parental consent form, essays and letters of recommendation, followed by an interview with the SYAC Board. Watch the SYAC page in summer 2027 for the next cycle. Contact: Vicky Schiber, 817-748-8186.",
+          "applyStatus": "closed",
+          "applyBy": "2026-08-21",
           "source": "https://www.cityofsouthlake.com/262/Southlake-Youth-Action-Commission"
         },
         {
@@ -7937,6 +8015,7 @@
           "ages": "Teens (middle and high school students volunteer as jurors and attorneys); the program handles defendants ages 12 to 19",
           "description": "Southlake administers the joint Grapevine, Southlake, Colleyville and Keller teen court, where student volunteers act as attorneys and jurors in real Class C misdemeanor cases for juvenile defendants who work off their citations through community service.",
           "applyWindow": "Rolling. Register through the Southlake volunteer website (applications take about a week or more to process), then email Teen Court staff to be placed as a volunteer, since the volunteer site has no Teen Court signup option; a waitlist was in effect as of September 2026. Phone 817-748-8346, 600 State Street; office hours Monday to Friday, 8:00 a.m. to 5:00 p.m.",
+          "applyStatus": "rolling",
           "source": "https://www.cityofsouthlake.com/106/Metroport-Teen-Court"
         }
       ],
@@ -8179,6 +8258,7 @@
           "ages": "Grades 7 to 12; must live in The Colony, attend a school in The Colony, or attend a Lewisville ISD or Little Elm ISD school",
           "description": "Free week-long summer program run by The Colony Police Department (9 a.m. to 4 p.m. at 5151 North Colony Blvd) with hands-on sessions on police work, meant to build a positive relationship between teens and officers; t-shirts and lunches are provided. The 2026 session ran June 22 to 26.",
           "applyWindow": "Registration opens ahead of the summer session; apply online or email the printable application and waiver forms to the academy coordinator (Sgt. TJ Vowell-Zundel) or drop them at the Police Department (972-625-1887)",
+          "applyStatus": "closed",
           "source": "https://www.thecolonytx.gov/302/Teen-Police-Academy"
         }
       ],
@@ -8419,6 +8499,8 @@
           "ages": "University Park residents in grades 9 through 12 at the start of the upcoming academic year",
           "description": "Liaison between city youth and the City Council that advises on items affecting teens, meets monthly to review routine business, promotes the city recycling program, and helps staff community events such as fishing derbies and holiday celebrations.",
           "applyWindow": "Applications were due March 31, 2026 for the fall 2026 cycle (the deadline recurs each spring); interviews guaranteed for the first 30 applicants, others waitlisted. Contacts: Amanda Hartwick (ahartwick@uptexas.org), Paige Ruedy (pruedy@uptexas.org).",
+          "applyStatus": "closed",
+          "applyBy": "2026-03-31",
           "source": "https://www.uptexas.org/371/Youth-Advisory-Commission"
         }
       ],
@@ -8610,6 +8692,7 @@
           "ages": "Jurors: ages 14 to 18 and attending high school; defendants: ages 13 to 17 (some 18-year-olds may be eligible)",
           "description": "A municipal court program in which teen volunteers serve as jurors for Class C misdemeanor cases involving juvenile defendants. All sessions are Wednesday nights at 6 p.m. at the Municipal Court, 2000 N. Highway 78; jurors arrive by 5:45 p.m. Posted dates run from Aug 12, 2026 through May 5, 2027 (roughly the first Wednesday of each month). Jurors must keep a C average in all classes, have parent consent and stay drug and alcohol free.",
           "applyWindow": "Ongoing; contact the Juvenile Case Manager (Melissa Davis, 972-429-8085, melissa.davis@wylietexas.gov)",
+          "applyStatus": "rolling",
           "source": "https://www.wylietexas.gov/departments/municipal_court/teen_court.php"
         },
         {
@@ -8618,10 +8701,12 @@
           "ages": "Wylie ISD students entering 8th or 9th grade (just finished 7th or 8th)",
           "description": "A Wylie Police Department program run by the school resource officers for students who are interested in law enforcement or just curious about the profession.",
           "applyWindow": "Application dates and session dates are not posted on the program page; contact the Wylie Police Department School Resource Officers Division at 972-442-8171",
+          "applyStatus": "unknown",
           "source": "https://www.wylietexas.gov/community2/youth_programs/index.php"
         },
         {
           "name": "P.O.L.I.C.E. Club (Practice of Leadership, Integrity and Character Education)",
+          "applyStatus": "unknown",
           "url": "https://www.wylietexas.gov/community2/youth_programs/index.php",
           "ages": "Wylie ISD students in grades 9 to 12",
           "description": "A high-school-level leadership and character club sponsored by the Wylie Police Department's school resource officers.",
@@ -8629,6 +8714,7 @@
         },
         {
           "name": "Wylie Youth Enrichment Program",
+          "applyStatus": "unknown",
           "url": "https://www.wylietexas.gov/community2/youth_programs/index.php",
           "ages": "Adolescents; no grade range is posted",
           "description": "A Wylie Police Department program for adolescents who are at risk or heading down a troubled path. It promotes respect for self and others, tobacco, drug and alcohol awareness, teen pregnancy education and community volunteerism.",

@@ -1,0 +1,468 @@
+{
+ "Title": "City Council Meeting - October 13 2026",
+ "MeetingType": "City Council Meeting",
+ "MeetingDate": "2026-10-13T23:00:00",
+ "CreateTimeUtc": "2026-10-07T21:30:08.683",
+ "ChangeTimeUtc": "2026-10-08T13:27:45.237",
+ "Id": "95175214-f833-4db3-8a77-0a8e49312ab9",
+ "WP_Sections": [
+  {
+   "Number": 9,
+   "Title": "Presentations by the City Council",
+   "WP_Items": []
+  },
+  {
+   "Number": 2,
+   "Title": "Invocation - Mother Amanda Kotval, All Saints Episcopal Church",
+   "WP_Items": [
+    {
+     "Number": 0,
+     "Title": "Invocation - Minutes Placeholder"
+    }
+   ]
+  },
+  {
+   "Number": 14,
+   "Title": "Adjournment",
+   "WP_Items": [
+    {
+     "Number": 0,
+     "Title": "Adjournment"
+    }
+   ]
+  },
+  {
+   "Number": 3,
+   "Title": "Pledges of Allegiance to the United States and the State of Texas",
+   "WP_Items": [
+    {
+     "Number": 0,
+     "Title": "Pledges of Allegiance - Minutes Placeholder"
+    }
+   ]
+  },
+  {
+   "Number": 5,
+   "Title": "Consideration of Reduction to Registered Speakers' Allotted Time",
+   "WP_Items": [
+    {
+     "Number": 1,
+     "Title": "Consideration of Reduction to Registered Speakers' Allotted Time - Minutes Placeholder"
+    }
+   ]
+  },
+  {
+   "Number": 13,
+   "Title": "Executive Session",
+   "WP_Items": [
+    {
+     "Number": 0,
+     "Title": "Executive Session"
+    }
+   ]
+  },
+  {
+   "Number": 11,
+   "Title": "Zoning Hearing",
+   "WP_Items": [
+    {
+     "Number": 13,
+     "Title": "ZC-26-119 (CD 6) 6345 Altamesa Boulevard"
+    },
+    {
+     "Number": 14,
+     "Title": "ZC-26-121 (CD 2) Text Amendment Panther Island"
+    },
+    {
+     "Number": 7,
+     "Title": "ZC-26-106 (CD 5) 7911 Meadowbrook Drive"
+    },
+    {
+     "Number": 1,
+     "Title": "ZC-26-017 (CD 6) (Address 5332 Sycamore School Road) (Continued from a Previous Meeting)"
+    },
+    {
+     "Number": 6,
+     "Title": "ZC-26-105 (CD 10) 9201 NW US Highway 287"
+    },
+    {
+     "Number": 4,
+     "Title": "ZC-26-084 (CD 9) 2800 Cleburne Road 1600 Block W. Cantey Street"
+    },
+    {
+     "Number": 9,
+     "Title": "ZC-26-112 (CD 7) 3608 & 3612 Dexter Avenue"
+    },
+    {
+     "Number": 2,
+     "Title": "ZC-26-064 (CD 7) 1401 Alemeda Street"
+    },
+    {
+     "Number": 15,
+     "Title": "ZC-26-099 (CD 7) Approximately 950 feet west of the western end of the 2700 block of Muscogee Drive where the archeological site is bounded within a fenced area"
+    },
+    {
+     "Number": 10,
+     "Title": "ZC-26-113 (CD 7) 2801 Shoshoni Drive"
+    },
+    {
+     "Number": 12,
+     "Title": "ZC-26-117 (CD 2) Generally bounded by the Trinity River from N. Main Street, the Clear Fork of the Trinity River, Arthur and Kansas Streets and the Fort Worth & Western Railroad"
+    },
+    {
+     "Number": 5,
+     "Title": "ZC-26-101 (CD 10) 2101 - 2200 (evens) Avondale Haslet Road"
+    },
+    {
+     "Number": 8,
+     "Title": "ZC-26-107 (CD 8) 1125 E. Broadway Avenue"
+    },
+    {
+     "Number": 11,
+     "Title": "ZC-26-114 (CD 2) Northside (Stockyards) TEXRail Zoning"
+    },
+    {
+     "Number": 3,
+     "Title": "ZC-26-071 (CD 2) 1297 - 1309 (odds) Cantrel Sansom Road"
+    }
+   ]
+  },
+  {
+   "Number": 9.1,
+   "Title": "Changes in Membership on Boards and Commissions",
+   "WP_Items": [
+    {
+     "Number": 1,
+     "Title": "Board Reappointments - District 6"
+    },
+    {
+     "Number": 2,
+     "Title": "Board Reappointments - District 8"
+    },
+    {
+     "Number": 3,
+     "Title": "Board Reappointment - At Large for Human Relations Commission"
+    },
+    {
+     "Number": 4,
+     "Title": "Board Appointments - At Large for Mayor’s Committee on Persons with Disabilities"
+    }
+   ]
+  },
+  {
+   "Number": 4,
+   "Title": "Special Presentations, Introductions, Etc.",
+   "WP_Items": [
+    {
+     "Number": 3,
+     "Title": "Presentation of a Recognition Honoring Becky Ramirez for Community Leadership and Impact"
+    },
+    {
+     "Number": 1,
+     "Title": "Presentation of a Recognition to the Susan G. Komen of Greater Fort Worth in Observance of Breast Cancer Awareness Month"
+    },
+    {
+     "Number": 2,
+     "Title": "Presentation of a Recognition Honoring Coach Darius White of Dunbar High School"
+    }
+   ]
+  },
+  {
+   "Number": 1,
+   "Title": "Call to Order",
+   "WP_Items": [
+    {
+     "Number": 0,
+     "Title": "Call to Order - Minutes Placeholder"
+    }
+   ]
+  },
+  {
+   "Number": 10.2,
+   "Title": "Resolutions",
+   "WP_Items": [
+    {
+     "Number": 2,
+     "Title": "2027 Council Meeting Schedule"
+    },
+    {
+     "Number": 1,
+     "Title": "03PID22 IA6 Cost Determination"
+    }
+   ]
+  },
+  {
+   "Number": 12,
+   "Title": "Public Comments",
+   "WP_Items": [
+    {
+     "Number": 1,
+     "Title": "Public Comments"
+    }
+   ]
+  },
+  {
+   "Number": 0.1,
+   "Title": "Front Page",
+   "WP_Items": [
+    {
+     "Number": 1,
+     "Title": "Front Page - Agenda"
+    }
+   ]
+  },
+  {
+   "Number": 7.2,
+   "Title": "Purchase of Equipment, Materials, and Services - Consent Items",
+   "WP_Items": [
+    {
+     "Number": 3,
+     "Title": "RFP 26-0182 Standby Disaster Debris Removal and Emergency Response Services ENV"
+    },
+    {
+     "Number": 6,
+     "Title": "RFP 26-0226 Filter Media"
+    },
+    {
+     "Number": 2,
+     "Title": "Amend COOP 57413 MRO Supplies"
+    },
+    {
+     "Number": 7,
+     "Title": "RFP 26-0211 Residential Plumbing Services WTR"
+    },
+    {
+     "Number": 9,
+     "Title": "Amend Coop CSC 62438 Repair Glass Damage PMD"
+    },
+    {
+     "Number": 4,
+     "Title": "RFP 26-0222 Aluminum, Iron, Rebar and Steel WTR"
+    },
+    {
+     "Number": 8,
+     "Title": "RFP 26-0258 Kennel Doors CODE"
+    },
+    {
+     "Number": 1,
+     "Title": "RFP 26-0224 Paint and Paint Supplies PARD"
+    },
+    {
+     "Number": 5,
+     "Title": "Amend CSC 64847 Flotec, Inc."
+    }
+   ]
+  },
+  {
+   "Number": 7.3,
+   "Title": "Land - Consent Items",
+   "WP_Items": [
+    {
+     "Number": 3,
+     "Title": "Monroe Building Sale"
+    },
+    {
+     "Number": 2,
+     "Title": "Fort Worth Spinks Village Creek Parkway and Stone Road Widening Project"
+    },
+    {
+     "Number": 1,
+     "Title": "209 Nursery Ln - Purchase"
+    }
+   ]
+  },
+  {
+   "Number": 6,
+   "Title": "Items to be Continued or Withdrawn",
+   "WP_Items": [
+    {
+     "Number": 0,
+     "Title": "Items to be Withdrawn or Continued - Minutes Placeholder"
+    }
+   ]
+  },
+  {
+   "Number": 8,
+   "Title": "Announcements by City Council members and staff",
+   "WP_Items": [
+    {
+     "Number": 0,
+     "Title": "Announcements by City Council members and staff"
+    }
+   ]
+  },
+  {
+   "Number": 7.1,
+   "Title": "General - Consent Items",
+   "WP_Items": [
+    {
+     "Number": 15,
+     "Title": "EJES, Inc. Engineering Agreement Amendment No. 1 for Water and Sanitary Sewer Replacements Contract 2019, WSM-M"
+    },
+    {
+     "Number": 14,
+     "Title": "Acadia Services, LLC Construction Contract Change Order No. 2 for Northside IV 24-inch Water Transmission Main, Phase 1C Segment 3"
+    },
+    {
+     "Number": 18,
+     "Title": "Ordinance Establishing Sewer Capacity Charge for Panther Island 24-inch Siphon"
+    },
+    {
+     "Number": 22,
+     "Title": "RTCC Design Bid Build Contract"
+    },
+    {
+     "Number": 12,
+     "Title": "Alan Plummer Associates, Inc. Amendment No. 3 for Mary's Creek Water Reclamation Facility"
+    },
+    {
+     "Number": 13,
+     "Title": "Hazen and Sawyer Engineering Agreement for Village Creek Water Reclamation Facility West Fork Influent Lift Station"
+    },
+    {
+     "Number": 9,
+     "Title": "Ordinance Amending FY2027 Wholesale Rates for Water and Wastewater"
+    },
+    {
+     "Number": 4,
+     "Title": "Revise Operating PID Policy"
+    },
+    {
+     "Number": 8,
+     "Title": "Sycamore Park TPWD Rider Grant Acceptance"
+    },
+    {
+     "Number": 6,
+     "Title": "Western Municipal Construction of Texas, LLC Construction Contract and GFT Infrastructure, Inc. Amendment No. 2 for Water and Sanitary Sewer Replacement Contract 2021 WSM-A Part 1"
+    },
+    {
+     "Number": 7,
+     "Title": "Risk 2021 Winter Storm Closeout"
+    },
+    {
+     "Number": 19,
+     "Title": "Ordinance Establishing Sewer Capacity Charge for Panther Island 30-Inch Sewer Line"
+    },
+    {
+     "Number": 21,
+     "Title": "CCPD School Resource Officer Program FY27"
+    },
+    {
+     "Number": 17,
+     "Title": "Freese and Nichols, Inc. Engineering Agreement for Sanitary Sewer Main M-245 Parallel Relief Main, Part 3"
+    },
+    {
+     "Number": 1,
+     "Title": "Approval of Minutes"
+    },
+    {
+     "Number": 3,
+     "Title": "FY26 BJA JAG Grant Program-Formula"
+    },
+    {
+     "Number": 23,
+     "Title": "Notice of Claims for Alleged Damages or Injuries"
+    },
+    {
+     "Number": 2,
+     "Title": "Ordinance Establishing Panther Island Sewer Capacity Charge for 20-Inch Sewer Line"
+    },
+    {
+     "Number": 11,
+     "Title": "Ordinance Establishing the Southside III Water Main Capacity Charge (Primrose)"
+    },
+    {
+     "Number": 10,
+     "Title": "Meacham Admin Building Window Replacement Project Budget"
+    },
+    {
+     "Number": 5,
+     "Title": "ACME Electric Company Agreement Change Order No. 7 for Westside Water Treatment Plant Generators and Emergency Preparation Plan Part 2"
+    },
+    {
+     "Number": 16,
+     "Title": "Gra-Tex Utilities, Inc. Construction Contract Change Order No. 3 for Sanitary Sewer Rehabilitation, Contract 110"
+    },
+    {
+     "Number": 20,
+     "Title": "Development Agreement for Panther Island Partners Phase 1"
+    }
+   ]
+  },
+  {
+   "Number": 7.4,
+   "Title": "Award of Contract - Consent Items",
+   "WP_Items": [
+    {
+     "Number": 4,
+     "Title": "GBTM Sendera, LLC Community Facilities Agreement for Oversizing the Comancheria Way 24-Inch Waterline"
+    },
+    {
+     "Number": 5,
+     "Title": "Fire Station #43 Public Art Project"
+    },
+    {
+     "Number": 2,
+     "Title": "Kimley-Horn and Associates Engineering Agreement Amendment No. 3 for the McCart Berry Flood Mitigation Project"
+    },
+    {
+     "Number": 8,
+     "Title": "Freese and Nichols, Inc. Engineering Agreement for Village Creek Water Reclamation Facility Master Plan"
+    },
+    {
+     "Number": 7,
+     "Title": "Infrasync Technology Services Engineering Agreement for Development of Water Inflow and Infiltration 5-Year Roadmap"
+    },
+    {
+     "Number": 9,
+     "Title": "Innovative Road Composites, LLC Sole Source Purchase Agreement for Composite Joint and Crack Seal Products"
+    },
+    {
+     "Number": 1,
+     "Title": "Kimley-Horn and Associates Engineering Agreement Amendment No. 2 for the Bonds Ranch - Wagley Robertson Project"
+    },
+    {
+     "Number": 3,
+     "Title": "Oak Grove Park Engineering Amendment"
+    },
+    {
+     "Number": 6,
+     "Title": "Freese and Nichols, Inc. Engineering Agreement Amendment No. 2 for Lebow Channel Flood Mitigation"
+    }
+   ]
+  },
+  {
+   "Number": 10,
+   "Title": "Non-Consent Agenda",
+   "WP_Items": []
+  },
+  {
+   "Number": 10.1,
+   "Title": "Land",
+   "WP_Items": [
+    {
+     "Number": 3,
+     "Title": "Condemn CPN 104940 - P17 - Sandstrom Business Park, Ltd."
+    },
+    {
+     "Number": 2,
+     "Title": "Condemn C02723 P18 2708 Rouse Street"
+    },
+    {
+     "Number": 1,
+     "Title": "Condemn P59 & P60 Northside III 54-inch Water Transmission Main Alignment and Land Study"
+    }
+   ]
+  },
+  {
+   "Number": 7,
+   "Title": "Consent Agenda",
+   "WP_Items": [
+    {
+     "Number": 0,
+     "Title": "Consent Agenda Preamble & Minutes Placeholder"
+    }
+   ]
+  }
+ ]
+}

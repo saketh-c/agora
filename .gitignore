@@ -24,5 +24,8 @@ Thumbs.db
 # Headlines gathered at deploy time by scripts/build-news.mjs, never committed
 packages/web/public/news-snapshot.json
 
+# Meetings and agendas read from city agenda sites by scripts/build-agendas.mjs, never committed
+packages/web/public/agendas-snapshot.json
+
 # On-device vision models, fetched by scripts/fetch-models.mjs (about 10 MB)
 packages/web/public/models/

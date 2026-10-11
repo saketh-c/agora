@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { nextMeetingFor, t } from '@agora/core';
 import { useCities } from '../lib/DataProvider.jsx';
 import { useStore } from '../lib/store.jsx';
-import { MeetingDetail, MeetingDetailBadge, Sheet } from '../components/ui/index.js';
+import { MeetingDetail, MeetingDetailBadge, MeetingShare, Sheet } from '../components/ui/index.js';
 import HomeFirst from '../components/home/HomeFirst.jsx';
 import HomeReturning from '../components/home/HomeReturning.jsx';
 import useClock from '../components/home/useClock.js';
@@ -27,7 +27,7 @@ function MeetingSheet({ id, onClose, onOpenMeeting }) {
     [meeting, city, today, now],
   );
   return (
-    <Sheet open={Boolean(found)} onClose={onClose} variant="side" labelledBy="home-md-h" barStart={meeting ? <MeetingDetailBadge meeting={meeting} homeCityId={prefs.homeCityId} /> : null}>
+    <Sheet open={Boolean(found)} onClose={onClose} variant="side" labelledBy="home-md-h" barStart={meeting ? <MeetingDetailBadge meeting={meeting} homeCityId={prefs.homeCityId} /> : null} barEnd={meeting ? <MeetingShare meeting={meeting} /> : null}>
       {meeting && <MeetingDetail meeting={meeting} city={city} today={today} now={now} headingId="home-md-h" nextSpeakable={nextSpeakable} onOpenMeeting={onOpenMeeting} />}
     </Sheet>
   );
@@ -39,13 +39,17 @@ function MeetingSheet({ id, onClose, onOpenMeeting }) {
  * that Back closes. (?setup=1, "Your city, topics and times", is the shell's: see SetupHost.)
  */
 export default function Home() {
-  const { setupComplete, profile } = useStore();
+  const { setupComplete, profile, resetSetup } = useStore();
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
   // The profile that just finished setup here: its returning view takes focus on arrival.
   const [arrived, setArrived] = useState(null);
   const [saved, setSaved] = useState('');
+  // What the first-visit answer saved, so the returning view can confirm it with Undo.
+  const [confirm, setConfirm] = useState(null);
+  // After Undo, the first-visit question takes the cursor again.
+  const [undone, setUndone] = useState(null);
 
   // Clear the spoken confirmation, so the same words are announced again next time.
   useEffect(() => {
@@ -92,14 +96,31 @@ export default function Home() {
   return (
     <div className="home-page">
       {setupComplete ? (
-        <HomeReturning key={profile.id} focusHeading={arrived === profile.id} onOpenMeeting={openMeeting} />
+        <HomeReturning
+          key={profile.id}
+          focusHeading={arrived === profile.id}
+          onOpenMeeting={openMeeting}
+          confirm={confirm && confirm.profileId === profile.id ? confirm : null}
+          onDismissConfirm={() => setConfirm(null)}
+          onUndo={() => {
+            if (!confirm) return;
+            resetSetup(confirm.before);
+            setConfirm(null);
+            setArrived(null);
+            setUndone(profile.id);
+            setSaved(t('home.confirm.undone'));
+          }}
+        />
       ) : (
         <HomeFirst
           key={profile.id}
           onOpenMeeting={openMeeting}
-          onDone={(place) => {
+          focusPlace={undone === profile.id}
+          onDone={(info) => {
             setArrived(profile.id);
-            setSaved(t('home.setup.ready', { city: place.city.name }));
+            setUndone(null);
+            setConfirm({ ...info, profileId: profile.id });
+            setSaved(t('home.setup.ready', { city: info.city.name }));
           }}
         />
       )}

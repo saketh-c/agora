@@ -1,0 +1,44 @@
+[
+ {
+  "EventId": 1155,
+  "EventLastModifiedUtc": "2026-10-06T19:45:39.2",
+  "EventBodyId": 138,
+  "EventBodyName": "City Council",
+  "EventDate": "2026-10-12T00:00:00",
+  "EventTime": "7:00 PM",
+  "EventAgendaStatusName": "Final",
+  "EventLocation": "Senator Florence Shapiro Council Chambers",
+  "EventAgendaFile": "https://plano.legistar1.com/plano/meetings/2026/10/1155_A_City_Council_26-10-12_City_Council_Agenda.pdf",
+  "EventAgendaLastPublishedUTC": "2026-10-06T19:45:39.477",
+  "EventComment": null,
+  "EventInSiteURL": "https://plano.legistar.com/MeetingDetail.aspx?LEGID=1155&GID=1009&G=37981C5B-E71A-4EA1-9EF5-B1B2D6EED57C"
+ },
+ {
+  "EventId": 1176,
+  "EventLastModifiedUtc": "2026-10-06T19:39:11.377",
+  "EventBodyId": 184,
+  "EventBodyName": "City Council Preliminary Open Meeting",
+  "EventDate": "2026-10-12T00:00:00",
+  "EventTime": "5:00 PM",
+  "EventAgendaStatusName": "Final",
+  "EventLocation": "Senator Florence Shapiro Council Chambers",
+  "EventAgendaFile": "https://plano.legistar1.com/plano/meetings/2026/10/1176_A_City_Council_Preliminary_Open_Meeting_26-10-12_City_Council_Agenda.pdf",
+  "EventAgendaLastPublishedUTC": "2026-10-06T19:38:42.173",
+  "EventComment": null,
+  "EventInSiteURL": "https://plano.legistar.com/MeetingDetail.aspx?LEGID=1176&GID=1009&G=37981C5B-E71A-4EA1-9EF5-B1B2D6EED57C"
+ },
+ {
+  "EventId": 1190,
+  "EventLastModifiedUtc": "2026-08-31T14:21:52.79",
+  "EventBodyId": 179,
+  "EventBodyName": "Planning & Zoning Commission",
+  "EventDate": "2026-12-25T00:00:00",
+  "EventTime": "6:00 PM",
+  "EventAgendaStatusName": "Hidden",
+  "EventLocation": "Senator Florence Shapiro Council Chambers",
+  "EventAgendaFile": null,
+  "EventAgendaLastPublishedUTC": null,
+  "EventComment": "DUMMY MEETING - FOR LOST ITEMS",
+  "EventInSiteURL": "https://plano.legistar.com/MeetingDetail.aspx?LEGID=1190&GID=1009&G=37981C5B-E71A-4EA1-9EF5-B1B2D6EED57C"
+ }
+]

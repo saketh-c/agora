@@ -29,6 +29,8 @@ import {
   isLocale,
   setLocale,
   localizeCities,
+  planLiveAgendas,
+  applyLivePlans,
 } from '@agora/core';
 import { fetchNews } from './news.js';
 import { loadTranslations } from '@agora/core/node';
@@ -237,21 +239,44 @@ function staticCacheHeaders(res, relativePath) {
   const rel = relativePath.split(path.sep).join('/');
   const base = path.basename(rel);
   if (rel.startsWith('assets/')) res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-  else if (/\.html$/.test(base) || ['sw.js', 'registerSW.js', 'manifest.webmanifest', 'news-snapshot.json'].includes(base) || /^workbox-.*\.js$/.test(base)) res.setHeader('Cache-Control', 'no-cache');
+  else if (/\.html$/.test(base) || ['sw.js', 'registerSW.js', 'manifest.webmanifest', 'news-snapshot.json', 'agendas-snapshot.json'].includes(base) || /^workbox-.*\.js$/.test(base)) res.setHeader('Cache-Control', 'no-cache');
   else res.setHeader('Cache-Control', 'public, max-age=3600');
 }
 
 /**
  * Build the Express app. Data is injected so tests can pass fixtures.
- * @param {{cities: object[], news: {sources: object[], topicLinks: object[]}, webDist?: string, now?: () => Date, translations?: (lang: string) => object|null, limits?: Partial<typeof DEFAULT_LIMITS>, trustProxy?: string|boolean|number, newsWaitMs?: number, geocoder?: typeof resolvePlace}} deps
+ * `agendas` (optional) holds the live agenda snapshot the server refreshes (see index.js):
+ * { snapshot(): object|null, version: number }. Its meetings and agenda items are merged on top of
+ * the curated cities (core/src/agendas.js), and GET /api/agendas returns it for the web app.
+ * @param {{cities: object[], news: {sources: object[], topicLinks: object[]}, agendas?: {snapshot: () => object|null, version: number}, webDist?: string, now?: () => Date, translations?: (lang: string) => object|null, limits?: Partial<typeof DEFAULT_LIMITS>, trustProxy?: string|boolean|number, newsWaitMs?: number, geocoder?: typeof resolvePlace}} deps
  */
-export function createApp({ cities, news, webDist, now = () => new Date(), translations = loadTranslationsSafely, limits: limitOverrides = {}, trustProxy = process.env.TRUST_PROXY, newsWaitMs = 2500, geocoder = resolvePlace }) {
+export function createApp({ cities, news, agendas = null, webDist, now = () => new Date(), translations = loadTranslationsSafely, limits: limitOverrides = {}, trustProxy = process.env.TRUST_PROXY, newsWaitMs = 2500, geocoder = resolvePlace }) {
   const limits = { ...DEFAULT_LIMITS, ...(Number(process.env.AI_DAILY_LIMIT) > 0 ? { aiPerDay: Number(process.env.AI_DAILY_LIMIT) } : {}), ...limitOverrides };
-  // City data localized per language, built once per language and reused.
-  const localized = new Map([['en', cities]]);
+  // City data localized per language, built once per language and reused. A refreshed agenda
+  // snapshot (a new agendas.version) clears the cache, so every language picks it up.
+  const localized = new Map();
+  let livePlans = new Map();
+  let liveVersion = null;
+  const syncLive = () => {
+    const version = agendas ? agendas.version : null;
+    if (version === liveVersion) return;
+    liveVersion = version;
+    try {
+      livePlans = agendas ? planLiveAgendas(cities, agendas.snapshot()) : new Map();
+    } catch (e) {
+      livePlans = new Map();
+      console.warn(`Live agendas could not be merged: ${(e && e.message) || e}`);
+    }
+    localized.clear();
+    // Agenda item positions can shift with new items, and explanations are cached by position.
+    explanations.clear();
+    cityIndex = new Map(citiesIn('en').map((c) => [c.cityId, c]));
+  };
   const citiesIn = (lang) => {
+    syncLive();
     if (localized.has(lang)) return localized.get(lang);
-    const list = localizeCities(cities, translations(lang));
+    const strings = lang === 'en' ? null : translations(lang);
+    const list = applyLivePlans(localizeCities(cities, strings), livePlans, { strings, locale: lang });
     localized.set(lang, list);
     return list;
   };
@@ -297,7 +322,7 @@ export function createApp({ cities, news, webDist, now = () => new Date(), trans
   app.use('/api', limiter(limits.api));
 
   const today = () => todayStr('America/Chicago', now());
-  const cityIndex = new Map(cities.map((c) => [c.cityId, c]));
+  let cityIndex = new Map(cities.map((c) => [c.cityId, c]));
   const invalid = (res, req, field) => res.status(400).json({ error: apiMessage('invalidField', { field }, req.lang), code: 'invalid_input', field });
 
   /**
@@ -306,7 +331,8 @@ export function createApp({ cities, news, webDist, now = () => new Date(), trans
    * up across languages because localizing a city keeps the order of its items.
    */
   const findAgendaItem = ({ cityId, title, itemIndex, lang }) => {
-    const pool = cityId && cityIndex.has(cityId) ? [cityIndex.get(cityId)] : cities;
+    const englishCities = citiesIn('en');
+    const pool = cityId && cityIndex.has(cityId) ? [cityIndex.get(cityId)] : englishCities;
     const wanted = sameTitle(title);
     if (Number.isInteger(itemIndex) && cityId && cityIndex.has(cityId)) {
       const city = cityIndex.get(cityId);
@@ -331,6 +357,14 @@ export function createApp({ cities, news, webDist, now = () => new Date(), trans
   });
 
   app.get('/api/topics', (req, res) => res.json({ topics: topicList(req.lang) }));
+
+  // The live agenda snapshot the server keeps current: the web app merges it into the bundled
+  // city data the same way the routes here do.
+  app.get('/api/agendas', (req, res) => {
+    const snapshot = agendas ? agendas.snapshot() : null;
+    if (!snapshot) return res.status(404).json({ error: apiMessage('notFound', null, req.lang), code: 'no_snapshot' });
+    res.json(snapshot);
+  });
 
   app.get('/api/cities', (req, res) => {
     const from = today();
@@ -489,6 +523,7 @@ export function createApp({ cities, news, webDist, now = () => new Date(), trans
     const itemIndex = Number.isInteger(body.itemIndex) ? body.itemIndex : undefined;
     if (!title && itemIndex === undefined) return res.status(400).json({ error: apiMessage('missingTitle', null, lang), code: 'missing_title' });
 
+    // findAgendaItem brings the live merge up to date first, so cityIndex is current here.
     const known = findAgendaItem({ cityId, title, itemIndex, lang });
     const english = known ? known.city : cityIndex.get(cityId) || null;
     const shownCity = english ? citiesIn(lang).find((c) => c.cityId === english.cityId) || english : null;

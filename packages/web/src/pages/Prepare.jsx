@@ -1,12 +1,12 @@
-import { useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { checklist, daysBetween, t, tList, tn, todayStr, weekdayOf } from '@agora/core';
 import { useStore } from '../lib/store.jsx';
-import { PREP_STEPS } from '../lib/prep.js';
+import { PREP_STEPS, checkedItems } from '../lib/prep.js';
 import { directionsUrl } from '../lib/ics.js';
-import { asSentence, Disclosure, Icon, Linkified, Notice, PageHeader, ProgressLights, dayTimeText, meetingDeadline, monthDay, remoteState, speakMinutes, tidyTimes, timeText, whenText } from '../components/ui/index.js';
-import MeetingPicker, { ForLine } from '../components/prepare/MeetingPicker.jsx';
-import CommentBuilder, { composeDraft } from '../components/prepare/CommentBuilder.jsx';
+import { asSentence, Disclosure, Icon, Linkified, PageHeader, ProgressLights, dayTimeText, meetingDeadline, monthDay, remoteState, speakMinutes, tidyTimes, timeText, whenText } from '../components/ui/index.js';
+import MeetingPicker, { CarryNotice, ForLine, MeetingNotice } from '../components/prepare/MeetingPicker.jsx';
+import CommentBuilder from '../components/prepare/CommentBuilder.jsx';
 import Reference from '../components/prepare/Reference.jsx';
 import { usePrepMeeting } from '../components/prepare/prepMeeting.js';
 import { mmss } from '../components/prepare/TimeRuler.jsx';
@@ -14,6 +14,10 @@ import '../styles/pages/prepare.css';
 
 const STEP_IDS = ['signup', 'write', 'practice', 'day', 'after'];
 const ARRIVE_EARLY_MINUTES = 20;
+const OPEN_MS = 240;
+const CLOSE_MS = 180;
+
+const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /** "1 of 4 done before Monday" (or before Oct 22, or "the meeting is today"). */
 function progressText(summary, meeting, day) {
@@ -44,18 +48,75 @@ function minusMinutes(time, minutes) {
   return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
 }
 
-function StepCard({ id, n, title, sub, state, quietState = false, done, open, onToggle, children }) {
+/**
+ * One expandable step (podium mock .step). Open, the card carries a 2px Ink ring drawn above
+ * its content, so hovering the header only tints the header band inside it. The body grows
+ * and shrinks smoothly (instantly with reduced motion); `hideSubOpen` drops a subtitle that the
+ * open body repeats.
+ */
+function StepCard({ id, n, title, sub, hideSubOpen = false, state, quietState = false, done, open, onToggle, children }) {
   const bodyId = `step-${id}-body`;
+  const bodyRef = useRef(null);
+  const anim = useRef(null);
+  const prevOpen = useRef(open);
+  const [closing, setClosing] = useState(false);
+  const shownOpen = open && !closing;
+
+  const settle = () => {
+    if (anim.current) anim.current.cancel();
+    anim.current = null;
+    if (bodyRef.current) bodyRef.current.style.overflow = '';
+  };
+
+  useLayoutEffect(() => {
+    // Only a change animates (and running twice in development changes nothing).
+    if (prevOpen.current === open) return;
+    prevOpen.current = open;
+    const el = bodyRef.current;
+    settle();
+    if (!open || !el || reducedMotion() || typeof el.animate !== 'function') return;
+    const h = el.offsetHeight;
+    el.style.overflow = 'hidden';
+    const a = el.animate([{ height: '0px', opacity: 0 }, { height: `${h}px`, opacity: 1 }], { duration: OPEN_MS, easing: 'cubic-bezier(.2, 0, 0, 1)' });
+    anim.current = a;
+    a.onfinish = settle;
+  }, [open]);
+  useEffect(() => () => settle(), []);
+
+  const toggle = () => {
+    const el = bodyRef.current;
+    if (closing) {
+      // Pressed again while closing: stay open.
+      settle();
+      setClosing(false);
+      return;
+    }
+    if (!open || !el || reducedMotion() || typeof el.animate !== 'function') {
+      onToggle();
+      return;
+    }
+    settle();
+    setClosing(true);
+    el.style.overflow = 'hidden';
+    const a = el.animate([{ height: `${el.offsetHeight}px`, opacity: 1 }, { height: '0px', opacity: 0 }], { duration: CLOSE_MS, easing: 'cubic-bezier(.3, 0, .8, .15)', fill: 'forwards' });
+    anim.current = a;
+    // The layout effect for the closed state removes the animation once the body is hidden.
+    a.onfinish = () => {
+      setClosing(false);
+      onToggle();
+    };
+  };
+
   return (
-    <li className={`step${done ? ' is-done' : ''}${open ? ' is-open' : ''}`} id={`step-${id}`}>
+    <li className={`step${done ? ' is-done' : ''}${shownOpen ? ' is-open' : ''}`} id={`step-${id}`}>
       <h3 className="step__h">
-        <button type="button" className="step__head" aria-expanded={open} aria-controls={bodyId} onClick={onToggle}>
+        <button type="button" className="step__head" aria-expanded={shownOpen} aria-controls={bodyId} onClick={toggle}>
           <span className="step__num" aria-hidden="true">
             {done ? <Icon name="check" /> : n}
           </span>
           <span className="step__txt">
             <span className="step__t">{title}</span>
-            {sub && <span className="step__s">{sub}</span>}
+            {sub && <span className={`step__s${hideSubOpen ? ' step__s--dup' : ''}`}>{sub}</span>}
           </span>
           <span className="step__state">
             <span className={quietState ? 'step__statetxt step__statetxt--quiet' : 'step__statetxt'}>{state}</span>
@@ -63,7 +124,7 @@ function StepCard({ id, n, title, sub, state, quietState = false, done, open, on
           </span>
         </button>
       </h3>
-      <div className="step__body" id={bodyId} hidden={!open}>
+      <div className="step__body" id={bodyId} ref={bodyRef} hidden={!open}>
         {children}
       </div>
     </li>
@@ -79,11 +140,38 @@ function DoneCheck({ step, checked, onChange }) {
   );
 }
 
+
+/**
+ * A meeting from a shared link that only a city's agenda site lists is known once the live
+ * agendas load: until then the page says it is looking, instead of showing another meeting's
+ * steps or "That meeting is over".
+ */
+function PrepareLoading({ ctx }) {
+  return (
+    <div className="wrap prep">
+      <PageHeader title={t('nav.prepare')}>
+        <ForLine ctx={ctx} />
+      </PageHeader>
+      <div className="page-loading prep-loading" role="status">
+        <span className="vh">{t('prepare.finding')}</span>
+        <span className="page-loading__line page-loading__line--short" aria-hidden="true" />
+        <span className="page-loading__block" aria-hidden="true" />
+      </div>
+    </div>
+  );
+}
+
 export default function Prepare() {
   const ctx = usePrepMeeting();
-  const { meeting, city, homeCity, practicing, past, problem, prepKey, day, now } = ctx;
-  const { profile, ui, setUi, prepFor, setPrepStep, lang } = useStore();
+  // The steps mount once the meeting is known, so which step starts open fits that meeting.
+  return ctx.pending ? <PrepareLoading ctx={ctx} /> : <PrepareSteps ctx={ctx} />;
+}
+
+function PrepareSteps({ ctx }) {
+  const { meeting, city, homeCity, practicing, past, prepKey, day, now } = ctx;
+  const { profile, ui, prepFor, lang } = useStore();
   const navigate = useNavigate();
+  const { hash } = useLocation();
   const [params] = useSearchParams();
   const [picking, setPicking] = useState(false);
   const summary = prepFor(prepKey);
@@ -96,10 +184,23 @@ export default function Prepare() {
   });
   const toggle = (id) => setOpenSteps((list) => (list.includes(id) ? list.filter((x) => x !== id) : [...list, id]));
   const isOpen = (id) => openSteps.includes(id);
-  const setDone = (step) => (on) => setPrepStep(prepKey, step, on);
+  const setDone = (step) => (on) => ctx.markStep(step, on);
   const stateFor = (step, inProgress = false) => (summary.steps[step] ? t('ui.prep.done') : inProgress ? t('prepare.state.inProgress') : t('prepare.state.notStarted'));
   // "Not started" is the default, so narrow phones hide it (visually only) to give the title room.
   const quiet = (step, inProgress = false) => !summary.steps[step] && !inProgress;
+
+  // A link to one step (Home's Continue: ?step=day#step-day) lands on it, open.
+  useEffect(() => {
+    const asked = params.get('step');
+    if (!STEP_IDS.includes(asked)) return undefined;
+    setOpenSteps((list) => (list.includes(asked) ? list : [...list, asked]));
+    if (hash !== `#step-${asked}`) return undefined;
+    const id = requestAnimationFrame(() => {
+      const el = document.getElementById(`step-${asked}`);
+      if (el) el.scrollIntoView({ block: 'start' });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [params, hash]);
 
   // Sign up: the city's real deadline (structured for a few cities, the city's own words otherwise).
   const pc = (city && city.publicComment) || {};
@@ -124,37 +225,21 @@ export default function Prepare() {
   const saved = draft && typeof draft === 'object' ? savedText(draft.at, day) : '';
   const limitText = mmss(practicing || !minutes ? 180 : minutes * 60);
 
-  // On the day: the checklist is kept per profile (ui.checklist); checking every item marks the step done.
+  // On the day: the checklist is kept per meeting; checking every item marks the step done.
   const items = checklist();
-  const checked = new Set((ui.checklist || []).filter((i) => Number.isInteger(i) && i >= 0 && i < items.length));
+  const checked = new Set(checkedItems(summary, items.length));
   const toggleItem = (i, on) => {
     const next = new Set(checked);
     if (on) next.add(i);
     else next.delete(i);
-    setUi({ checklist: [...next].sort((a, b) => a - b) });
-    const all = next.size === items.length;
-    if (all !== summary.steps.day) setPrepStep(prepKey, 'day', all);
+    ctx.setChecklist([...next], items.length);
   };
   const arrive = meeting ? minusMinutes(meeting.time, ARRIVE_EARLY_MINUTES) : null;
 
-  // Practice: hand over the saved draft so Practice opens with it, unless the builder already
-  // handed over a newer one (which may be the AI-polished version).
+  // Practice picks up the latest draft from Write by itself; saving the meeting here makes the
+  // run count for it.
   const startPractice = () => {
-    const last = ui.lastDraft;
-    const writtenAt = draft && typeof draft === 'object' ? Date.parse(draft.at || '') : NaN;
-    const handedAt = last && typeof last === 'object' ? Date.parse(last.at || '') : NaN;
-    if (Number.isFinite(writtenAt) && !(handedAt >= writtenAt)) {
-      const forCity = city || homeCity;
-      setUi({
-        lastDraft: {
-          text: composeDraft(draft, { meeting, city: forCity }),
-          cityId: forCity ? forCity.cityId : '',
-          meetingId: meeting ? meeting.id : null,
-          fields: { name: draft.name || '', school: draft.school || '', itemTitle: draft.itemTitle || '', ask: draft.ask || '' },
-          at: new Date().toISOString(),
-        },
-      });
-    }
+    ctx.pin();
     navigate('/prepare/practice');
   };
 
@@ -171,26 +256,8 @@ export default function Prepare() {
         <ForLine ctx={ctx} onChange={() => setPicking(true)} />
       </PageHeader>
 
-      {problem && (
-        <Notice
-          tone="neutral"
-          icon="info"
-          className="prep-notice"
-          role="status"
-          action={
-            <button type="button" className="link" onClick={() => setPicking(true)}>
-              {t('prepare.signup.pickButton')}
-            </button>
-          }
-        >
-          {t(`prepare.notice.${problem}`)}
-        </Notice>
-      )}
-      {!problem && past && (
-        <Notice tone="neutral" className="prep-notice">
-          {t('prepare.notice.past')}
-        </Notice>
-      )}
+      <MeetingNotice ctx={ctx} onPick={() => setPicking(true)} />
+      <CarryNotice ctx={ctx} />
 
       <div className="prep-prog">
         <p className="prep-prog__h">{progressText(summary, meeting, day)}</p>
@@ -199,7 +266,7 @@ export default function Prepare() {
 
       <h2 className="vh">{t('prepare.stepsHeading')}</h2>
       <ol className="steps">
-        <StepCard id="signup" n={1} title={t('ui.prep.stepsLong.signup')} sub={signupSub} state={stateFor('signup')} quietState={quiet('signup')} done={summary.steps.signup} open={isOpen('signup')} onToggle={() => toggle('signup')}>
+        <StepCard id="signup" n={1} title={t('ui.prep.stepsLong.signup')} sub={signupSub} hideSubOpen={Boolean(meeting)} state={stateFor('signup')} quietState={quiet('signup')} done={summary.steps.signup} open={isOpen('signup')} onToggle={() => toggle('signup')}>
           {meeting ? (
             <>
               <dl className="facts prep-facts">
@@ -233,7 +300,7 @@ export default function Prepare() {
               </dl>
               <div className="btn-row step__actions">
                 {pc.registrationUrl && !(deadline && deadline.passed) && (
-                  <a className="btn btn--primary" href={pc.registrationUrl} target="_blank" rel="noopener noreferrer">
+                  <a className="btn btn--primary" href={pc.registrationUrl} target="_blank" rel="noopener noreferrer" onClick={ctx.pin}>
                     <Icon name="ext" size={20} />
                     {t('prepare.signup.openForm')}
                     <span className="vh">{t('ui.opensNewTab')}</span>
@@ -275,7 +342,7 @@ export default function Prepare() {
           open={isOpen('write')}
           onToggle={() => toggle('write')}
         >
-          <CommentBuilder key={profile.id} meeting={meeting} city={city || homeCity} practicing={practicing} prepKey={prepKey} headingLevel={4} idPrefix="hub" />
+          <CommentBuilder key={profile.id} ctx={ctx} meeting={meeting} city={city || homeCity} practicing={practicing} headingLevel={4} idPrefix="hub" />
           <DoneCheck step="write" checked={summary.steps.write} onChange={setDone('write')} />
         </StepCard>
 

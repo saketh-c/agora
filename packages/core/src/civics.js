@@ -1,5 +1,5 @@
 import { getTopic } from './topics.js';
-import { t, tList, lowerFirst } from './i18n/index.js';
+import { t, tList, lowerFirst } from './i18n/runtime.js';
 
 /** English glossary, kept for callers that need a stable reference. Prefer glossary() for display. */
 export const GLOSSARY = Object.freeze(tList('civics.glossary', 'en'));

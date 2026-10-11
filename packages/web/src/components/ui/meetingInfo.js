@@ -6,6 +6,7 @@
 import { formatDate, formatTime, getLocale, tList, t, tn, parseDate } from '@agora/core';
 import { rawCity } from '../../lib/data.js';
 import { signupDeadline } from '../../lib/deadline.js';
+import { setDeadlineResolver } from '../../lib/ics.js';
 
 /** 'weekend' | 'during' (a weekday, 7:30 to 16:00) | 'before' (weekday morning) | 'after'. */
 export function schoolTiming(meeting) {
@@ -112,6 +113,9 @@ export function meetingDeadline(meeting, now = new Date().toISOString()) {
   const text = raw && raw.publicComment ? raw.publicComment.deadline : '';
   return signupDeadline(text, meeting, now);
 }
+
+// Calendar files add the sign-up deadline as its own event, wherever they are made.
+setDeadlineResolver((meeting) => meetingDeadline(meeting));
 
 /** A phrase as a sentence: one closing period, even after a Spanish "4:00 p.m.". */
 export function asSentence(text) {

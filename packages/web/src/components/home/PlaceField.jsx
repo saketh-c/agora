@@ -1,8 +1,7 @@
-import { useEffect, useId, useRef, useState } from 'react';
-import { cityPoint, t, tn } from '@agora/core';
-import { apiAvailable } from '../../lib/api.js';
+import { useId, useRef, useState } from 'react';
+import { t, tn } from '@agora/core';
 import { CityPicker, Icon, matchCities } from '../ui/index.js';
-import usePlaceFinder, { ZIP_RE } from './usePlaceFinder.js';
+import usePlaceFinder from './usePlaceFinder.js';
 
 const fold = (s) =>
   String(s || '')
@@ -11,118 +10,91 @@ const fold = (s) =>
     .toLowerCase()
     .trim();
 
-/** A city record as a place: distances measure from its city hall. */
-export function cityPlace(city) {
-  return { city, location: cityPoint(city), label: city.name, source: 'hall' };
+const OSM_COPYRIGHT = 'https://www.openstreetmap.org/copyright';
+
+/**
+ * "Your places stay on this device." plus the OpenStreetMap credit the address search needs,
+ * as fine print. `lead` goes first (the city count on the first-visit card).
+ */
+export function PlacePrivacy({ lead, className = '' }) {
+  return (
+    <p className={`place__private ${className}`.trim()}>
+      {lead ? `${lead} ` : ''}
+      {t('home.where.private')}{' '}
+      <a href={OSM_COPYRIGHT} target="_blank" rel="noopener noreferrer">
+        {t('home.where.osm')}
+        <span className="vh"> {t('ui.opensNewTab')}</span>
+      </a>
+    </p>
+  );
 }
 
 /**
- * "Where do you live or go to school?": a type-ahead over the covered cities, "Use my
- * location", and a ZIP code lookup when this build has an API (never on the static deploy).
+ * One field for a place: type a covered city (type-ahead), or a ZIP code, street address or
+ * school and look it up (only when submitted), or "Use my exact location".
  *
- * variant="ask"    the first-visit card: the question as a heading, "Find my meetings",
- *                  then the city count and the ZIP switch.
- * variant="sheet"  inside the setup sheet: a form label, a help line (`help`), and quiet
- *                  "Use my location" / ZIP controls under the field.
+ * variant="ask"    the first-visit card: the question as a heading, "Find my meetings", the
+ *                  city count and the privacy line.
+ * variant="sheet"  in the setup sheet: a form label (`label`), an optional help line (`help`),
+ *                  "Look up" and "Use my exact location" under the field, and `onCancel`.
  *
- * `onPlace({ city, location, label, source })` gets the chosen place; source is 'hall' (a city
- * picked from the list), 'device' (browser location) or 'search' (a ZIP code).
+ * `onPlace({ place, city, school, location, label, source })` gets the chosen place (see
+ * usePlaceFinder). `allowCurrent` hides "Use my exact location" when false.
  */
-export default function PlaceField({ cities, value, onPlace, variant = 'ask', help, autoFocus = false }) {
+export default function PlaceField({ cities, value, onPlace, variant = 'ask', label, help, autoFocus = false, onCancel, allowCurrent = true }) {
   const uid = useId().replace(/[^a-zA-Z0-9_-]/g, '');
   const inputId = `place-${uid}`;
   const msgId = `place-msg-${uid}`;
-  const [mode, setMode] = useState('city'); // 'city' | 'zip'
   const [typed, setTyped] = useState('');
-  const [zip, setZip] = useState('');
   const inputRef = useRef(null);
-  const zipRef = useRef(null);
   const finder = usePlaceFinder({ cities, onPlace });
   const { status, busy } = finder;
   const error = status.kind === 'error';
   const ask = variant === 'ask';
 
-  const pickCity = (city) => {
-    finder.cancel();
-    if (onPlace) onPlace(cityPlace(city));
-  };
+  const focusInput = () => inputRef.current && inputRef.current.focus();
 
-  const focusInput = () => {
-    const el = mode === 'zip' ? zipRef.current : inputRef.current;
-    if (el) el.focus();
-  };
-
+  /** Submit: a covered city by name, else look the text up (an address, ZIP code or school). */
   const submit = (e) => {
     if (e) e.preventDefault();
-    if (mode === 'zip') return finder.lookupZip(zip);
     const text = typed.trim();
     if (!text) {
-      finder.showError(t('home.where.typeCity'));
+      finder.showError(t('home.where.typePlace'));
       return focusInput();
     }
-    if (ZIP_RE.test(text) && apiAvailable) return finder.lookupZip(text);
     const matches = matchCities(cities, text, 40);
-    const exact = matches.find((c) => fold(c.name) === fold(text));
-    if (exact || matches.length === 1) return pickCity(exact || matches[0]);
-    finder.showError(matches.length ? t('home.where.pickCity') : t('ui.cityPicker.none', { n: cities.length }));
-    return focusInput();
+    const exact = matches.find((c) => fold(c.name) === fold(text) || c.cityId === fold(text));
+    if (exact) return finder.pickCity(exact);
+    // Words with no number or comma that start a city's name ("fris") mean that city; when
+    // several cities fit ("park"), ask which. Anything else is a place to look up.
+    if (!/\d/.test(text) && !text.includes(',') && matches.length) {
+      if (matches.length === 1) return finder.pickCity(matches[0]);
+      finder.showError(t('home.where.pickCity'));
+      return focusInput();
+    }
+    return finder.lookup(text);
   };
 
-  // After switching between city and ZIP, the cursor goes into the field that replaced the old one.
-  const focusAfterSwitch = useRef(false);
-  useEffect(() => {
-    if (!focusAfterSwitch.current) return;
-    focusAfterSwitch.current = false;
-    const el = mode === 'zip' ? zipRef.current : inputRef.current;
-    if (el) el.focus();
-  }, [mode, inputRef]);
-
-  const switchMode = () => {
-    finder.cancel();
-    focusAfterSwitch.current = true;
-    setMode(mode === 'city' ? 'zip' : 'city');
+  const lookup = {
+    label: (q) => t('home.where.lookupRow', { q }),
+    hint: t('home.where.lookupHint'),
+    noMatch: t('home.where.enterToLookUp'),
+    onLookup: (q) => finder.lookup(q),
   };
 
-  const zipInput = (
-    <div className="search">
-      <Icon name="pin" />
-      <input
-        ref={zipRef}
-        id={inputId}
-        type="text"
-        inputMode="numeric"
-        autoComplete="postal-code"
-        pattern="[0-9]*"
-        maxLength={5}
-        enterKeyHint="go"
-        placeholder={t('home.where.zipPlaceholder')}
-        value={zip}
-        aria-describedby={msgId}
-        aria-invalid={error || undefined}
-        onChange={(e) => {
-          setZip(e.target.value.replace(/\D/g, '').slice(0, 5));
-          if (error) finder.cancel();
-        }}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' && !ask) {
-            e.preventDefault();
-            finder.lookupZip(zip);
-          }
-        }}
-      />
-    </div>
-  );
-
-  const cityInput = (
+  const input = (
     <CityPicker
       id={inputId}
       cities={cities}
       value={value}
       inputRef={inputRef}
       autoFocus={autoFocus}
-      placeholder={t('home.where.cityPlaceholder')}
+      icon="pin"
+      placeholder={t('home.where.placeholder')}
       describedBy={msgId}
-      onSelect={pickCity}
+      invalid={error}
+      lookup={lookup}
+      onSelect={finder.pickCity}
       onQueryChange={(text) => {
         setTyped(text);
         if (error) finder.cancel();
@@ -138,16 +110,10 @@ export default function PlaceField({ cities, value, onPlace, variant = 'ask', he
     </p>
   );
 
-  const locateButton = (
+  const locateButton = allowCurrent ? (
     <button type="button" className={`btn btn--quiet${ask ? '' : ' btn--sm'}`} onClick={finder.locate} aria-busy={busy === 'locate' || undefined} disabled={busy === 'locate'}>
       {busy === 'locate' ? <span className="spinner" aria-hidden="true" /> : <Icon name="locate" size={20} />}
       {t('home.where.useLocation')}
-    </button>
-  );
-
-  const zipSwitch = apiAvailable ? (
-    <button type="button" className="link place__switch" onClick={switchMode}>
-      {mode === 'city' ? t('home.where.useZip') : t('home.where.useCity')}
     </button>
   ) : null;
 
@@ -155,46 +121,44 @@ export default function PlaceField({ cities, value, onPlace, variant = 'ask', he
     return (
       <form className="ask" onSubmit={submit} noValidate>
         <label className="ask__q t-heading" htmlFor={inputId}>
-          {mode === 'zip' ? t('home.where.zipQuestion') : t('home.where.question')}
+          {t('home.where.question')}
         </label>
-        {mode === 'zip' ? zipInput : cityInput}
+        {input}
         {message}
         <div className="btn-row ask__do">
-          <button type="submit" className="btn btn--primary" aria-busy={busy === 'zip' || undefined}>
-            {busy === 'zip' && <span className="spinner" aria-hidden="true" />}
+          <button type="submit" className="btn btn--primary" aria-busy={busy === 'lookup' || undefined}>
+            {busy === 'lookup' && <span className="spinner" aria-hidden="true" />}
             {t('home.where.find')}
           </button>
           {locateButton}
         </div>
-        <p className="ask__alt">
-          {tn('home.where.cities', cities.length)} {zipSwitch}
-        </p>
+        <PlacePrivacy className="ask__alt" lead={tn('home.where.cities', cities.length)} />
       </form>
     );
   }
 
   return (
-    <div className="place">
+    <form className="place" onSubmit={submit} noValidate>
       <label className="label" htmlFor={inputId}>
-        {mode === 'zip' ? t('home.where.zipQuestion') : t('home.where.question')}
+        {label || t('home.where.question')}
       </label>
-      {mode === 'zip' ? (
-        <div className="place__zip">
-          {zipInput}
-          <button type="button" className="btn btn--secondary" onClick={() => finder.lookupZip(zip)} aria-busy={busy === 'zip' || undefined}>
-            {busy === 'zip' && <span className="spinner" aria-hidden="true" />}
-            {t('home.where.lookUp')}
-          </button>
-        </div>
-      ) : (
-        cityInput
-      )}
+      <div className="place__row">
+        {input}
+        <button type="submit" className="btn btn--secondary place__go" aria-busy={busy === 'lookup' || undefined}>
+          {busy === 'lookup' && <span className="spinner" aria-hidden="true" />}
+          {t('home.where.lookUp')}
+        </button>
+      </div>
       {message}
       {help && status.kind === 'idle' && <p className="help">{help}</p>}
       <div className="place__alt">
         {locateButton}
-        {zipSwitch}
+        {onCancel && (
+          <button type="button" className="btn btn--quiet btn--sm" onClick={onCancel}>
+            {t('home.setup.cancel')}
+          </button>
+        )}
       </div>
-    </div>
+    </form>
   );
 }

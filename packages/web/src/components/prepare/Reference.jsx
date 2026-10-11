@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { glossary, lowerFirst, speakingTips, t, tn } from '@agora/core';
 import { Icon, Sheet } from '../ui/index.js';
 
@@ -12,11 +12,18 @@ const SAMPLE_TERMS = [2, 4, 9];
  * #glossary and open the matching sheet.
  */
 export default function Reference() {
-  const { hash } = useLocation();
+  const { hash, search, state } = useLocation();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(() => (hash === '#tips' || hash === '#glossary' ? hash.slice(1) : null));
   useEffect(() => {
     if (hash === '#tips' || hash === '#glossary') setOpen(hash.slice(1));
   }, [hash]);
+  // Closing drops #tips or #glossary from the address, so a reload does not reopen the sheet
+  // and a later link to it opens it again.
+  const close = () => {
+    setOpen(null);
+    if (hash === '#tips' || hash === '#glossary') navigate({ search, hash: '' }, { replace: true, state });
+  };
 
   const tips = speakingTips();
   const terms = glossary();
@@ -69,7 +76,7 @@ export default function Reference() {
         </li>
       </ul>
 
-      <Sheet open={open === 'tips'} onClose={() => setOpen(null)} title={t('prepare.ref.tips')}>
+      <Sheet open={open === 'tips'} onClose={close} title={t('prepare.ref.tips')}>
         <ol className="prep-tips">
           {tips.map((tip, i) => (
             <li key={tip}>
@@ -81,7 +88,7 @@ export default function Reference() {
           ))}
         </ol>
       </Sheet>
-      <Sheet open={open === 'glossary'} onClose={() => setOpen(null)} title={t('prepare.ref.words')}>
+      <Sheet open={open === 'glossary'} onClose={close} title={t('prepare.ref.words')}>
         <dl className="prep-gloss">
           {terms.map((g) => (
             <div key={g.term}>

@@ -111,6 +111,7 @@
       "ages": "Volunteers 14 to 18 enrolled in middle or high school and living in Coppell ISD",
       "description": "Peer-jury alternative sentencing program in Coppell Municipal Court where teens serve as attorneys, bailiffs, clerks or jurors. The city's Teen Court and Volunteers pages both state the program is not currently active (placed on hold indefinitely when the court closed during the pandemic).",
       "applyWindow": "Not accepting volunteers while the program is inactive; contact 972-462-0022 or info@coppelltx.gov",
+      "applyStatus": "closed",
       "source": "https://www.coppelltx.gov/661/Volunteers"
     },
     {
@@ -119,6 +120,7 @@
       "ages": "7th to 11th grade students who live in Coppell and attend Coppell ISD (per the city's October 2023 recruitment notice)",
       "description": "Student advisor seats on the Library Board, the Parks and Recreation Board and the Smart City Board, filled through the city's boards and commissions application at coppelltx.gov/boards. The city's news release says the positions are not ceremonial and appointees are expected to attend meetings regularly. The Boards and Commissions page itself does not currently mention the youth seats, so confirm current openings and grade requirements with the City Secretary's Office (972-304-3669).",
       "applyWindow": "Adult board recruitment runs August through September each year with interviews in October and appointments in November; youth advisor openings have been announced separately (the last published notice had an October 20, 2023 deadline), so ask the City Secretary about the next round",
+      "applyStatus": "unknown",
       "source": "https://www.coppelltx.gov/CivicAlerts.aspx?AID=1213&ARC=1876"
     }
   ],

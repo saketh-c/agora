@@ -12,7 +12,7 @@ import { DICTIONARIES, t, tn } from '../src/i18n/index.js';
 import { translationCoverage } from '../src/i18n/data.js';
 import { buildComment } from '../src/civics.js';
 import { loadCities, loadTranslations, REPO_ROOT } from '../src/load-node.js';
-import { looksLikeUntranslatedEnglish, dataResidue } from '../../../scripts/i18n-check.mjs';
+import { looksLikeUntranslatedEnglish, dataResidue, missingUsedKeys } from '../../../scripts/i18n-check.mjs';
 import { extractReport, cityFieldValues } from '../../../scripts/i18n-extract.mjs';
 
 /** Every string in a dictionary, with its dotted path. */
@@ -138,4 +138,13 @@ test('i18n-extract --check is read-only and its exit code reports untranslated s
   const incomplete = Object.values(report.locales).some((l) => l.missing.length);
   assert.equal(run.status, incomplete ? 1 : 0, run.stderr);
   assert.equal(existsSync(sourceFile) ? readFileSync(sourceFile, 'utf8') : null, before, '--check never writes');
+});
+
+test('every literal key the code asks for exists in the English dictionary', () => {
+  // A key missing everywhere falls back to itself, so the app would print "rehearse.setup.x".
+  assert.deepEqual(missingUsedKeys(), []);
+  // The scan itself works: a dictionary without the key reports where it is used.
+  const trimmed = structuredClone(DICTIONARIES.en);
+  delete trimmed.rehearse.setup.scriptHelpDraft;
+  assert.ok(missingUsedKeys(trimmed).some((line) => line.endsWith('Practice.jsx: rehearse.setup.scriptHelpDraft')));
 });

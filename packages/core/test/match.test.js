@@ -201,6 +201,40 @@ test('upcoming agenda items stay the strongest topic signal; recent ones are a w
   assert.deepEqual(plan.recentAgendaItems.map((a) => a.title), ['Rezoning for apartments near Legacy']);
 });
 
+test('topic points count the topics a meeting touches, not its items, at most 6', () => {
+  const items = (n, topics) => Array.from({ length: n }, (_, i) => ({ title: `Item ${i}`, meetingDate: '2026-10-12', topics: [topics[i % topics.length]] }));
+  const withItems = (list) => [{ ...cities[0], agendaItems: list }];
+  const topicPoints = (list, interests) => matchMeetings(withItems(list), { interests }, { today: '2026-10-10', days: 5 })[0].reasons.find((r) => r.kind === 'topic').points;
+  assert.equal(topicPoints(items(1, ['parks-recreation']), ['parks-recreation']), 3);
+  assert.equal(topicPoints(items(12, ['parks-recreation']), ['parks-recreation']), 3, 'twelve items on one topic are one topic');
+  assert.equal(topicPoints(items(4, ['parks-recreation', 'environment']), ['parks-recreation', 'environment']), 6);
+  assert.equal(topicPoints(items(9, ['parks-recreation', 'environment', 'transit']), ['parks-recreation', 'environment', 'transit']), 6, 'capped');
+});
+
+test('with any distance, a council 40 mi away never outranks a near one that is otherwise the same', () => {
+  // Two copies of one council: one 3 mi from the student, one 42 mi away with a long agenda on their topics.
+  const interests = ['parks-recreation', 'environment', 'transit', 'youth'];
+  const student = { lat: 33.0198, lng: -96.6989 };
+  const near = { ...cities[0], cityId: 'near', name: 'Near', cityHall: { address: '1 Near St', lat: 33.0198 + 3 / 69, lng: -96.6989 }, agendaItems: [] };
+  const far = {
+    ...cities[0],
+    cityId: 'far',
+    name: 'Far',
+    cityHall: { address: '1 Far St', lat: 33.0198 - 42 / 69, lng: -96.6989 },
+    agendaItems: Array.from({ length: 12 }, (_, i) => ({ title: `Item ${i}`, meetingDate: '2026-10-12', topics: [interests[i % interests.length]] })),
+  };
+  const ranked = matchMeetings([far, near], { interests, location: student, maxMiles: null }, { today: '2026-10-10', days: 5 });
+  assert.deepEqual(
+    ranked.map((m) => m.cityId),
+    ['near', 'far'],
+  );
+  assert.ok(Math.round(ranked[1].distanceMiles) >= 40);
+  // A wide limit ranks the same way; nearer meetings within the limit lose a point per 5 mi past 15.
+  assert.equal(matchMeetings([far, near], { interests, location: student, maxMiles: 60 }, { today: '2026-10-10', days: 5 })[0].cityId, 'near');
+  const at = (miles) => matchMeetings([{ ...near, cityHall: { ...near.cityHall, lat: 33.0198 + miles / 69 } }], { location: student, maxMiles: null }, { today: '2026-10-10', days: 5 })[0].reasons.find((r) => r.kind === 'distance' && /away/.test(r.text)).points;
+  assert.deepEqual([at(3), at(8), at(14), at(19), at(24), at(29), at(50)], [4, 2, 0, -1, -2, -3, -5]);
+});
+
 test('perCity caps how many meetings one council contributes; buildPlan keeps two', () => {
   const prefs = { interests: ['housing'], homeCityId: 'plano', location: nearPlano };
   const count = (list, id) => list.filter((m) => m.cityId === id).length;
@@ -279,6 +313,7 @@ test('validator accepts note exceptions and explicit fields, and checks every li
       { date: '2026-11-03', status: 'note', note: 'Held as scheduled on Election Day.' },
       { date: '2026-11-10', status: 'special', label: 'Canvass meeting', type: 'other', openToPublicComment: false, time: '18:00', note: 'Canvass.' },
       { date: '2026-11-16', status: 'rescheduled', movedFrom: '2026-11-17', time: '19:00', note: 'Moved.' },
+      { date: '2026-11-19', status: 'added', label: 'City Council Regular Meeting', type: 'regular', note: 'Listed on the city site.' },
     ],
   };
   assert.deepEqual(validateCity(good), []);
@@ -295,7 +330,7 @@ test('validator accepts note exceptions and explicit fields, and checks every li
     ],
   };
   const errors = validateCity(bad).join('\n');
-  for (const expected of ['council.findMyDistrictUrl is not a URL', 'sources[1] is not a URL', 'agendaItems[0].url is not a URL', 'scheduleExceptions[0].label only applies to special exceptions', 'scheduleExceptions[0].time "7pm" must be HH:MM', 'scheduleExceptions[1].note is required', 'scheduleExceptions[2].type "party" is not a known meeting type']) {
+  for (const expected of ['council.findMyDistrictUrl is not a URL', 'sources[1] is not a URL', 'agendaItems[0].url is not a URL', 'scheduleExceptions[0].label only applies to special and added exceptions', 'scheduleExceptions[0].time "7pm" must be HH:MM', 'scheduleExceptions[1].note is required', 'scheduleExceptions[2].type "party" is not a known meeting type']) {
     assert.ok(errors.includes(expected), `missing: ${expected}`);
   }
   const smells = scheduleWarnings({

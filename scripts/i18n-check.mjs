@@ -1,7 +1,10 @@
 /**
  * Verify that every locale dictionary mirrors the English one: same keys, same array
  * lengths, the same {parameters} in each string (array items included), and no em or en
- * dash. Those are failures and make the script exit non-zero.
+ * dash. Those are failures and make the script exit non-zero. So is a literal key in code
+ * (t('a.b'), tn('a.b') or tList('a.b') in any packages/<name>/src file) that the English
+ * dictionary does not have: comparing dictionaries with each other cannot catch that, and
+ * the app would show the raw key.
  *
  * It also prints warnings, which never change the exit code:
  *  - es/vi dictionary values that are identical to English and read like an English phrase
@@ -14,7 +17,7 @@
  *
  * Usage: node scripts/i18n-check.mjs
  */
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { DICTIONARIES, dictionaryKeys, LOCALES } from '../packages/core/src/i18n/index.js';
@@ -137,6 +140,41 @@ function checkDictionaries(log) {
   return { problems, warnings };
 }
 
+/** Source files under packages/<name>/src (no build output, no dependencies). */
+function* sourceFiles(dir) {
+  for (const name of readdirSync(dir)) {
+    const file = path.join(dir, name);
+    if (statSync(file).isDirectory()) {
+      if (name !== 'node_modules' && name !== 'dist') yield* sourceFiles(file);
+    } else if (/\.(?:m?js|jsx)$/.test(name)) {
+      yield file;
+    }
+  }
+}
+
+/** t('a.b'), tn("a.b") or tList(`a.b`): a call to the translator with a literal dotted key. */
+const KEY_CALL = /(?<![\w.$])(t|tn|tList)\(\s*(['"`])([A-Za-z][\w-]*(?:\.[\w-]+)+)\2/g;
+
+/**
+ * Literal keys used in code that the English dictionary does not have, as
+ * "packages/web/src/pages/Practice.jsx: rehearse.setup.x". Keys built at run time
+ * (template literals with ${...}) are not checked.
+ */
+export function missingUsedKeys(dict = DICTIONARIES.en, packagesDir = path.join(root, 'packages')) {
+  const missing = [];
+  for (const pkg of readdirSync(packagesDir)) {
+    const src = path.join(packagesDir, pkg, 'src');
+    if (!existsSync(src)) continue;
+    for (const file of sourceFiles(src)) {
+      const code = readFileSync(file, 'utf8');
+      for (const m of code.matchAll(KEY_CALL)) {
+        if (get(dict, m[3]) === undefined) missing.push(`${path.relative(root, file)}: ${m[3]}`);
+      }
+    }
+  }
+  return missing;
+}
+
 /** City-data translation memories: residue and coverage. Warnings only. */
 function checkDataMemories(log) {
   let warnings = 0;
@@ -171,9 +209,12 @@ function checkDataMemories(log) {
 function main() {
   const log = (line) => console.log(line);
   const dicts = checkDictionaries(log);
+  const unknown = missingUsedKeys();
+  log(`code: ${unknown.length ? `${unknown.length} keys missing from the English dictionary` : 'every literal key exists in English'}`);
+  for (const u of unknown) log(`  missing ${u}`);
   const warnings = dicts.warnings + checkDataMemories(log);
   if (warnings) log(`${warnings} warning${warnings === 1 ? '' : 's'} (not failures)`);
-  process.exit(dicts.problems ? 1 : 0);
+  process.exit(dicts.problems || unknown.length ? 1 : 0);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) main();

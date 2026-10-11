@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { defaultPrefs, normalizePrefs, setLocale, getLocale, detectLocale, isLocale, cityPoint } from '@agora/core';
+import { defaultPrefs, normalizePrefs, setLocale, getLocale, detectLocale, hasLocale, isLocale, loadLocale, cityPoint } from '@agora/core';
 import { PROFILES_KEY, makeProfile, normalizeState, normalizeUi, cleanName, cleanEmail, displayName, isSetupComplete, exportPayload, readImport } from './profiles.js';
 import { prepSummary, withPrepStep } from './prep.js';
+import { withHomeCity } from './places.js';
 
 /**
  * Profiles, preferences, language, and small UI state.
@@ -14,7 +15,10 @@ import { prepSummary, withPrepStep } from './prep.js';
  *  - other tabs: a `storage` listener adopts their writes, so two tabs never overwrite each
  *    other with stale copies;
  *  - language: applied synchronously during render (core's t() is module-global), so a
- *    switch re-renders in the new language without remounting anything.
+ *    switch re-renders in the new language without remounting anything. Languages other than
+ *    English load on demand (core's loadLocale): main.jsx loads the first one before the app
+ *    renders, a switch waits for its dictionary, and until it arrives the app keeps the
+ *    language it is in. `lang` in the store is the language on screen.
  */
 
 // Keys from before profiles existed, and from before the app was renamed. Anyone with a
@@ -86,9 +90,19 @@ function initialState() {
   return next;
 }
 
-/** Make the active profile's language the one core's t() uses. Idempotent. */
+/**
+ * The language the app opens in: the active profile's, or the device's for a first visit.
+ * main.jsx loads its dictionary before the first render, so nothing shows in English first.
+ */
+export function initialLang() {
+  const stored = normalizeState(readJson(PROFILES_KEY), deviceLang());
+  const active = stored && (stored.profiles.find((p) => p.id === stored.activeId) || stored.profiles[0]);
+  return active && isLocale(active.lang) ? active.lang : deviceLang();
+}
+
+/** Make the active profile's language the one core's t() uses, once its dictionary is here. Idempotent. */
 function applyLocale(lang) {
-  if (getLocale() !== lang) setLocale(lang);
+  if (getLocale() !== lang && hasLocale(lang)) setLocale(lang);
 }
 
 export function StoreProvider({ children }) {
@@ -99,10 +113,25 @@ export function StoreProvider({ children }) {
   // Synchronous on purpose: children rendered below in this same pass must translate in the
   // new language. setLocale is idempotent, so a repeated render is harmless.
   applyLocale(active.lang);
+  const shown = getLocale();
+
+  // A language whose dictionary has not loaded (another tab switched to it, or a profile
+  // switch): load it, then render again in it.
+  const [, setLoaded] = useState(0);
+  useEffect(() => {
+    if (hasLocale(active.lang)) return undefined;
+    let alive = true;
+    loadLocale(active.lang).then((ok) => {
+      if (alive && ok) setLoaded((n) => n + 1);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [active.lang]);
 
   useLayoutEffect(() => {
-    document.documentElement.lang = active.lang;
-  }, [active.lang]);
+    document.documentElement.lang = shown;
+  }, [shown]);
 
   // One place that persists. Changes that arrived from another tab are not written back.
   useEffect(() => {
@@ -169,30 +198,43 @@ export function StoreProvider({ children }) {
   );
 
   /**
-   * Make `city` (a city record) the home city: sets homeCityId and measures distance from its
-   * city hall. With { complete: true } (the default) this also completes setup, because a
-   * home city with a location is all setup needs.
+   * Make `city` (a city record) the home city. A precise Home (an address, ZIP or your
+   * position) is kept and only the home council changes; otherwise Home becomes the city and
+   * distances measure from its city hall (see lib/places.js withHomeCity). With
+   * { complete: true } (the default) this also completes setup, because a home city with a
+   * location is all setup needs.
    */
   const setHomeCity = useCallback(
     (city, { complete = true } = {}) => {
-      if (!city || !city.cityId) return;
-      const point = cityPoint(city);
+      if (!city || !city.cityId || !cityPoint(city)) return;
       patchActive((p) => ({
-        prefs: normalizePrefs({ ...p.prefs, homeCityId: city.cityId, location: point, locationLabel: city.name }),
+        prefs: normalizePrefs(withHomeCity(p.prefs, city)),
         onboarded: complete ? true : p.onboarded,
       }));
     },
     [patchActive],
   );
 
-  /** Start setup over: default preferences, not set up. Keeps name, language and ui. */
-  const resetSetup = useCallback(() => patchActive({ prefs: defaultPrefs(), onboarded: false }), [patchActive]);
+  /**
+   * Start setup over: default preferences (or `prefs`, to undo a setup just finished), not set
+   * up. Keeps name, language and ui.
+   */
+  const resetSetup = useCallback(
+    // A click event passed straight through (onClick={resetSetup}) is not preferences.
+    (prefs) => patchActive({ prefs: prefs && typeof prefs === 'object' && !('nativeEvent' in prefs) ? normalizePrefs(prefs) : defaultPrefs(), onboarded: false }),
+    [patchActive],
+  );
 
   const setLang = useCallback(
     (lang) => {
       if (!isLocale(lang)) return;
-      applyLocale(lang);
-      patchActive({ lang });
+      // Switch once the dictionary is here (at once when it already is).
+      const go = () => {
+        applyLocale(lang);
+        patchActive({ lang });
+      };
+      if (hasLocale(lang)) go();
+      else loadLocale(lang).then(go);
     },
     [patchActive],
   );
@@ -282,8 +324,8 @@ export function StoreProvider({ children }) {
       completeSetup,
       setHomeCity,
       resetSetup,
-      // language
-      lang: active.lang,
+      // language: the one on screen (a newly picked one once its dictionary has loaded)
+      lang: shown,
       setLang,
       // ui bag
       ui: active.ui,
@@ -303,8 +345,8 @@ export function StoreProvider({ children }) {
       exportProfile,
       importProfile,
     }),
-    // active.lang is listed so the display name re-resolves in the new language.
-    [active, setPrefs, completeSetup, setHomeCity, resetSetup, setLang, setUi, prepFor, setPrepStep, setPrepMeeting, state.profiles, switchProfile, createProfile, updateProfile, deleteProfile, exportProfile, importProfile],
+    // shown is listed so the display name re-resolves in the new language.
+    [active, shown, setPrefs, completeSetup, setHomeCity, resetSetup, setLang, setUi, prepFor, setPrepStep, setPrepMeeting, state.profiles, switchProfile, createProfile, updateProfile, deleteProfile, exportProfile, importProfile],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

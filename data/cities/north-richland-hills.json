@@ -106,6 +106,7 @@
       "ages": "High school students who live in North Richland Hills",
       "description": "Liaison between the City Council and local youth: members learn how city government works, hear guest speakers, organize a community service project each semester and report to council yearly. Appointed by the mayor and council to one-year terms (members in good standing are reappointed). Meets the second Wednesday of the month at 6 p.m. at City Hall during the school year.",
       "applyWindow": "Applications for 2026-27 have closed; the next cycle typically opens before the school year. Contact Christy Hardy, 817-427-6004.",
+      "applyStatus": "closed",
       "source": "https://www.nrhtx.com/523/Youth-Advisory-Committee"
     },
     {
@@ -114,6 +115,7 @@
       "ages": "12 to 18",
       "description": "Teen court serving North Richland Hills, Watauga and Richland Hills for middle and high school students who received a citation; students without a citation can volunteer as jurors or teen attorneys. Sessions are on Mondays at City Hall, 4301 City Point Drive (use the west parking lot); upcoming dates include Sept. 14, Sept. 28 and Oct. 5, 2026. Coordinator Rafael Martinez, 817-427-6734.",
       "applyWindow": "Volunteer application accepted online year-round",
+      "applyStatus": "rolling",
       "source": "https://www.nrhtx.com/331/Teen-Court"
     }
   ],

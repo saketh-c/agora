@@ -69,5 +69,6 @@ export default {
   newsEmpty: 'No hay noticias recientes sobre {city}.',
   newsError: 'Las noticias necesitan conexión. Inténtalo más tarde.',
   verifiedLine: 'Verificado el {date} en páginas oficiales de la ciudad. Confirma la hora antes de ir.',
+  verifiedStale: 'Revisado por última vez el {date}. Los horarios pueden haber cambiado desde entonces, así que confírmalos en el calendario de la ciudad antes de ir.',
   sources: 'Fuentes',
 };

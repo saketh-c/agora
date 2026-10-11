@@ -1,20 +1,21 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { Link, useLocation, useNavigate, useNavigationType, useSearchParams } from 'react-router-dom';
 import {
-  agendaFor,
   addDays,
+  agendaFor,
   cityPoint,
   expandCityMeetings,
   formatDate,
   hasEnded,
   haversineMiles,
   isDateStr,
-  isTopicId,
+  joinList,
   lowerFirst,
   nextMeetingFor,
   normalizePrefs,
   scoreMeeting,
   t,
+  tList,
   tn,
   topicList,
   upcomingMeetings,
@@ -22,29 +23,72 @@ import {
 import { nowIso, today as todayFn } from '../lib/data.js';
 import { useCities } from '../lib/DataProvider.jsx';
 import { useStore } from '../lib/store.jsx';
-import { milesChoices } from '../lib/distance.js';
-import { useHideFooter } from '../components/shell/PageMeta.jsx';
+import { lookupPlace, placeFromDevice, placesOf, withPlaces } from '../lib/places.js';
+import {
+  DEFAULT_WHEN,
+  FILTER_KEYS,
+  WEEK_ORDER,
+  WHEN,
+  activeKeys,
+  changedKeys,
+  clearFilters,
+  countyKey,
+  dateWindow,
+  mileChoices,
+  parseQuery,
+  passes,
+  queryVocab,
+  isPastRange,
+  readFilters,
+  relaxTogether,
+  relaxations,
+  sortMeetings,
+  windowDays,
+  withoutKey,
+  writeFilters,
+} from '../lib/meetingFilters.js';
+import { useHideFooter, useSkipLink } from '../components/shell/PageMeta.jsx';
 import { SETUP_STATE, setupTo } from '../components/shell/SetupHost.jsx';
 import AppFooter from '../components/shell/AppFooter.jsx';
-import { canSpeakText, Chip, dayTimeText, EmptyState, Icon, MeetingDetail, MeetingDetailBadge, MeetingRow, meetingDeadline, Menu, remoteState, schoolTiming, Segmented, Sheet, whenText } from '../components/ui/index.js';
+import FilterControls from '../components/meetings/FilterControls.jsx';
+import MapStrip from '../components/meetings/MapStrip.jsx';
+import { locate, readHere, resolveOrigin } from '../components/meetings/origin.js';
+import { canSpeakText, Chip, dayTimeText, EmptyState, Icon, MeetingDetail, MeetingDetailBadge, MeetingRow, MeetingShare, meetingDeadline, Menu, monthDay, Segmented, Sheet, whenText } from '../components/ui/index.js';
 import '../styles/pages/meetings.css';
 
 // Leaflet only loads when a map is on screen (desktop, or the phone Map view).
 const MapView = lazy(() => import('../components/MapView.jsx'));
 
-const DAYS = [7, 14, 30];
 const FIRST_PAGE = 10;
 const PAGE = 20;
 /** How many meetings one council may place before others in "Best for you"; the rest follow. */
 const PER_CITY = 2;
 const PANEL_INSET = 452;
+const STRIP_MAX = 30;
+const EMPTY = new Set();
+/** Filters shown in the row of removable chips (the others have their own chip or menu above). */
+const STRIP_KINDS = new Set(['dow', 'time', 'topic', 'county', 'city']);
+/** Parts of the URL that are not remembered between visits. */
+const NOT_REMEMBERED = ['meeting', 'setup', 'q'];
+/**
+ * Where distance is measured from is the profile's (prefs.origin, shared with Home and
+ * Prepare); a city or a looked-up place chosen here is for this visit only.
+ */
+const ORIGIN_KEYS = ['near', 'at', 'atl'];
 
-const fold = (s) =>
-  String(s || '')
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .trim();
+/** A remembered query without what should not come back: the origin, and a date range that is over. */
+function rememberable(query, today) {
+  const next = new URLSearchParams(query);
+  for (const k of [...NOT_REMEMBERED, ...ORIGIN_KEYS]) next.delete(k);
+  if (isPastRange(next.get('from'), next.get('to'), today)) for (const k of ['when', 'from', 'to']) next.delete(k);
+  return next;
+}
+
+/**
+ * The address's current query. Two quick changes (a chip, then a key in the search box) can
+ * both land before React renders again; starting from the live URL keeps the first one.
+ */
+const latest = (prev) => new URLSearchParams(typeof window !== 'undefined' ? window.location.search : prev);
 
 function useMedia(query) {
   const read = () => typeof window !== 'undefined' && window.matchMedia(query).matches;
@@ -59,149 +103,68 @@ function useMedia(query) {
   return matches;
 }
 
-/** The current instant, refreshed each minute, so a meeting that just ended leaves the list. */
+/**
+ * The current instant, refreshed each minute and whenever the tab comes back into view, so a
+ * meeting that just ended leaves the list even in a tab left open overnight.
+ */
 function useNow() {
   const [now, setNow] = useState(nowIso);
   useEffect(() => {
-    const id = setInterval(() => setNow(nowIso()), 60000);
-    return () => clearInterval(id);
+    const tick = () => setNow(nowIso());
+    const id = setInterval(tick, 60000);
+    const onShow = () => document.visibilityState === 'visible' && tick();
+    document.addEventListener('visibilitychange', onShow);
+    window.addEventListener('pageshow', onShow);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener('visibilitychange', onShow);
+      window.removeEventListener('pageshow', onShow);
+    };
   }, []);
   return now;
 }
 
-/** Filters live in the URL (only where they differ from the defaults), so Back and links keep them. */
-function readFilters(params, defaults) {
-  const flag = (key, fallback) => (params.has(key) ? params.get(key) === '1' : fallback);
-  const days = Number(params.get('days'));
-  // ?miles=any turns the distance filter off; no ?miles= means the saved distance.
-  const rawMiles = params.get('miles');
-  const miles = rawMiles === 'any' ? null : Number(rawMiles) > 0 && Number(rawMiles) <= 200 ? Number(rawMiles) : defaults.miles;
-  const sort = params.get('sort');
-  return {
-    q: params.get('q') || '',
-    days: DAYS.includes(days) ? days : 14,
-    after: flag('after', defaults.after),
-    speak: flag('speak', defaults.speak),
-    remote: flag('remote', false),
-    miles,
-    topics: [...new Set((params.get('topics') || '').split(',').filter(isTopicId))],
-    sort: sort === 'best' || sort === 'soonest' ? sort : defaults.sort,
-  };
+/** "Next 2 weeks", "Oct 13 to Oct 20", "Oct 20". */
+function whenLabel(f, today) {
+  if (f.when !== 'custom') return t(`meetings.when.${f.when}`);
+  const w = dateWindow(f, today);
+  return w.from === w.to ? monthDay(w.from) : t('meetings.when.range', { from: monthDay(w.from), to: monthDay(w.to) });
 }
 
-function writeFilters(params, f, defaults) {
-  const set = (key, value, isDefault) => (isDefault ? params.delete(key) : params.set(key, value));
-  set('q', f.q, !f.q);
-  set('days', String(f.days), f.days === 14);
-  set('after', f.after ? '1' : '0', f.after === defaults.after);
-  set('speak', f.speak ? '1' : '0', f.speak === defaults.speak);
-  set('remote', '1', !f.remote);
-  set('miles', f.miles == null ? 'any' : String(f.miles), f.miles === defaults.miles);
-  set('topics', f.topics.join(','), !f.topics.length);
-  set('sort', f.sort, f.sort === defaults.sort);
-}
-
-/**
- * What a search box query means: city names first (a prefix of the name or of one of its words),
- * then initials, partial names and counties; plus topics, matched against the councils whose
- * recent or upcoming agendas touched them.
- */
-function readQuery(q, cities, topics) {
-  const n = fold(q);
-  if (!n) return null;
-  const words = (s) => fold(s).split(/[\s,/-]+/);
-  let hits = cities.filter((c) => c.cityId === n || fold(c.name).startsWith(n) || words(c.name).some((w) => w.startsWith(n)));
-  if (!hits.length) {
-    const bare = n.replace(/\s+/g, '');
-    hits = cities.filter((c) => {
-      const w = words(c.name);
-      return (w.length > 1 && w.map((x) => x[0]).join('').startsWith(bare)) || fold(c.name).includes(n) || fold(c.county).startsWith(n);
-    });
-  }
-  const topicIds =
-    n.length >= 3
-      ? topics.filter((tp) => words(tp.label).some((w) => w.startsWith(n)) || fold(tp.short).startsWith(n) || (tp.keywords || []).some((k) => fold(k).startsWith(n))).map((tp) => tp.id)
-      : [];
-  return { text: n, cityIds: new Set(hits.map((c) => c.cityId)), topicIds };
-}
-
-/** One choice out of a few, as native radio buttons drawn as chips (inside a fieldset with a legend). */
-function ChoiceChips({ name, value, options, onChange }) {
-  return (
-    <div className="chipwrap">
-      {options.map((o) => {
-        const on = o.value === value;
-        return (
-          <label key={o.value} className={`chip choice${on ? ' is-on' : ''}`}>
-            <input type="radio" className="vh" name={name} checked={on} onChange={() => onChange(o.value)} />
-            {on && <Icon name="check" size={20} />}
-            {o.label}
-          </label>
-        );
-      })}
-    </div>
-  );
+/** "this weekend", "in the next 2 weeks", "from Oct 13 to Oct 20", "on Oct 20": a window inside a sentence. */
+function whenPhrase(f, today) {
+  if (f.when !== 'custom') return t(`meetings.when.phrase.${f.when}`);
+  const w = dateWindow(f, today);
+  return w.from === w.to ? t('meetings.when.phrase.day', { date: monthDay(w.from) }) : t('meetings.when.phrase.range', { from: monthDay(w.from), to: monthDay(w.to) });
 }
 
 export default function Meetings() {
   useHideFooter();
-  const { prefs, lang } = useStore();
-  const { cities, cityById } = useCities();
+  const { prefs, setPrefs, lang, ui, setUi } = useStore();
+  const { cities, cityById, liveReady } = useCities();
   const [params, setParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const navType = useNavigationType();
   const isDesktop = useMedia('(min-width: 1024px)');
   const now = useNow();
   const today = todayFn();
   const P = useMemo(() => normalizePrefs(prefs), [prefs]);
-  const hasPlace = Boolean(P.homeCityId || P.location);
+  const saved = useMemo(() => placesOf(P, cityById), [P, cityById]);
+  const [here, setHere] = useState(readHere);
+  const [hereStatus, setHereStatus] = useState('idle');
 
-  // With a place set, the list starts at the distance the student said they can travel.
-  const defaults = useMemo(
-    () => ({ after: !P.availability.daytime, speak: true, sort: hasPlace ? 'best' : 'soonest', miles: P.location ? P.maxMiles : null }),
-    [P.availability.daytime, hasPlace, P.location, P.maxMiles],
-  );
-  const f = readFilters(params, defaults);
-  const sort = hasPlace ? f.sort : 'soonest';
-  const view = params.get('view') === 'map' ? 'map' : 'list';
-  const meetingId = params.get('meeting');
-
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const returnFocus = useRef(null);
-  const focusPanel = useRef(false);
-  const switching = useRef(false);
-  const panelRef = useRef(null);
-
-  /** Change filters in place (no new history entry). An open meeting stays open. */
-  const update = useCallback(
-    (patch) => {
-      setParams(
-        (prev) => {
-          const next = new URLSearchParams(prev);
-          writeFilters(next, { ...readFilters(prev, defaults), ...patch }, defaults);
-          return next;
-        },
-        // Going Back from here would undo the filter change, so it no longer just closes a meeting.
-        { replace: true, state: null },
-      );
-    },
-    [setParams, defaults],
-  );
-
-  const setView = (v) =>
-    setParams(
-      (prev) => {
-        const next = new URLSearchParams(prev);
-        if (v === 'map') next.set('view', 'map');
-        else next.delete('view');
-        return next;
-      },
-      { replace: true, state: location.state },
-    );
-
-  // ---------- data ----------
+  // ---------- reference data ----------
+  const cityIds = useMemo(() => new Set(cities.map((c) => c.cityId)), [cities]);
+  const counties = useMemo(() => {
+    const byKey = new Map();
+    for (const c of cities) byKey.set(countyKey(c.county), c.county);
+    return [...byKey].map(([key, name]) => ({ key, name })).sort((a, b) => a.name.localeCompare(b.name));
+  }, [cities]);
+  const countySet = useMemo(() => new Set(counties.map((c) => c.key)), [counties]);
+  const countyOfCity = useMemo(() => new Map(cities.map((c) => [c.cityId, countyKey(c.county)])), [cities]);
   const topics = useMemo(() => topicList().filter((tp) => tp.id !== 'other'), [lang]); // eslint-disable-line react-hooks/exhaustive-deps
-  const base = useMemo(() => upcomingMeetings(cities, { from: today, days: f.days, now }), [cities, today, f.days, now]);
+  const vocab = useMemo(() => queryVocab(lang), [lang]);
   const cityTopics = useMemo(() => {
     const map = new Map();
     for (const city of cities) {
@@ -210,44 +173,203 @@ export default function Meetings() {
     }
     return map;
   }, [cities, today]);
+
+  // ---------- filters (in the URL) ----------
+  const defaultNear = saved[saved.origin] ? saved.origin : null;
+  const defaults = useMemo(
+    () => ({ when: DEFAULT_WHEN, after: !P.availability.daytime, speak: true, remote: false, miles: defaultNear ? P.maxMiles : null, near: defaultNear, sort: P.homeCityId || defaultNear ? 'best' : 'soonest' }),
+    [P.availability.daytime, P.maxMiles, P.homeCityId, defaultNear],
+  );
+  const readCtx = useMemo(() => ({ today, cityIds, counties: countySet }), [today, cityIds, countySet]);
+  const f = useMemo(() => readFilters(params, defaults, readCtx), [params, defaults, readCtx]);
+  const view = params.get('view') === 'map' ? 'map' : 'list';
+  const phoneMap = view === 'map' && !isDesktop;
+  const meetingId = params.get('meeting');
+
+  /** Change filters in place (no new history entry). An open meeting stays open. */
+  const update = useCallback(
+    (patch) => {
+      setParams(
+        (prev) => {
+          const next = latest(prev);
+          writeFilters(next, { ...readFilters(next, defaults, readCtx), ...patch }, defaults);
+          return next;
+        },
+        // Going Back from here would undo the filter change, so it no longer just closes a meeting.
+        { replace: true, state: null },
+      );
+    },
+    [setParams, defaults, readCtx],
+  );
+
+  const setView = (v) =>
+    setParams(
+      (prev) => {
+        const next = latest(prev);
+        if (v === 'map') next.set('view', 'map');
+        else next.delete('view');
+        return next;
+      },
+      { replace: true, state: location.state },
+    );
+
+  // Coming back through the tab bar (a bare /meetings): bring back the filters and the
+  // List | Map choice this profile used last. Search text and an open meeting are not kept.
+  const restoring = useRef(false);
+  useLayoutEffect(() => {
+    if (navType === 'REPLACE') return;
+    const savedQuery = typeof ui.meetingsQuery === 'string' ? ui.meetingsQuery : '';
+    if (!savedQuery || FILTER_KEYS.some((k) => params.has(k))) return;
+    const restored = rememberable(savedQuery, today);
+    if (!restored.toString()) {
+      // Only what is no longer kept (an old origin, a range that is over): forget it.
+      setUi({ meetingsQuery: '' });
+      return;
+    }
+    restoring.current = true;
+    setParams(
+      (prev) => {
+        const next = new URLSearchParams(restored);
+        for (const k of NOT_REMEMBERED) if (prev.has(k)) next.set(k, prev.get(k));
+        return next;
+      },
+      { replace: true, state: location.state },
+    );
+    // Only on arrival.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.key]);
+  useEffect(() => {
+    if (restoring.current && !FILTER_KEYS.some((k) => params.has(k))) return;
+    restoring.current = false;
+    const s = rememberable(params, today).toString();
+    if (s !== (ui.meetingsQuery || '')) setUi({ meetingsQuery: s });
+    // Saves follow the address only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params]);
+
+  // ---------- where distance is measured from ----------
+  const origin = useMemo(() => {
+    const ctx = { saved, here, pt: f.pt, cityById };
+    const o = resolveOrigin(f.near, ctx) || resolveOrigin(defaults.near, ctx);
+    if (!o) return null;
+    return { ...o, mapLabel: o.id === 'here' ? t('meetings.youAreHere') : o.name || o.label };
+    // lang: labels are translated
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [f.near, f.pt, saved, here, cityById, defaults.near, lang]);
   const milesTo = useMemo(() => {
     const map = new Map();
-    if (P.location) for (const city of cities) map.set(city.cityId, haversineMiles(P.location, cityPoint(city)));
+    if (origin) for (const city of cities) map.set(city.cityId, haversineMiles(origin, cityPoint(city)));
     return map;
-  }, [cities, P.location]);
-  const query = useMemo(() => readQuery(f.q, cities, topics), [f.q, cities, topics]);
-  const topicKey = f.topics.join(',');
+  }, [cities, origin]);
 
-  const list = useMemo(() => {
-    const wanted = topicKey ? topicKey.split(',') : [];
-    const items = base.filter((m) => {
-      const city = cityById(m.cityId);
-      if (f.after && !['after', 'weekend'].includes(schoolTiming(m))) return false;
-      if (f.speak && !m.openToPublicComment) return false;
-      if (f.remote && remoteState(city) !== 'yes') return false;
-      if (f.miles != null && milesTo.size && !(milesTo.get(m.cityId) <= f.miles)) return false;
-      if (wanted.length && !wanted.some((id) => cityTopics.get(m.cityId).has(id))) return false;
-      if (query) {
-        const byCity = query.cityIds.has(m.cityId);
-        const byLabel = query.text.length >= 3 && fold(m.label).includes(query.text);
-        const byTopic = query.topicIds.some((id) => cityTopics.get(m.cityId).has(id));
-        if (!byCity && !byLabel && !byTopic) return false;
+  /**
+   * Home, School and where you are now are the profile's places: choosing one here makes it the
+   * place Home and Prepare measure from too (prefs.origin), so every page agrees. A city or a
+   * looked-up place stays in the address, for this visit.
+   */
+  const shareOrigin = useCallback(
+    (id, position) => {
+      setPrefs((cur) => withPlaces(cur, position ? { here: placeFromDevice(position, position.at), origin: 'here' } : { origin: id }, cities));
+      update({ near: null, pt: null });
+    },
+    [setPrefs, cities, update],
+  );
+  const onNear = useCallback(
+    (v) => {
+      if (v !== 'here') {
+        setHereStatus('idle');
+        if (v === 'home' || v === 'school') shareOrigin(v);
+        else update({ near: v, pt: null });
+        return;
       }
-      return true;
-    });
-    if (sort !== 'best') return items;
-    const scored = items.map((m) => ({ m, s: scoreMeeting(m, cityById(m.cityId), P, { today }).score }));
-    scored.sort((a, b) => b.s - a.s || a.m.date.localeCompare(b.m.date) || a.m.time.localeCompare(b.m.time) || a.m.cityName.localeCompare(b.m.cityName));
-    const first = [];
-    const later = [];
-    const seen = new Map();
-    for (const { m } of scored) {
-      const n = seen.get(m.cityId) || 0;
-      (n < PER_CITY ? first : later).push(m);
-      seen.set(m.cityId, n + 1);
-    }
-    return [...first, ...later];
-  }, [base, cityById, f.after, f.speak, f.remote, f.miles, topicKey, query, sort, cityTopics, milesTo, P, today]);
+      if (here || saved.here) {
+        setHereStatus('idle');
+        // A position found earlier in this tab is saved; one already saved is kept as it is.
+        shareOrigin('here', saved.here ? null : here);
+        return;
+      }
+      setHereStatus('locating');
+      locate().then(
+        (p) => {
+          setHere(p);
+          setHereStatus('idle');
+          shareOrigin('here', p);
+        },
+        (err) => setHereStatus(err && err.code === 'denied' ? 'denied' : 'failed'),
+      );
+    },
+    [here, saved.here, update, shareOrigin],
+  );
+
+  const [lookupState, setLookupState] = useState({ status: 'idle' });
+  const lookupAbort = useRef(null);
+  useEffect(() => () => lookupAbort.current && lookupAbort.current.abort(), []);
+  const runLookup = useCallback(
+    async (text) => {
+      const q = String(text || '').trim();
+      if (q.length < 2) return;
+      if (lookupAbort.current) lookupAbort.current.abort();
+      const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+      lookupAbort.current = ctrl;
+      setLookupState({ status: 'looking', query: q });
+      try {
+        const place = await lookupPlace(q, { cities, signal: ctrl ? ctrl.signal : undefined });
+        if (place.kind === 'city' && place.cityId && cityIds.has(place.cityId)) update({ near: place.cityId, pt: null });
+        else update({ near: 'pt', pt: { lat: place.lat, lng: place.lng, label: place.label || q } });
+        setLookupState({ status: 'idle' });
+      } catch (err) {
+        const code = err && err.code;
+        if (code === 'aborted') return;
+        const message =
+          code === 'outside_area' ? t('meetings.from.outside', { place: err.label || q }) : code === 'offline' ? t('meetings.from.offline') : code === 'busy' || code === 'unavailable' ? t('meetings.from.busy') : t('meetings.from.notFound', { place: q });
+        setLookupState({ status: 'error', query: q, message });
+      }
+    },
+    [cities, cityIds, update],
+  );
+  const lookup = useMemo(() => ({ available: true, state: lookupState, run: runLookup, reset: () => setLookupState({ status: 'idle' }) }), [lookupState, runLookup]);
+
+  // ---------- the list ----------
+  const win = dateWindow(f, today);
+  const base = useMemo(() => upcomingMeetings(cities, { from: win.from, days: windowDays(win), now }), [cities, win.from, win.to, now]); // eslint-disable-line react-hooks/exhaustive-deps
+  const query = useMemo(() => parseQuery(f.q, { cities, topics, today, vocab }), [f.q, cities, topics, today, vocab]);
+  const ctx = useMemo(
+    () => ({
+      cityById,
+      topicsAt: (id) => cityTopics.get(id) || EMPTY,
+      countyOf: (id) => countyOfCity.get(id),
+      milesTo: (id) => (milesTo.has(id) ? milesTo.get(id) : null),
+      hasOrigin: Boolean(origin),
+      query,
+    }),
+    [cityById, cityTopics, countyOfCity, milesTo, origin, query],
+  );
+  const canBest = Boolean(P.homeCityId || origin);
+  const sort = f.sort === 'nearest' && origin ? 'nearest' : f.sort === 'best' && canBest ? 'best' : 'soonest';
+  const scorePrefs = useMemo(() => ({ ...P, location: origin ? { lat: origin.lat, lng: origin.lng } : null, maxMiles: f.miles }), [P, origin, f.miles]);
+  const list = useMemo(() => {
+    const items = base.filter((m) => passes(m, f, ctx));
+    return sortMeetings(items, sort, { scoreOf: (m) => scoreMeeting(m, cityById(m.cityId), scorePrefs, { today }).score, milesTo: ctx.milesTo, perCity: PER_CITY });
+  }, [base, f, ctx, sort, cityById, scorePrefs, today]);
+
+  /** How many meetings another filter state would show (for the ways out of an empty list). */
+  const pools = useRef(new Map());
+  const countFor = useCallback(
+    (g) => {
+      const w = dateWindow(g, today);
+      let pool = base;
+      if (w.from < win.from || w.to > win.to) {
+        const key = `${w.from}|${w.to}|${now}`;
+        if (!pools.current.has(key)) {
+          if (pools.current.size > 8) pools.current.clear();
+          pools.current.set(key, upcomingMeetings(cities, { from: w.from, days: windowDays(w), now }));
+        }
+        pool = pools.current.get(key);
+      }
+      return pool.filter((m) => m.date >= w.from && m.date <= w.to && passes(m, g, ctx)).length;
+    },
+    [base, win.from, win.to, today, now, cities, ctx],
+  );
 
   // ---------- the open meeting ----------
   const selected = useMemo(() => {
@@ -264,19 +386,35 @@ export default function Meetings() {
     if (!selected || selected.openToPublicComment || selected.status === 'cancelled' || !selectedCity) return null;
     return nextMeetingFor(selectedCity, selected.date, { publicCommentOnly: true, now });
   }, [selected, selectedCity, now]);
+  const selectedDistance = selected && origin && milesTo.has(selected.cityId) && milesTo.get(selected.cityId) >= 0.3 ? { miles: milesTo.get(selected.cityId), from: origin.label } : null;
+  const selectedReasons = useMemo(() => {
+    if (!selected || sort !== 'best' || !selectedCity) return null;
+    // The distance line and the "Your city" badge already say how near it is.
+    const said = Boolean(selectedDistance) || selected.cityId === P.homeCityId;
+    return scoreMeeting(selected, selectedCity, scorePrefs, { today })
+      .reasons.filter((r) => r.points > 0 && !(said && r.kind === 'distance'))
+      .slice(0, 3)
+      .map((r) => r.text);
+  }, [selected, selectedCity, sort, scorePrefs, today, selectedDistance, P.homeCityId]);
 
-  // A link to a meeting that has passed or never existed: drop it quietly.
+  // A link to a meeting that has passed or never existed: drop it quietly. A meeting only a
+  // city's agenda site lists exists once the live agendas have loaded (or failed to), so wait.
   useEffect(() => {
-    if (meetingId && !selected)
+    if (meetingId && !selected && liveReady)
       setParams(
         (prev) => {
-          const next = new URLSearchParams(prev);
+          const next = latest(prev);
           next.delete('meeting');
           return next;
         },
         { replace: true },
       );
-  }, [meetingId, selected, setParams]);
+  }, [meetingId, selected, liveReady, setParams]);
+
+  const returnFocus = useRef(null);
+  const focusPanel = useRef(false);
+  const switching = useRef(false);
+  const panelRef = useRef(null);
 
   const openMeeting = useCallback(
     (m) => {
@@ -287,7 +425,7 @@ export default function Meetings() {
       switching.current = fromOpen;
       setParams(
         (prev) => {
-          const next = new URLSearchParams(prev);
+          const next = latest(prev);
           next.set('meeting', m.id);
           return next;
         },
@@ -304,7 +442,7 @@ export default function Meetings() {
     else
       setParams(
         (prev) => {
-          const next = new URLSearchParams(prev);
+          const next = latest(prev);
           next.delete('meeting');
           return next;
         },
@@ -341,8 +479,68 @@ export default function Meetings() {
     if (isDesktop && el.isConnected) el.focus({ preventScroll: true });
   }, [selectedKey, isDesktop]);
 
+  // ---------- filters panel (desktop, inline) and sheet (phones) ----------
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [section, setSection] = useState(null);
+  const filtersBtn = useRef(null);
+  const panelHeading = useRef(null);
+  const openFilters = (name) => {
+    setSection(name ? { name } : null);
+    setFiltersOpen(true);
+  };
+  const closePanel = useCallback(() => {
+    setFiltersOpen(false);
+    if (filtersBtn.current) filtersBtn.current.focus({ preventScroll: true });
+  }, []);
+  // The phone sheet is not shown on desktop and the inline panel not on phones.
+  const sheetOpen = filtersOpen && !isDesktop;
+  const panelOpen = filtersOpen && isDesktop;
+
+  // Opened from Filters, the panel takes focus (its heading), so Tab goes straight into it
+  // rather than past the other chips. Opened for one group, FilterControls focuses that group.
+  useEffect(() => {
+    if (!panelOpen || section) return undefined;
+    const id = requestAnimationFrame(() => {
+      const h = panelHeading.current;
+      if (!h) return;
+      h.focus({ preventScroll: true });
+      h.scrollIntoView({ block: 'nearest' });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [panelOpen, section]);
+
+  // Escape closes the filters panel, then the meeting panel, wherever focus is, unless
+  // something smaller (a menu, a dialog, a city list, a search box with text) uses it first.
+  useEffect(() => {
+    if (!isDesktop || (!selectedKey && !panelOpen)) return undefined;
+    const onKey = (e) => {
+      if (e.key !== 'Escape' || e.defaultPrevented) return;
+      if (document.querySelector('.sheet-layer')) return;
+      const el = e.target instanceof Element ? e.target : null;
+      if (el && el.closest('[role="menu"]')) return;
+      if (el && el.matches('input[type="search"]') && el.value) return;
+      if (panelOpen) {
+        e.preventDefault();
+        closePanel();
+        return;
+      }
+      if (el && el.closest('.cbx, .mtg-fpanel')) return;
+      e.preventDefault();
+      closeMeeting();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [isDesktop, selectedKey, panelOpen, closeMeeting, closePanel]);
+  const addPlace = () => {
+    // One dialog at a time: close the filters before "Your city, topics and times" opens.
+    setFiltersOpen(false);
+    navigate(setupTo(location), { state: SETUP_STATE });
+  };
+
   // ---------- paging ----------
-  const sig = `${f.q}|${f.days}|${f.after}|${f.speak}|${f.remote}|${f.miles}|${topicKey}|${sort}`;
+  const sigParams = new URLSearchParams(params);
+  for (const k of ['meeting', 'view', 'setup']) sigParams.delete(k);
+  const sig = sigParams.toString();
   const [page, setPage] = useState({ sig, n: FIRST_PAGE });
   const shownCount = page.sig === sig ? page.n : FIRST_PAGE;
   const shown = list.slice(0, shownCount);
@@ -358,7 +556,11 @@ export default function Meetings() {
     if (el) el.focus();
   }, [shownCount]);
 
+  const skipTarget = list.length && !phoneMap;
+  useSkipLink(skipTarget ? 'mtg-results' : null, skipTarget ? tn('meetings.skipToResults', list.length) : null);
+
   // ---------- map pins: the councils in the list ----------
+  const [hot, setHot] = useState(null);
   const pins = useMemo(() => {
     const byCity = new Map();
     for (const m of list) {
@@ -381,100 +583,254 @@ export default function Meetings() {
       };
     });
   }, [list, selected, cityById, lang]); // eslint-disable-line react-hooks/exhaustive-deps
+  const councils = new Set(list.map((m) => m.cityId)).size;
 
+  // The chip row fades out on the right while more chips are hidden past the edge.
+  const chipbarRef = useRef(null);
+  const [chipEnd, setChipEnd] = useState(false);
+  const checkChipEnd = useCallback(() => {
+    const el = chipbarRef.current;
+    if (el) setChipEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 4);
+  }, []);
+  useEffect(() => {
+    checkChipEnd();
+  });
+  useEffect(() => {
+    const el = chipbarRef.current;
+    if (!el || typeof ResizeObserver !== 'function') return undefined;
+    const ro = new ResizeObserver(checkChipEnd);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [checkChipEnd]);
   const onPin = useCallback(
     (cityId) => {
+      if (phoneMap && hot !== cityId) {
+        // First tap: show that city's meeting in the strip; a second tap opens it.
+        setHot(cityId);
+        return;
+      }
       if (selected && selected.cityId === cityId) return;
       const m = list.find((x) => x.cityId === cityId);
       if (m) openMeeting(m);
     },
-    [list, selected, openMeeting],
+    [phoneMap, hot, list, selected, openMeeting],
   );
 
-  // "You are here" only when the distance origin is not just the home city hall.
-  const homeCity = P.homeCityId ? cityById(P.homeCityId) : null;
-  const you = P.location && !(homeCity && haversineMiles(P.location, cityPoint(homeCity)) < 0.3) ? P.location : null;
-  const centre = homeCity ? cityPoint(homeCity) : P.location;
+  // ---------- words for chips ----------
+  const shortDays = tList('format.weekdaysShort');
+  const longDays = tList('format.weekdays');
+  const keyLabel = (key) => {
+    const [kind, id] = key.split(/:(.*)/s);
+    switch (kind) {
+      case 'when':
+        return whenLabel(f, today);
+      case 'dow':
+        return f.dow.map((i) => shortDays[i]).join(', ');
+      case 'time':
+        return f.time.map((x) => t(`meetings.time.${x}`)).join(', ');
+      case 'after':
+        return t('ui.timing.after');
+      case 'speak':
+        return t('ui.canSpeak');
+      case 'remote':
+        return t('meetings.speaking.remote');
+      case 'miles':
+        return t('meetings.distance.within', { n: f.miles });
+      case 'topic': {
+        const tp = topics.find((x) => x.id === id);
+        return tp ? tp.label : id;
+      }
+      case 'county': {
+        const c = counties.find((x) => x.key === id);
+        return t('meetings.where.county', { county: c ? c.name : id });
+      }
+      case 'city': {
+        const c = cityById(id);
+        return c ? c.name : id;
+      }
+      default:
+        return key;
+    }
+  };
+  const keys = activeKeys(f, { hasOrigin: Boolean(origin) });
+  // The number on Filters counts only what differs from the profile's defaults.
+  const changed = changedKeys(f, defaults, { hasOrigin: Boolean(origin) }).length;
+  const stripKeys = keys.filter((k) => STRIP_KINDS.has(k.split(':')[0]));
+  const clearAll = () => update(clearFilters(f));
 
-  // ---------- pieces ----------
-  const milesOn = f.miles != null && P.location != null;
-  const sheetCount = (milesOn ? 1 : 0) + f.topics.length;
-  const anyFilter = f.after || f.speak || f.remote || milesOn || f.topics.length > 0;
-  const clearAll = () => update({ q: '', after: false, speak: false, remote: false, miles: null, topics: [] });
-  const topicOnly = query && !query.cityIds.size && query.topicIds.length > 0;
-  const hintTopic = topicOnly ? topics.find((tp) => tp.id === query.topicIds[0]) : null;
+  const nonDefaultOrigin = origin && origin.id !== defaults.near;
+  const milesLabel = !origin ? t('meetings.distance.label') : f.miles == null ? t('meetings.distance.any') : nonDefaultOrigin ? t('meetings.distance.withinFrom', { n: f.miles, place: origin.label }) : t('meetings.distance.within', { n: f.miles });
 
-  const daysLabel = (d) => t(`meetings.days${d}`);
-  const dayHead = (date) => (date === today ? t('common.today') : date === addDays(today, 1) ? t('common.tomorrow') : formatDate(date, { long: true }));
+  // ---------- search hints ----------
+  const structured = query && (query.weekdays.size > 0 || query.dates || query.counties.size > 0);
+  const makeFilter = () => {
+    const patch = { q: query.terms.map((x) => x.text).join(' ') };
+    if (query.weekdays.size) patch.dow = WEEK_ORDER.filter((i) => f.dow.includes(i) || query.weekdays.has(i));
+    if (query.counties.size) patch.counties = [...new Set([...f.counties, ...query.counties])];
+    if (query.dates) {
+      if (query.dateWord && WHEN.includes(query.dateWord)) Object.assign(patch, { when: query.dateWord, from: '', to: '' });
+      else {
+        const ds = [...query.dates].sort();
+        Object.assign(patch, { when: 'custom', from: ds[0], to: ds[ds.length - 1] });
+      }
+    }
+    update(patch);
+  };
+  let searchHint = null;
+  if (structured) {
+    let text;
+    if (query.weekdays.size) text = t('meetings.hint.days', { days: joinList(WEEK_ORDER.filter((i) => query.weekdays.has(i)).map((i) => longDays[i])) });
+    else if (query.dates) text = t('meetings.hint.dates', { dates: query.dateWord ? t(`meetings.when.phrase.${query.dateWord}`) : joinList([...query.dates].sort().map((d) => monthDay(d))) });
+    else text = t('meetings.hint.county', { county: counties.filter((c) => query.counties.has(c.key)).map((c) => c.name).join(', ') });
+    searchHint = { text, action: t('meetings.hint.makeFilter'), onClick: makeFilter };
+  }
+  let countyHint = null;
+  if (!structured && query && query.countyHint) {
+    const c = counties.find((x) => x.key === query.countyHint);
+    if (c) countyHint = { text: t('meetings.hint.countyAlso', { county: c.name }), action: t('meetings.hint.countyShow'), onClick: () => update({ q: '', counties: [...new Set([...f.counties, c.key])] }) };
+  }
+  // A search the filters partly hide: say how much and offer to show it.
+  const hiddenForSearch = useMemo(() => {
+    if (!query || !list.length || !keys.some((k) => k !== 'when')) return 0;
+    const g = { ...clearFilters(f), when: f.when, from: f.from, to: f.to };
+    return Math.max(0, countFor(g) - list.length);
+    // keys follow f
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, list.length, f, countFor]);
+  const topicOnly = query && !structured && query.terms.length === 1 && !query.terms[0].cityIds.size && query.terms[0].topicIds.length > 0;
+  const hintTopic = topicOnly ? topics.find((tp) => tp.id === query.terms[0].topicIds[0]) : null;
 
-  const row = (m, i) => (
-    <li key={m.id}>
-      <MeetingRow
-        meeting={m}
-        city={cityById(m.cityId)}
-        onSelect={openMeeting}
-        selected={Boolean(selected && selected.id === m.id)}
-        homeCityId={P.homeCityId}
-        distanceMiles={milesTo.has(m.cityId) ? milesTo.get(m.cityId) : null}
-        deadline={m.openToPublicComment ? meetingDeadline(m, now) : null}
-        showTiming={!f.after}
-        aria-haspopup={isDesktop ? undefined : 'dialog'}
-        data-mid={m.id}
-        data-idx={i}
-      />
-    </li>
+  // ---------- empty states ----------
+  const emptyInfo = useMemo(() => {
+    if (list.length) return null;
+    // The default two weeks can widen too, so a search for a city that meets later and
+    // farther away than the limit still gets one way out.
+    const relaxKeys = keys.includes('when') || f.when === '3months' ? keys : [...keys, 'when'];
+    const fixes = relaxations(f, relaxKeys, countFor).slice(0, 3);
+    const everything = countFor({ ...clearFilters(f), when: '3months' });
+    // No single filter is enough: the fewest that hide meetings together.
+    const together = fixes.length || relaxKeys.length < 2 ? null : relaxTogether(f, relaxKeys, countFor);
+    return { fixes, everything, together, withoutAll: keys.length ? countFor(clearFilters(f)) : 0 };
+    // keys follow f
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [list.length, f, countFor]);
+
+  // Every word of the search was understood (a city, county, topic, day or date), so the
+  // answer is "none of them meet then", not "try other words".
+  const understood = Boolean(query) && (query.weekdays.size > 0 || Boolean(query.dates) || query.counties.size > 0 || query.terms.some((x) => x.cityIds.size || x.topicIds.length)) && query.terms.every((x) => x.cityIds.size || x.topicIds.length);
+
+  const fixText = (fix) => {
+    if (fix.key === 'when') return tn(f.when === DEFAULT_WHEN ? 'meetings.empty.more3months' : 'meetings.empty.more2weeks', fix.count);
+    return tn('meetings.empty.hiddenBy', fix.count, { filter: keyLabel(fix.key) });
+  };
+  // A search for one city ("irving") names it in the way out.
+  const searchedCity =
+    query && query.terms.length === 1 && query.terms[0].cityIds.size === 1 && !query.terms[0].topicIds.length && !query.weekdays.size && !query.dates && !query.counties.size ? cityById([...query.terms[0].cityIds][0]) : null;
+  /** "4 meetings in Irving in the next 3 months", "5 meetings in the next 3 months hidden by Within 15 mi". */
+  const togetherText = ({ keys: drop, count }) => {
+    const later = drop.includes('when') && f.when === DEFAULT_WHEN;
+    const rest = later ? drop.filter((k) => k !== 'when') : drop;
+    const filter = joinList(rest.map(keyLabel));
+    if (searchedCity) {
+      if (later) return tn('meetings.empty.cityLater', count, { city: searchedCity.name });
+      return tn('meetings.empty.cityHiddenBy', count, { city: searchedCity.name, filter });
+    }
+    if (later) return rest.length ? tn('meetings.empty.laterHiddenBy', count, { filter }) : tn('meetings.empty.more3months', count);
+    return tn('meetings.empty.hiddenBy', count, { filter });
+  };
+
+  const day = (date) => (date === today ? t('common.today') : date === addDays(today, 1) ? t('common.tomorrow') : formatDate(date, { long: true }));
+
+  const rowHover = isDesktop
+    ? (m) => ({
+        onMouseEnter: () => setHot(m.cityId),
+        onMouseLeave: () => setHot((h) => (h === m.cityId ? null : h)),
+        onFocus: () => setHot(m.cityId),
+        onBlur: () => setHot((h) => (h === m.cityId ? null : h)),
+      })
+    : () => ({});
+  // In the phone map's strip a card shows the essentials only; the sheet has the rest.
+  const row = (m, i, { compact = false } = {}) => (
+    <MeetingRow
+      meeting={m}
+      city={cityById(m.cityId)}
+      onSelect={openMeeting}
+      selected={Boolean(selected && selected.id === m.id)}
+      homeCityId={P.homeCityId}
+      distanceMiles={milesTo.has(m.cityId) ? milesTo.get(m.cityId) : null}
+      deadline={m.openToPublicComment && !compact ? meetingDeadline(m, now) : null}
+      showTiming={!f.after && !compact}
+      aria-haspopup={isDesktop ? undefined : 'dialog'}
+      data-mid={m.id}
+      data-idx={i}
+      {...rowHover(m)}
+    />
   );
 
   let body;
-  if (!list.length) {
-    if (query) {
+  if (!list.length && emptyInfo) {
+    if (query && emptyInfo.everything === 0) {
       body = (
         <EmptyState
           icon="search"
-          title={t('meetings.noSearchTitle', { q: f.q.trim() })}
+          title={t('meetings.empty.noSearchTitle', { q: f.q.trim() })}
           actions={
             <button type="button" className="btn btn--primary" onClick={() => update({ q: '' })}>
               {t('meetings.clearSearch')}
             </button>
           }
         >
-          {t('meetings.noSearchBody')}
-        </EmptyState>
-      );
-    } else if (anyFilter) {
-      body = (
-        <EmptyState
-          icon="cal"
-          title={t('meetings.emptyTitle')}
-          actions={
-            <button type="button" className="btn btn--primary" onClick={clearAll}>
-              {t('meetings.clearFilters')}
-            </button>
-          }
-        >
-          {t('meetings.emptyBody')}
+          {understood ? t('meetings.empty.noSearchAll') : t('meetings.empty.noSearchBody')}
         </EmptyState>
       );
     } else {
+      const onlyWindow = !keys.length && !query;
+      const title = onlyWindow ? t('meetings.empty.windowTitle', { range: whenPhrase(f, today) }) : query ? t('meetings.empty.search', { q: f.q.trim() }) : t('meetings.empty.title');
       body = (
         <EmptyState
-          icon="cal"
-          title={t('meetings.emptyWindowTitle', { n: f.days })}
+          icon={query ? 'search' : 'cal'}
+          title={title}
           actions={
-            f.days < 30 ? (
-              <button type="button" className="btn btn--primary" onClick={() => update({ days: 30 })}>
-                {t('meetings.showThirty')}
+            !emptyInfo.fixes.length && !(emptyInfo.together && emptyInfo.together.count > 0) && keys.length ? (
+              <button type="button" className="btn btn--primary" onClick={clearAll}>
+                {t('meetings.clearAll')}
+              </button>
+            ) : query ? (
+              <button type="button" className="btn btn--quiet mtg-empty__clear" onClick={() => update({ q: '' })}>
+                {t('meetings.clearSearch')}
               </button>
             ) : null
           }
         >
-          {t('meetings.emptyWindowBody')}
+          {emptyInfo.fixes.length ? (
+            <ul className="mtg-fixes">
+              {emptyInfo.fixes.map((fix) => (
+                <li key={fix.key}>
+                  <span>{fixText(fix)}</span>
+                  <button type="button" className="btn btn--secondary btn--sm" onClick={() => update(withoutKey(f, fix.key))}>
+                    {t('meetings.empty.showThem')}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : emptyInfo.together && emptyInfo.together.count > 0 ? (
+            <ul className="mtg-fixes">
+              <li>
+                <span>{togetherText(emptyInfo.together)}</span>
+                <button type="button" className="btn btn--secondary btn--sm" onClick={() => update(emptyInfo.together.keys.reduce(withoutKey, f))}>
+                  {t('meetings.empty.showThem')}
+                </button>
+              </li>
+            </ul>
+          ) : keys.length && emptyInfo.withoutAll ? (
+            <p>{tn('meetings.empty.withoutAll', emptyInfo.withoutAll)}</p>
+          ) : (
+            <p>{onlyWindow ? t('meetings.empty.windowBody') : t('meetings.empty.body')}</p>
+          )}
         </EmptyState>
       );
     }
-  } else if (sort === 'best') {
-    body = <ul className="group">{shown.map(row)}</ul>;
-  } else {
+  } else if (sort === 'soonest') {
     const groups = [];
     shown.forEach((m, i) => {
       const last = groups[groups.length - 1];
@@ -484,21 +840,95 @@ export default function Meetings() {
     body = groups.map((g) => (
       <section key={g.date} className="mtg__day" aria-labelledby={`day-${g.date}`}>
         <h2 className="day-head" id={`day-${g.date}`}>
-          {dayHead(g.date)}
+          {day(g.date)}
         </h2>
-        <ul className="group">{g.items.map(([m, i]) => row(m, i))}</ul>
+        <ul className="group">
+          {g.items.map(([m, i]) => (
+            <li key={m.id}>{row(m, i)}</li>
+          ))}
+        </ul>
       </section>
     ));
+  } else {
+    body = (
+      <ul className="group">
+        {shown.map((m, i) => (
+          <li key={m.id}>{row(m, i)}</li>
+        ))}
+      </ul>
+    );
   }
 
   const remaining = list.length - shown.length;
-  // Sorting orders the list; on a phone's map there is no list to order.
-  const showSort = hasPlace && !(view === 'map' && !isDesktop);
+  const showSort = !phoneMap;
+  const sortName = { best: t('meetings.sortBest'), soonest: t('meetings.sortSoonest'), nearest: t('meetings.sortNearest') };
+  const sortItems = [
+    ...(canBest ? [{ type: 'radio', label: sortName.best, checked: sort === 'best', onSelect: () => update({ sort: 'best' }) }] : []),
+    { type: 'radio', label: sortName.soonest, checked: sort === 'soonest', onSelect: () => update({ sort: 'soonest' }) },
+    ...(origin ? [{ type: 'radio', label: sortName.nearest, checked: sort === 'nearest', onSelect: () => update({ sort: 'nearest' }) }] : []),
+  ];
+
+  const mapEmpty =
+    !list.length && emptyInfo ? (
+      <div className="map__emptycard">
+        <p className="map__emptyt">{t('meetings.empty.map')}</p>
+        {phoneMap && (emptyInfo.fixes[0] || emptyInfo.together || keys.length > 0 || query) ? (
+          query && emptyInfo.everything === 0 ? (
+            <button type="button" className="btn btn--secondary btn--sm" onClick={() => update({ q: '' })}>
+              {t('meetings.clearSearch')}
+            </button>
+          ) : emptyInfo.fixes[0] ? (
+            <>
+              <p className="help">{fixText(emptyInfo.fixes[0])}</p>
+              <button type="button" className="btn btn--secondary btn--sm" onClick={() => update(withoutKey(f, emptyInfo.fixes[0].key))}>
+                {t('meetings.empty.showThem')}
+              </button>
+            </>
+          ) : emptyInfo.together && emptyInfo.together.count > 0 ? (
+            <>
+              <p className="help">{togetherText(emptyInfo.together)}</p>
+              <button type="button" className="btn btn--secondary btn--sm" onClick={() => update(emptyInfo.together.keys.reduce(withoutKey, f))}>
+                {t('meetings.empty.showThem')}
+              </button>
+            </>
+          ) : (
+            <button type="button" className="btn btn--secondary btn--sm" onClick={() => (keys.length ? clearAll() : update({ q: '' }))}>
+              {keys.length ? t('meetings.clearAll') : t('meetings.clearSearch')}
+            </button>
+          )
+        ) : null}
+      </div>
+    ) : null;
+
   const mapBlock = (
     <Suspense fallback={<div className="map map--loading" role="status" aria-label={t('meetings.mapLoading')} />}>
-      <MapView pins={pins} selectedId={selected ? selected.cityId : null} onSelect={onPin} you={you} home={centre} insetRight={isDesktop && selected ? PANEL_INSET : 0} />
+      <MapView pins={pins} selectedId={selected ? selected.cityId : null} hotId={hot} followHot={phoneMap} onSelect={onPin} origin={origin} ringMiles={origin ? f.miles : null} insetRight={isDesktop && selected ? PANEL_INSET : 0} empty={mapEmpty} />
     </Suspense>
   );
+
+  const filterControls = (idBase) => (
+    <FilterControls
+      idBase={idBase}
+      f={{ ...f, near: origin ? origin.id : f.near }}
+      update={update}
+      today={today}
+      win={win}
+      topics={topics}
+      cities={cities}
+      counties={counties}
+      saved={saved}
+      origin={origin}
+      savedMiles={P.maxMiles}
+      onNear={onNear}
+      hereStatus={hereStatus}
+      lookup={lookup}
+      onAddPlace={addPlace}
+      section={section}
+    />
+  );
+
+  const countText = list.length ? t('meetings.countAt', { meetings: tn('meetings.count', list.length), councils: tn('meetings.councils', councils) }) : tn('meetings.count', 0);
+  const noPlaceTip = !origin && !ui.meetingsPlaceTipHidden;
 
   return (
     <div className={`mtg${view === 'map' ? ' mtg--mapview' : ''}`}>
@@ -527,72 +957,211 @@ export default function Meetings() {
               </button>
             )}
           </div>
-          <div className="mtg__chips">
-            <div className="chipbar" role="group" aria-label={t('meetings.filtersLabel')}>
-              <Chip icon="sliders" count={sheetCount} aria-haspopup="dialog" onClick={() => setFiltersOpen(true)}>
+          <div className={`mtg__chips${chipEnd ? ' is-end' : ''}`}>
+            <div ref={chipbarRef} className="chipbar" role="group" aria-label={t('meetings.filtersLabel')} onScroll={checkChipEnd}>
+              <Chip
+                ref={filtersBtn}
+                icon="sliders"
+                count={changed}
+                className={panelOpen ? 'is-open' : ''}
+                aria-label={changed ? tn('meetings.filtersOn', changed) : t('meetings.filters')}
+                aria-haspopup={isDesktop ? undefined : 'dialog'}
+                aria-expanded={isDesktop ? panelOpen : undefined}
+                aria-controls={isDesktop && panelOpen ? 'mtg-fpanel' : undefined}
+                onClick={() => (panelOpen ? closePanel() : openFilters(null))}
+              >
                 {t('meetings.filters')}
               </Chip>
               <Menu
-                label={daysLabel(f.days)}
-                buttonClassName="chip chip--menu"
+                label={`${t('meetings.when.label')}: ${whenLabel(f, today)}`}
+                buttonClassName={`chip chip--menu${f.when !== DEFAULT_WHEN ? ' is-on' : ''}`}
                 align="start"
                 button={
                   <>
-                    {daysLabel(f.days)}
+                    {whenLabel(f, today)}
                     <Icon name="chev-d" size={20} />
                   </>
                 }
-                items={DAYS.map((d) => ({ type: 'radio', label: daysLabel(d), checked: f.days === d, onSelect: () => update({ days: d }) }))}
+                items={[
+                  ...WHEN.map((w) => ({ type: 'radio', label: t(`meetings.when.${w}`), checked: f.when === w, onSelect: () => update({ when: w, from: '', to: '' }) })),
+                  { type: 'separator' },
+                  {
+                    type: 'radio',
+                    label: t('meetings.when.custom'),
+                    sub: f.when === 'custom' ? whenLabel(f, today) : undefined,
+                    checked: f.when === 'custom',
+                    onSelect: () => {
+                      if (f.when !== 'custom') update({ when: 'custom', from: win.from, to: win.to });
+                      openFilters('when');
+                    },
+                  },
+                ]}
               />
-              <Chip pressed={f.after} onClick={() => update({ after: !f.after })}>
+              {origin ? (
+                <Menu
+                  label={`${t('meetings.distance.label')}: ${milesLabel}`}
+                  buttonClassName={`chip chip--menu${f.miles != null ? ' is-on' : ''}`}
+                  align="start"
+                  button={
+                    <>
+                      {milesLabel}
+                      <Icon name="chev-d" size={20} />
+                    </>
+                  }
+                  items={[
+                    { type: 'group', label: t('meetings.distance.menuFrom', { place: origin.label }) },
+                    ...mileChoices(P.maxMiles, f.miles).map((n) => ({ type: 'radio', label: t('ui.milesShort', { n }), checked: f.miles === n, onSelect: () => update({ miles: n }) })),
+                    { type: 'radio', label: t('meetings.distance.any'), checked: f.miles == null, onSelect: () => update({ miles: null }) },
+                    { type: 'separator' },
+                    { label: t('meetings.distance.elsewhere'), icon: 'pin', onSelect: () => openFilters('distance') },
+                  ]}
+                />
+              ) : (
+                <Chip menu aria-haspopup={isDesktop ? undefined : 'dialog'} onClick={() => openFilters('distance')}>
+                  {t('meetings.distance.label')}
+                </Chip>
+              )}
+              <Chip pressed={f.after} title={t('meetings.time.afterLong')} onClick={() => update({ after: !f.after })}>
                 {t('ui.timing.after')}
               </Chip>
               <Chip pressed={f.speak} onClick={() => update({ speak: !f.speak })}>
                 {t('ui.canSpeak')}
               </Chip>
-              <Chip pressed={f.remote} onClick={() => update({ remote: !f.remote })}>
-                {t('meetings.remoteOk')}
+              <Chip pressed={f.remote} title={t('meetings.speaking.remoteLong')} onClick={() => update({ remote: !f.remote })}>
+                {t('meetings.speaking.remote')}
               </Chip>
             </div>
           </div>
+          {stripKeys.length > 0 && !panelOpen && (
+            <ul className="mtg__active" aria-label={t('meetings.activeLabel')}>
+              {stripKeys.map((key) => (
+                <li key={key}>
+                  <button type="button" className="chip is-on mtg-x" aria-label={t('meetings.remove', { filter: keyLabel(key) })} onClick={() => update(withoutKey(f, key))}>
+                    <span className="mtg-x__t">{keyLabel(key)}</span>
+                    <Icon name="x" size={20} />
+                  </button>
+                </li>
+              ))}
+              <li>
+                <button type="button" className="see mtg__clearall" onClick={clearAll}>
+                  {t('meetings.clearAll')}
+                </button>
+              </li>
+            </ul>
+          )}
         </div>
 
-        {hintTopic && <p className="mtg__hint">{t('meetings.topicHint', { topic: hintTopic.short || lowerFirst(hintTopic.label) })}</p>}
+        {panelOpen && (
+          <section id="mtg-fpanel" className="mtg-fpanel" aria-labelledby="mtg-fpanel-h">
+            <div className="mtg-fpanel__bar">
+              <h2 className="t-heading" id="mtg-fpanel-h" ref={panelHeading} tabIndex={-1}>
+                {t('meetings.filters')}
+              </h2>
+              <button type="button" className="iconbtn" aria-label={t('common.close')} onClick={closePanel}>
+                <Icon name="x" />
+              </button>
+            </div>
+            {filterControls('mf-panel')}
+            <div className="mtg-fpanel__foot">
+              <span className="count-l num" aria-hidden="true">
+                {tn('meetings.count', list.length)}
+              </span>
+              <button type="button" className="btn btn--quiet" onClick={clearAll} aria-disabled={!keys.length || undefined}>
+                {t('meetings.clearAll')}
+              </button>
+              <button type="button" className="btn btn--primary" onClick={closePanel}>
+                {t('meetings.done')}
+              </button>
+            </div>
+          </section>
+        )}
+
+        {searchHint && (
+          <p className="mtg__hint">
+            <Icon name="info" size={18} />
+            <span>
+              {searchHint.text}{' '}
+              <button type="button" className="link" onClick={searchHint.onClick}>
+                {searchHint.action}
+              </button>
+            </span>
+          </p>
+        )}
+        {hiddenForSearch > 0 && !searchHint && (
+          <p className="mtg__hint">
+            <Icon name="eye" size={18} />
+            <span>
+              {tn('meetings.hint.hidden', hiddenForSearch, { q: f.q.trim() })}{' '}
+              <button type="button" className="link" onClick={() => update({ ...clearFilters(f), when: f.when, from: f.from, to: f.to })}>
+                {t('meetings.hint.showThem')}
+              </button>
+            </span>
+          </p>
+        )}
+        {countyHint && !hiddenForSearch && (
+          <p className="mtg__hint">
+            <Icon name="info" size={18} />
+            <span>
+              {countyHint.text}{' '}
+              <button type="button" className="link" onClick={countyHint.onClick}>
+                {countyHint.action}
+              </button>
+            </span>
+          </p>
+        )}
+        {hintTopic && !searchHint && !hiddenForSearch && <p className="mtg__hint mtg__hint--plain">{t('meetings.topicHint', { topic: hintTopic.short || lowerFirst(hintTopic.label) })}</p>}
+
+        {noPlaceTip && (
+          <div className="notice mtg__tip">
+            <Icon name="pin" />
+            <div>
+              <p>{t('meetings.noPlace.body')}</p>
+              <p className="act">
+                <Link className="link" to={setupTo(location)} state={SETUP_STATE}>
+                  {t('meetings.noPlace.action')}
+                </Link>
+                <button type="button" className="link mtg__tiphide" onClick={() => setUi({ meetingsPlaceTipHidden: true })}>
+                  {t('meetings.noPlace.dismiss')}
+                </button>
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className={`listbar${showSort ? '' : ' listbar--count'}`}>
           {showSort ? (
             <Menu
-              label={`${t('meetings.sort')}: ${sort === 'best' ? t('meetings.sortBest') : t('meetings.sortSoonest')}`}
+              label={`${t('meetings.sort')}: ${sortName[sort]}`}
               buttonClassName="sortbtn"
               align="start"
               button={
                 <>
-                  {sort === 'best' ? t('meetings.sortBest') : t('meetings.sortSoonest')}
+                  {sortName[sort]}
                   <Icon name="chev-d" size={20} />
                 </>
               }
-              items={[
-                { type: 'radio', label: t('meetings.sortBest'), checked: sort === 'best', onSelect: () => update({ sort: 'best' }) },
-                { type: 'radio', label: t('meetings.sortSoonest'), checked: sort === 'soonest', onSelect: () => update({ sort: 'soonest' }) },
-              ]}
+              items={sortItems}
             />
           ) : null}
           <span className="count-l num" role="status" aria-live="polite">
-            {tn('meetings.count', list.length)}
+            {countText}
           </span>
         </div>
 
-        {view === 'map' && !isDesktop ? (
-          <div className="mtg__phonemap">{mapBlock}</div>
+        {phoneMap ? (
+          <div className="mtg__phonemap">
+            {mapBlock}
+            <MapStrip label={t('meetings.strip')} meetings={list.slice(0, STRIP_MAX)} activeCity={hot} onActive={setHot} renderRow={(m, i) => row(m, i, { compact: true })} />
+          </div>
         ) : (
-          <>
+          <div id="mtg-results" className="mtg__results" tabIndex={-1}>
             {body}
             {remaining > 0 && (
               <button type="button" className="btn btn--secondary btn--block mtg__more" onClick={showMore}>
                 {t('meetings.showMore', { n: Math.min(PAGE, remaining) })}
               </button>
             )}
-          </>
+          </div>
         )}
 
         <ul className="group browse">
@@ -616,46 +1185,52 @@ export default function Meetings() {
         <div className="mtg__map">
           {mapBlock}
           {selected && (
-            <aside
-              ref={panelRef}
-              className="panel mtg-panel"
-              aria-labelledby="md-h"
-              tabIndex={-1}
-              onKeyDown={(e) => {
-                if (e.key === 'Escape') {
-                  e.stopPropagation();
-                  closeMeeting();
-                }
-              }}
-            >
+            <aside ref={panelRef} className="panel mtg-panel" aria-labelledby="md-h" tabIndex={-1}>
               <div className="sheet__bar">
                 <span className="sheet__title">
                   <MeetingDetailBadge meeting={selected} homeCityId={P.homeCityId} />
                 </span>
-                <button type="button" className="iconbtn" aria-label={t('common.close')} onClick={closeMeeting}>
-                  <Icon name="x" />
-                </button>
+                <span className="sheet__tools">
+                  <MeetingShare meeting={selected} />
+                  <button type="button" className="iconbtn" aria-label={t('common.close')} onClick={closeMeeting}>
+                    <Icon name="x" />
+                  </button>
+                </span>
               </div>
-              <MeetingDetail key={selected.id} className="mtg-panel__body" meeting={selected} city={selectedCity} today={today} now={now} headingId="md-h" nextSpeakable={nextSpeakable} onOpenMeeting={openMeeting} />
+              <MeetingDetail
+                key={selected.id}
+                className="mtg-panel__body"
+                meeting={selected}
+                city={selectedCity}
+                today={today}
+                now={now}
+                headingId="md-h"
+                nextSpeakable={nextSpeakable}
+                onOpenMeeting={openMeeting}
+                distance={selectedDistance}
+                reasons={selectedReasons}
+              />
             </aside>
           )}
         </div>
       )}
 
       {!isDesktop && (
-        <Sheet open={Boolean(selected)} onClose={closeMeeting} labelledBy="md-h" barStart={selected ? <MeetingDetailBadge meeting={selected} homeCityId={P.homeCityId} /> : null}>
-          {selected && <MeetingDetail key={selected.id} meeting={selected} city={selectedCity} today={today} now={now} headingId="md-h" nextSpeakable={nextSpeakable} onOpenMeeting={openMeeting} />}
+        <Sheet open={Boolean(selected)} onClose={closeMeeting} labelledBy="md-h" barStart={selected ? <MeetingDetailBadge meeting={selected} homeCityId={P.homeCityId} /> : null} barEnd={selected ? <MeetingShare meeting={selected} /> : null}>
+          {selected && (
+            <MeetingDetail key={selected.id} meeting={selected} city={selectedCity} today={today} now={now} headingId="md-h" nextSpeakable={nextSpeakable} onOpenMeeting={openMeeting} distance={selectedDistance} reasons={selectedReasons} />
+          )}
         </Sheet>
       )}
 
       <Sheet
-        open={filtersOpen}
+        open={sheetOpen}
         onClose={() => setFiltersOpen(false)}
         title={t('meetings.filters')}
         footer={
           <div className="btn-row mtg-filters__foot">
-            <button type="button" className="btn btn--quiet" onClick={() => update({ days: 14, miles: defaults.miles, topics: [], remote: false })}>
-              {t('meetings.clear')}
+            <button type="button" className="btn btn--quiet" onClick={clearAll} aria-disabled={!keys.length || undefined}>
+              {t('meetings.clearAll')}
             </button>
             <button type="button" className="btn btn--primary" onClick={() => setFiltersOpen(false)}>
               {tn('meetings.showResults', list.length)}
@@ -663,48 +1238,7 @@ export default function Meetings() {
           </div>
         }
       >
-        <div className="mtg-filters">
-          <fieldset>
-            <legend className="label">{t('meetings.when')}</legend>
-            <ChoiceChips name="mtg-days" value={f.days} onChange={(d) => update({ days: d })} options={DAYS.map((d) => ({ value: d, label: daysLabel(d) }))} />
-          </fieldset>
-          <fieldset>
-            <legend className="label">{t('meetings.distance')}</legend>
-            {P.location ? (
-              <ChoiceChips
-                name="mtg-miles"
-                value={f.miles == null ? 'any' : f.miles}
-                onChange={(v) => update({ miles: v === 'any' ? null : v })}
-                options={[{ value: 'any', label: t('meetings.anyDistance') }, ...milesChoices(P.maxMiles).map((n) => ({ value: n, label: t('ui.milesShort', { n }) }))]}
-              />
-            ) : (
-              <p className="help">
-                {t('meetings.distanceNeedsCity')}{' '}
-                <Link className="link" to={setupTo(location)} state={SETUP_STATE}>
-                  {t('meetings.setCity')}
-                </Link>
-              </p>
-            )}
-          </fieldset>
-          <fieldset>
-            <legend className="label">{t('meetings.topics')}</legend>
-            <p className="help">{t('meetings.topicsHelp')}</p>
-            <div className="chipwrap">
-              {topics.map((tp) => {
-                const on = f.topics.includes(tp.id);
-                return (
-                  <Chip key={tp.id} pressed={on} onClick={() => update({ topics: on ? f.topics.filter((x) => x !== tp.id) : [...f.topics, tp.id] })}>
-                    {tp.label}
-                  </Chip>
-                );
-              })}
-            </div>
-          </fieldset>
-          <label className="check-row">
-            <input type="checkbox" checked={f.remote} onChange={(e) => update({ remote: e.target.checked })} />
-            <span>{t('meetings.remoteLong')}</span>
-          </label>
-        </div>
+        {filterControls('mf-sheet')}
       </Sheet>
     </div>
   );

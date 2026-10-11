@@ -87,6 +87,8 @@
       "ages": "High school juniors and seniors (by January 2027) who live in Hurst, Euless or Bedford",
       "description": "Joint program of the HEB Chamber of Commerce and the cities of Hurst, Euless and Bedford that teaches students how local government works and encourages community involvement. Classes meet Mondays 5:30 to 7 p.m. at locations around the three cities with a light dinner; no transportation provided. Apply through heb.org.",
       "applyWindow": "Applications for the 2027 program open in November 2026",
+      "applyStatus": "closed",
+      "applyOpens": "2026-11",
       "source": "https://www.hursttx.gov/about-us/city-council/youth-in-government-program"
     },
     {
@@ -95,6 +97,7 @@
       "ages": "11 to 17, or 18 if still in high school",
       "description": "Diversion program run jointly by Hurst, Euless and Bedford that lets teens with Class C misdemeanor tickets resolve them outside the regular court system; cases are dismissed on completion. Teens without a ticket can volunteer as jurors (arrive by 5:15 p.m., pre-register by phone, dress code applies). Court meets Monday evenings at Bedford Municipal Court, 2000 Forest Ridge Drive, Bedford. Coordinator Mindy Eichorst, 817-952-2468, teen.court@bedfordtx.gov. Details at https://www.bedfordtx.gov/163/Teen-Court.",
       "applyWindow": "Juror volunteers pre-register by phone before a session",
+      "applyStatus": "rolling",
       "source": "https://www.bedfordtx.gov/163/Teen-Court"
     }
   ],

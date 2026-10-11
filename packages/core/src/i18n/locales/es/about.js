@@ -22,7 +22,7 @@ export default {
     meetingsSub: 'Todos los concejos de {n} ciudades, en una lista y un mapa',
     prepare: 'Prepárate para hablar',
     prepareSub: 'Inscríbete, escribe tu comentario y practícalo',
-    community: 'Lee consejos de otras personas que hablaron',
+    community: 'Lee consejos para hablar y comparte los tuyos',
     communitySub: 'Revisados con las reglas de cada ciudad',
     news: 'Sigue las noticias locales',
     newsSub: 'Reportajes de redacciones locales sobre tus temas',

@@ -1,0 +1,35 @@
+{
+ "value": [
+  {
+   "id": 2534,
+   "eventName": "City Council Meeting - Cancelled",
+   "startDateTime": "2026-10-19T18:30:00Z",
+   "agendaId": 2508,
+   "categoryName": "City Council",
+   "publishedFiles": [
+    {
+     "fileId": 5131,
+     "type": "Notice",
+     "publishOn": "2026-10-02T10:35:26.93Z",
+     "name": "Notice of Cancellation"
+    }
+   ]
+  },
+  {
+   "id": 2533,
+   "eventName": "City Council Meeting",
+   "startDateTime": "2026-11-02T18:30:00Z",
+   "agendaId": 2501,
+   "categoryName": "City Council",
+   "publishedFiles": []
+  },
+  {
+   "id": 2535,
+   "eventName": "City Council Meeting",
+   "startDateTime": "2026-11-16T18:30:00Z",
+   "agendaId": 2509,
+   "categoryName": "City Council",
+   "publishedFiles": []
+  }
+ ]
+}

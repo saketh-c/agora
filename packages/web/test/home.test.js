@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { localizeCities } from '@agora/core';
 import { signupDeadline } from '../src/lib/deadline.js';
-import { comingUp, daysUntil, eveningShare, findMeeting, firstVisitMeetings, fitsTimes, greetingKind, isSpeakable, pickNews, pickNextMeeting, pickPost } from '../src/components/home/homeData.js';
+import { comingUp, daysUntil, eveningShare, findMeeting, firstVisitMeetings, fitsTimes, greetingKind, isSpeakable, pickNews, pickNextMeeting, pickPost, withinLimit } from '../src/components/home/homeData.js';
 
 const raw = JSON.parse(readFileSync(new URL('../../../data/cities.json', import.meta.url))).cities;
 const cities = localizeCities(raw, null);
@@ -118,4 +118,23 @@ test('the featured post is from your city when there is one', () => {
   assert.equal(pickPost(posts, { homeCityId: 'plano' }).title, 'Plano');
   assert.equal(pickPost(posts, {}).title, 'Dallas');
   assert.equal(pickPost([], {}), null);
+});
+
+test('a tight distance limit: near meetings first, then the nearest farther ones, never quietly empty', () => {
+  const garland = { location: { lat: 32.9126, lng: -96.6389 }, homeCityId: 'garland', maxMiles: 5 };
+  const next = pickNextMeeting(cities, cityById, garland, { today: TODAY, now: NOW });
+  assert.ok(withinLimit(next, garland), 'the featured meeting is within the limit when one exists');
+  const rows = comingUp(cities, garland, { today: TODAY, now: NOW, exclude: next });
+  assert.equal(rows.length, 3, 'filled with farther meetings instead of dropping them');
+  const firstFar = rows.findIndex((m) => !withinLimit(m, garland));
+  assert.ok(firstFar >= 0);
+  assert.ok(rows.slice(firstFar).every((m) => !withinLimit(m, garland)), 'near rows come before far ones');
+  // The far rows are the nearest of the far ones.
+  const farIds = new Set(rows.filter((m) => !withinLimit(m, garland)).map((m) => m.cityId));
+  const allFar = comingUp(cities, { ...garland, maxMiles: null }, { today: TODAY, now: NOW, exclude: next, limit: 40 }).filter((m) => m.distanceMiles > 5 && !farIds.has(m.cityId));
+  const maxShown = Math.max(...rows.filter((m) => !withinLimit(m, garland)).map((m) => m.distanceMiles));
+  assert.ok(allFar.filter((m) => m.distanceMiles < maxShown - 0.01).length <= 2, 'no much nearer council was skipped');
+  // With any distance nothing counts as farther.
+  const any = comingUp(cities, { ...garland, maxMiles: null }, { today: TODAY, now: NOW, exclude: next });
+  assert.ok(any.every((m) => withinLimit(m, { ...garland, maxMiles: null })));
 });

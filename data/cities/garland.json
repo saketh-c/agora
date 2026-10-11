@@ -133,10 +133,13 @@
       "ages": "High school students (grades 9-12), no older than 19 at appointment; must live in Garland and/or attend a Garland ISD school",
       "description": "Advisory commission of up to 36 teens appointed by the Mayor and Council (up to four each) that advises Council on youth needs, learns the local political process, and runs service and social projects. Meets 5:30 p.m. on the 2nd Tuesday of each month at Fields Recreation Center, 1701 Dairy Road, September through May, after an August retreat and induction. Applicants need one letter of recommendation.",
       "applyWindow": "Applications for the 2026-27 class were due 11:59 p.m. May 31, 2026; applications typically open in spring for the following school year",
+      "applyStatus": "closed",
+      "applyBy": "2026-05-31",
       "source": "https://www.garlandtx.gov/DocumentCenter/View/22766/Garland-Youth-Council-Application_2026-27"
     },
     {
       "name": "Teen Advisory Board (Garland Public Library)",
+      "applyStatus": "unknown",
       "url": "https://www.garlandtx.gov/calendar.aspx?EID=12974",
       "ages": "13-17",
       "description": "Library teen board that helps plan teen events and gives input on library programming while earning volunteer hours toward graduation. The Central Library group (625 Austin St.) next meets Wednesday Sept. 16, 2026, 6 to 7 p.m., with snacks provided; the North Garland and South Garland branches run their own TAB groups. Check the library calendar for dates.",

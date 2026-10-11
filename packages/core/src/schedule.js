@@ -11,7 +11,7 @@
  * that English source; only display strings (labels, notes) follow the active locale.
  */
 
-import { t, tList } from './i18n/index.js';
+import { t, tList } from './i18n/runtime.js';
 
 const DATE_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
 const TIME_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
@@ -391,6 +391,8 @@ function noteDirection(note, date) {
  *    empty date. An added meeting takes `label`, `type` and `openToPublicComment` from the
  *    exception, defaulting to a "Special council meeting" of type 'other' with no public
  *    comment, because nothing says the public may speak.
+ *  - added: a meeting of the council's own kind on a date its rules do not cover (a city's
+ *    agenda site lists it; see agendas.js). See applyAdded. Its status stays 'scheduled'.
  *  - note: only attaches the note to the date's meetings (only the one at `time` when given);
  *    the status is unchanged. Use it for "the regular meeting is still on Election Day".
  */
@@ -416,6 +418,7 @@ export function expandCityMeetings(city, from, to) {
   phase(['rescheduled'], applyReschedule);
   phase(['cancelled', 'recess'], applyCancel);
   phase(['special'], applySpecial);
+  phase(['added'], applyAdded);
   phase(['note'], applyNote);
 
   const inWindow = ctx.occurrences.filter((o) => o.date >= from && o.date <= to);
@@ -462,6 +465,29 @@ function applySpecial(ctx, ex) {
     openToPublicComment: ex.openToPublicComment === true,
   };
   ctx.occurrences.push(makeOccurrence(ctx.city, rule, ex.date, explicit || noted[0] || ctx.defaultTime, 'special', ex.note));
+}
+
+/**
+ * Apply one 'added' exception. The rule with the same type and English label is the template,
+ * so the meeting reads like the council's other meetings of that kind (time, place, comment
+ * rules, length); without one, the exception's own label, type and openToPublicComment describe
+ * it (no public comment unless it says so). An explicit `time` wins over the rule's. A meeting
+ * with the same id already on the calendar that day, even a cancelled one, is left alone, so
+ * ids stay unique.
+ */
+function applyAdded(ctx, ex) {
+  const type = typeof ex.type === 'string' && ex.type ? ex.type : 'regular';
+  const label = sourceText(ex, 'label');
+  const rule = (label && ctx.rules.find((r) => r && r.type === type && sourceText(r, 'label') === label)) || {
+    type,
+    label: ex.label || defaultLabel(type),
+    labelSource: label || defaultLabel(type, 'en'),
+    openToPublicComment: ex.openToPublicComment === true,
+  };
+  const ruleTime = rule.recurrence && isTimeStr(rule.recurrence.time) ? rule.recurrence.time : null;
+  const occ = makeOccurrence(ctx.city, rule, ex.date, (isTimeStr(ex.time) && ex.time) || ruleTime || ctx.defaultTime, 'scheduled', ex.note);
+  if (ctx.occurrences.some((o) => o.id === occ.id)) return;
+  ctx.occurrences.push(occ);
 }
 
 function applyNote(ctx, ex) {
@@ -729,7 +755,7 @@ export function calendarThrough(city) {
   }
   if (!last) return null;
   for (const ex of city.scheduleExceptions || []) {
-    if (ex.status === 'special') consider(ex.date);
+    if (ex.status === 'special' || ex.status === 'added') consider(ex.date);
     else if (ex.status === 'rescheduled') consider(isDateStr(ex.movedTo) ? ex.movedTo : ex.date);
   }
   return last;

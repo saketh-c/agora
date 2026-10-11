@@ -1,4 +1,4 @@
-import { t } from './i18n/index.js';
+import { t } from './i18n/runtime.js';
 
 /**
  * Single source of truth for product naming. The name and identifiers are fixed;

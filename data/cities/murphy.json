@@ -64,11 +64,12 @@
   "youthPrograms": [
     {
       "name": "Murphy Youth Advisory Committee",
-      "url": "https://www.murphytx.org/935/Youth-Advisory-Committee",
+      "url": "https://murphytx.civicweb.net/Portal/MeetingInformation.aspx?type=31",
       "ages": "Murphy resident teens in grades 9 to 12 (ages 14 to 18)",
       "description": "A city board of teens that meets once a month on the third Monday at the Murphy Community Center, 205 N. Murphy Road, to discuss ideas that help the city serve its youth. Terms run Aug 1 through May 31 and members can be reappointed until they graduate from high school. Applicants submit the online application through the city's CivicWeb portal, a signed parent waiver, an essay of 500 words or less explaining why they want to serve, and one letter of reference (essay and reference letter for first-time applicants only). Supporting materials go to the City Secretary at kjackson@murphytx.org.",
-      "applyWindow": "The page says applications are being accepted, with no closing date posted; terms begin Aug 1",
-      "source": "https://www.murphytx.org/935/Youth-Advisory-Committee"
+      "applyWindow": "Not confirmed: the city took down this committee's page in 2026 and no longer lists it among its boards, so ask the City Secretary (kjackson@murphytx.org) whether it is taking members",
+      "applyStatus": "unknown",
+      "source": "https://murphytx.civicweb.net/Portal/MeetingInformation.aspx?type=31"
     }
   ],
   "agendaItems": [
@@ -178,7 +179,6 @@
     "https://www.murphytx.org/calendar.aspx?view=list&year=2026&month=11&day=17",
     "https://www.murphytx.org/calendar.aspx?view=list&year=2026&month=12&day=1",
     "https://www.murphytx.org/calendar.aspx?view=list&year=2026&month=12&day=15",
-    "https://www.murphytx.org/935/Youth-Advisory-Committee",
     "https://www.cognitoforms.com/CityOfMurphy1/PublicCommentForm",
     "https://censusreporter.org/profiles/16000US4850100-murphy-tx/",
     "https://nominatim.openstreetmap.org/search?format=json&q=206+N+Murphy+Road+Murphy+TX+75094"

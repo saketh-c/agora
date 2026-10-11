@@ -102,7 +102,9 @@
       "url": "https://www.cityofcarrollton.com/government/city-manager-s-office/city-secretary/youth-in-government-commission",
       "ages": "Grades 9 to 12; must live in Carrollton, attend a public or private high school in the city and be in good academic standing",
       "description": "Selected students serve as an advisory board member for one scheduled meeting each of the Parks & Recreation Board, Library Board, Neighborhood Advisory Commission and Museum and Historic Advisory Committee, then attend a City Council meeting where they are formally recognized.",
-      "applyWindow": "Application open online via SurveyMonkey (https://www.surveymonkey.com/r/K63JHBC); no deadline listed",
+      "applyWindow": "The 2026-27 application (on SurveyMonkey) closed Sept. 24, 2026; watch the city page for the next cycle",
+      "applyStatus": "closed",
+      "applyBy": "2026-09-24",
       "source": "https://www.cityofcarrollton.com/government/city-manager-s-office/city-secretary/youth-in-government-commission"
     },
     {
@@ -111,6 +113,9 @@
       "ages": "Ages 13 to 18",
       "description": "Group of teens that meets once a month with the Teen Librarian to plan teen programs, shape library services and materials for teens, and volunteer at youth events; members earn volunteer hours. Requires about 4 hours per month and one recommendation letter from a non-relative adult. Membership runs September through May.",
       "applyWindow": "June 1 to August 1 each year (the 2026-2027 application closed Aug. 1, 2026); interviews are held in August",
+      "applyStatus": "closed",
+      "applyBy": "2026-08-01",
+      "applyOpens": "2027-06-01",
       "source": "https://www.cityofcarrollton.com/departments/departments-g-p/library/about/support-the-library/teen-advisory-council"
     }
   ],

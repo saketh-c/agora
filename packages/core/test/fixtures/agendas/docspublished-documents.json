@@ -1,0 +1,330 @@
+[
+ {
+  "DocumentTitle": "Fort Worth Housing Finance Corporation - Tuesday 29 September 2026",
+  "MeetingType": "Fort Worth Housing Finance Corporation",
+  "MeetingDate": "2026-09-29T20:30:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "8e080ff4-8827-4ac0-a4c4-01c019b3b45f",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "City Council Work Session - Tuesday 4 August 2026",
+  "MeetingType": "City Council Work Session",
+  "MeetingDate": "2026-08-04T19:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "f9db6d44-c6c6-41d7-b301-7485e9c38cff",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "Budget Work Session - Tuesday 18 August 2026",
+  "MeetingType": "Budget Work Session",
+  "MeetingDate": "2026-08-18T18:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "13567535-3191-4a97-a507-06440ae0d17d",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "City Council Work Session - Tuesday 25 August 2026",
+  "MeetingType": "City Council Work Session",
+  "MeetingDate": "2026-08-25T14:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "12b96379-ab44-43f0-bdf4-08ae24ccee43",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "Legislative and Intergovernmental Affairs Committee - Tuesday 4 August 2026",
+  "MeetingType": "Legislative and Intergovernmental Affairs Committee",
+  "MeetingDate": "2026-08-04T15:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "42ad584b-5d31-4ff6-b951-4f4e5b064fa5",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "City Council Meeting - Tuesday 13 October 2026",
+  "MeetingType": "City Council Meeting",
+  "MeetingDate": "2026-10-13T23:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "95175214-f833-4db3-8a77-0a8e49312ab9",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "Special Called Council Meeting - Tuesday 1 September 2026",
+  "MeetingType": "Special Called Council Meeting",
+  "MeetingDate": "2026-09-01T19:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "fb235942-6e28-4a09-80ee-0b654c513dce",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "Budget Work Session - Tuesday 11 August 2026",
+  "MeetingType": "Budget Work Session",
+  "MeetingDate": "2026-08-11T18:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "cbd4b867-5b46-4054-83f2-25624c9c54e6",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "Executive Session - Tuesday 25 August 2026",
+  "MeetingType": "Executive Session",
+  "MeetingDate": "2026-08-25T17:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "6ded814e-ef0d-48ed-99f0-1e4c33a310df",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "City Council Work Session - Tuesday 23 June 2026",
+  "MeetingType": "City Council Work Session",
+  "MeetingDate": "2026-06-23T14:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "bd13805c-6210-4ff5-b37e-2f37be4583f4",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "City Council Work Session - Tuesday 1 September 2026",
+  "MeetingType": "City Council Work Session",
+  "MeetingDate": "2026-09-01T18:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "b21fcb4a-c7d4-4bdf-ac29-92ce8da099be",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "Fort Worth Crime Control and Prevention District Board of Directors - Friday 21 August 2026",
+  "MeetingType": "Fort Worth Crime Control and Prevention District Board of Directors",
+  "MeetingDate": "2026-08-21T15:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "d945f83b-0b81-40b0-bc73-399a8ec01d24",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "Budget Work Session - Friday 21 August 2026",
+  "MeetingType": "Budget Work Session",
+  "MeetingDate": "2026-08-21T14:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "ecaafe20-0731-4bcc-8ff2-36f92b641f0d",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "City Council Work Session - Tuesday 29 September 2026",
+  "MeetingType": "City Council Work Session",
+  "MeetingDate": "2026-09-29T15:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "0c0360b1-c65e-4809-a963-46f41d12a662",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "City Council Meeting - Tuesday 11 August 2026",
+  "MeetingType": "City Council Meeting",
+  "MeetingDate": "2026-08-11T23:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "45db471d-ca31-4b32-a7b8-47465e068528",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "Fort Worth Local Development Corporation - Tuesday 29 September 2026",
+  "MeetingType": "Fort Worth Local Development Corporation",
+  "MeetingDate": "2026-09-29T20:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "10dbe594-e002-4f2e-bcd9-52bbb3b0b2c6",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "Community Development Committee - Tuesday 15 September 2026",
+  "MeetingType": "Community Development Committee",
+  "MeetingDate": "2026-09-15T20:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "3f547756-13f6-4b90-834c-620ff96a3a8b",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "Research and Innovation Local Government Corporation - Tuesday 23 June 2026",
+  "MeetingType": "Research and Innovation Local Government Corporation",
+  "MeetingDate": "2026-06-23T19:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "10b05159-a041-4ba8-899e-6235a3537e84",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "Community Development Committee - Tuesday 11 August 2026",
+  "MeetingType": "Community Development Committee",
+  "MeetingDate": "2026-08-11T20:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "65ed97da-d81c-4789-bffa-67e70ccbbd44",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "Fort Worth Local Development Corporation - Tuesday 23 June 2026",
+  "MeetingType": "Fort Worth Local Development Corporation",
+  "MeetingDate": "2026-06-23T17:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "9101989f-f184-4e84-b40d-6e78925cc5af",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "Executive Session - Tuesday 23 June 2026",
+  "MeetingType": "Executive Session",
+  "MeetingDate": "2026-06-23T15:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "5f932b16-536a-4d24-935e-707467a7ebfd",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "City Council Meeting - Tuesday 15 September 2026",
+  "MeetingType": "City Council Meeting",
+  "MeetingDate": "2026-09-15T23:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "52760a8a-a5e3-49e5-8d23-7128e4702936",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "Audit and Finance Committee - Tuesday 13 October 2026",
+  "MeetingType": "Audit and Finance Committee",
+  "MeetingDate": "2026-10-13T18:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "4d584a74-ab3c-433b-95bb-87d5aca4fffa",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "Fort Worth Housing Finance Corporation - Tuesday 23 June 2026",
+  "MeetingType": "Fort Worth Housing Finance Corporation",
+  "MeetingDate": "2026-06-23T20:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "7ca278fd-0135-4c97-bdd0-8a8206144bf6",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "Executive Session - Tuesday 4 August 2026",
+  "MeetingType": "Executive Session",
+  "MeetingDate": "2026-08-04T17:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "95e2a937-0aee-4df7-a40e-8ef0c67134f4",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "Central City Local Government Corporation - Tuesday 23 June 2026",
+  "MeetingType": "Central City Local Government Corporation",
+  "MeetingDate": "2026-06-23T18:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "1a98a757-8c71-4c1f-b4f2-92664266d430",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "City Council Meeting - Tuesday 23 June 2026",
+  "MeetingType": "City Council Meeting",
+  "MeetingDate": "2026-06-23T16:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "d6c16ddd-ef46-4401-b683-ce413943a2d8",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "Fort Worth Crime Control and Prevention District Board of Directors - Tuesday 25 August 2026",
+  "MeetingType": "Fort Worth Crime Control and Prevention District Board of Directors",
+  "MeetingDate": "2026-08-25T15:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "0f8bedf3-7942-41dd-b031-98e725fca28b",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "Property Management and Environmental Services Committee - Tuesday 13 October 2026",
+  "MeetingType": "Property Management and Environmental Services Committee",
+  "MeetingDate": "2026-10-13T19:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "f1f1fffe-707a-4a9f-bb85-a5a0b05e459a",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "Community Development Committee - Tuesday 13 October 2026",
+  "MeetingType": "Community Development Committee",
+  "MeetingDate": "2026-10-13T21:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "ef02dacb-ab2e-4cfe-b1f8-a5e16ed11525",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "Fort Worth Housing Finance Corporation - Tuesday 25 August 2026",
+  "MeetingType": "Fort Worth Housing Finance Corporation",
+  "MeetingDate": "2026-08-25T18:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "7fb9c220-3432-43b9-850a-a897f2951601",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "Fort Worth Crime Control and Prevention District Board of Directors - Tuesday 18 August 2026",
+  "MeetingType": "Fort Worth Crime Control and Prevention District Board of Directors",
+  "MeetingDate": "2026-08-18T19:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "11565286-2269-496b-a359-b108fab10da5",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "Property Management and Environmental Services Committee - Tuesday 11 August 2026",
+  "MeetingType": "Property Management and Environmental Services Committee",
+  "MeetingDate": "2026-08-11T19:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "94b73e82-ba0a-4ecb-9fdc-b3864b8c90ac",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "City Council Meeting - Tuesday 29 September 2026",
+  "MeetingType": "City Council Meeting",
+  "MeetingDate": "2026-09-29T18:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "276452d8-0f57-4b69-b303-c789c3aded49",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "City Council Meeting - Tuesday 25 August 2026",
+  "MeetingType": "City Council Meeting",
+  "MeetingDate": "2026-08-25T16:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "5d02ad51-f86f-4e49-a176-db94b8583c40",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "Audit and Finance Committee - Tuesday 4 August 2026",
+  "MeetingType": "Audit and Finance Committee",
+  "MeetingDate": "2026-08-04T14:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "9c19a414-aea3-450c-aca3-d068c804ea42",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "Executive Session - Tuesday 1 September 2026",
+  "MeetingType": "Executive Session",
+  "MeetingDate": "2026-09-01T17:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "143dd86c-fc12-4fa4-ba99-dd97ac50202f",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "Executive Session - Tuesday 29 September 2026",
+  "MeetingType": "Executive Session",
+  "MeetingDate": "2026-09-29T17:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "ab24ab4e-55be-4ec3-a8bf-e933c2a779fe",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "Infrastructure and Growth Committee - Tuesday 13 October 2026",
+  "MeetingType": "Infrastructure and Growth Committee",
+  "MeetingDate": "2026-10-13T20:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "e7990b6b-331c-4c57-911e-ef484f4106d9",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "Public Safety Committee - Tuesday 1 September 2026",
+  "MeetingType": "Public Safety Committee",
+  "MeetingDate": "2026-09-01T15:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "29f7a08d-0fc2-4b52-bf0e-f10cb09f969c",
+  "IsArchived": false
+ },
+ {
+  "DocumentTitle": "Special Called Executive Session - Tuesday 15 September 2026",
+  "MeetingType": "Special Called Executive Session",
+  "MeetingDate": "2026-09-15T21:00:00",
+  "PlaceholderDocumentId": null,
+  "AgendaDocumentId": "77be94e4-1b2b-461b-a723-f826759f84be",
+  "IsArchived": false
+ }
+]

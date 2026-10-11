@@ -130,6 +130,7 @@
       "ages": "High school sophomores, juniors and seniors",
       "description": "Seven regular members plus five alternates appointed by the City Council advise Council on the needs of Rowlett youth, learn the local political process, serve as city ambassadors, and volunteer at city events. Meets 6 p.m. on the second Monday of each month at the Rowlett Community Centre, 5300 Main St., for a one-year term running August through July. Applicants under 18 need a notarized waiver of liability.",
       "applyWindow": "Applications are available from the City Secretary's Office (City Hall, 4000 Main St., 972-412-6109) or by email and can be dropped off or emailed back; the City Council makes appointments in July for the August-to-July term. Contact Recreation Supervisor Erin Mudry (emudry@rowlett.com, 972-463-3948) for timing.",
+      "applyStatus": "unknown",
       "source": "https://www.rowletttx.gov/1598/Rowlett-Youth-Advisory-Council"
     },
     {
@@ -138,6 +139,8 @@
       "ages": "Rowlett residents in grades 9-12",
       "description": "High school students can be appointed as non-voting junior alternate members of Rowlett's advisory boards and commissions to take part in discussions. The Junior Alternate Member application must be completed, printed and notarized, then delivered to the City Secretary's Office or emailed to citysec@rowlett.com.",
       "applyWindow": "Applications are accepted from Sept. 1 through Oct. 15 each year",
+      "applyStatus": "open",
+      "applyBy": "2026-10-15",
       "source": "https://www.rowletttx.gov/321/Boards-and-Commissions"
     }
   ],

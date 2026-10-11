@@ -7,3 +7,6 @@
 *.json text
 *.webm binary
 *.mp4 binary
+
+# Recorded responses from city agenda sources, kept byte for byte (iCalendar uses CRLF).
+packages/core/test/fixtures/** -text

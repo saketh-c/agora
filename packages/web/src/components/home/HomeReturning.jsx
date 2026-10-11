@@ -1,15 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { lowerFirst, t, tList } from '@agora/core';
+import { Link, useLocation } from 'react-router-dom';
+import { lowerFirst, normalizePrefs, t, tList } from '@agora/core';
 import { useCities } from '../../lib/DataProvider.jsx';
 import { useStore } from '../../lib/store.jsx';
 import { api } from '../../lib/api.js';
 import { KIND_ICON, seedPosts } from '../../lib/community.js';
 import { Avatar, Icon, MeetingRow, NewsList, Section, distanceText, meetingDeadline, monthDay } from '../ui/index.js';
 import NextMeetingCard from './NextMeetingCard.jsx';
-import { SETUP_STATE } from '../shell/SetupHost.jsx';
+import NextPicker from './NextPicker.jsx';
+import PlaceSwitch from './PlaceSwitch.jsx';
+import { SETUP_STATE, setupTo } from '../shell/SetupHost.jsx';
 import useClock from './useClock.js';
-import { HOME_DAYS, HOME_ROWS, comingUp, greetingKind, pickNews, pickNextMeeting, pickPost, seatsNear } from './homeData.js';
+import { activeOrigin } from '../../lib/places.js';
+import { HOME_DAYS, HOME_ROWS, comingUp, greetingKind, pickNews, pickNextMeeting, pickPost, seatsNear, withinLimit } from './homeData.js';
+import { pickerMeetings } from '../prepare/prepPick.js';
 
 /** "Saturday, Oct 10": today's date for the line beside the greeting, in the app language. */
 function todayLine(today) {
@@ -112,6 +116,15 @@ function HomeNews({ prefs, county, lang }) {
   );
 }
 
+/** Where an application stands, as one status line: amber when the window closes within two weeks. */
+function seatStatus(apply) {
+  const until = apply.applyBy ? t('home.seats.until', { date: monthDay(apply.applyBy).replace(/ /g, '\u00a0') }) : '';
+  if (apply.state === 'closing') return { tone: 'amber', icon: 'clock', text: until };
+  if (apply.state === 'open') return { tone: 'plain', icon: 'check', text: until || t('home.seats.open') };
+  if (apply.state === 'rolling') return { tone: 'plain', icon: 'check', text: t('home.seats.rolling') };
+  return { tone: 'plain', icon: 'info', text: t('home.seats.ask') };
+}
+
 function Seats({ seats, prefs }) {
   if (!seats.length) {
     return (
@@ -125,12 +138,19 @@ function Seats({ seats, prefs }) {
     <ul className="group">
       {seats.map((s) => {
         const where = distanceText({ cityId: s.cityId }, { homeCityId: prefs.homeCityId, distanceMiles: s.distanceMiles });
+        const status = s.apply ? seatStatus(s.apply) : null;
         return (
           <li key={`${s.cityId}:${s.name}`}>
             <a className="lrow" href={s.url} target="_blank" rel="noopener noreferrer">
               <span>
                 <span className="lrow__t">{s.name}</span>
                 <span className="lrow__m">{where ? t('home.seats.meta', { city: s.cityName, where: lowerFirst(where) }) : s.cityName}</span>
+                {status && status.text ? (
+                  <span className={`st st--${status.tone} seat__st`}>
+                    <Icon name={status.icon} />
+                    {status.text}
+                  </span>
+                ) : null}
               </span>
               <Icon name="ext" />
               <span className="vh">{t('ui.opensNewTab')}</span>
@@ -174,11 +194,57 @@ function CommunityPost({ post, cityName }) {
 }
 
 /**
- * Home for a student who has set up: the headline that names their turn, the Go card for the
- * next meeting they can speak at, three more meetings, then seats, news and one community post.
+ * How far the featured meeting is: "2.1 mi away", or "12 mi away, past your 5 mi limit" when
+ * Home had to reach past the limit. Nothing when the meeting is at the city hall you measure from.
  */
-export default function HomeReturning({ focusHeading = false, onOpenMeeting }) {
+export function whereLine(meeting, prefs, cityById) {
+  if (!meeting || meeting.distanceMiles == null) return '';
+  const origin = activeOrigin(prefs, cityById);
+  if (meeting.distanceMiles < 0.3 && origin && origin.place.kind === 'city') return '';
+  const where = t('home.next.away', { distance: distanceText({}, { distanceMiles: meeting.distanceMiles }) });
+  if (withinLimit(meeting, prefs)) return where;
+  return t('home.next.farther', { where, max: t('ui.milesShort', { n: prefs.maxMiles }) });
+}
+
+/** "Showing meetings near Garland." after the first-visit answer, with Undo and Change. */
+function Confirmation({ confirm, onUndo, onDismiss, setupLink }) {
+  const { place, city, slot } = confirm;
+  const text = place.kind === 'current' ? t('home.confirm.nearYou', { city: city.name }) : t('home.confirm.near', { place: place.label || city.name });
+  return (
+    <div className="notice notice--card home-confirm">
+      <Icon name="check" />
+      <div>
+        <p>
+          {slot === 'school' && <strong>{t('home.confirm.savedSchool')} </strong>}
+          {text}
+        </p>
+        <div className="act">
+          <button type="button" className="btn btn--secondary btn--sm" onClick={onUndo}>
+            {t('home.confirm.undo')}
+          </button>
+          <Link className="btn btn--quiet btn--sm" to={setupLink} state={SETUP_STATE} onClick={onDismiss}>
+            {t('home.confirm.change')}
+          </Link>
+        </div>
+      </div>
+      <button type="button" className="iconbtn home-confirm__x" onClick={onDismiss} aria-label={t('home.confirm.dismiss')}>
+        <Icon name="x" />
+      </button>
+    </div>
+  );
+}
+
+/**
+ * Home for a student who has set up: the headline that names their turn, which place distances
+ * come from (with a quick switch), the Go card for the next meeting they can speak at, three
+ * more meetings, then seats, news and one community post. `confirm` (just after the first-visit
+ * answer) shows what was saved with `onUndo` and `onDismissConfirm`.
+ */
+export default function HomeReturning({ focusHeading = false, onOpenMeeting, confirm = null, onUndo, onDismissConfirm }) {
   const { prefs, profile, ui, prepFor, setPrepMeeting, lang } = useStore();
+  const location = useLocation();
+  const [picking, setPicking] = useState(false);
+  const [picked, setPicked] = useState('');
   const { cities, cityById } = useCities();
   const { today, now } = useClock();
   const headingRef = useRef(null);
@@ -189,6 +255,11 @@ export default function HomeReturning({ focusHeading = false, onOpenMeeting }) {
     [cities, cityById, prefs, today, now, ui.prepMeeting, deadlineOf],
   );
   const rows = useMemo(() => comingUp(cities, prefs, { today, now, exclude: next, deadlineOf }), [cities, prefs, today, now, next, deadlineOf]);
+  // The same meetings Prepare's picker offers, so both pickers agree.
+  const lists = useMemo(() => (picking ? pickerMeetings({ cities, cityById, prefs, today, now, deadlineOf }) : null), [picking, cities, cityById, prefs, today, now, deadlineOf]);
+  // A meeting chosen earlier (here or in Prepare) stays on top, so it shows as chosen.
+  const chosenElsewhere = lists && next && ui.prepMeeting === next.id && ![...lists.home, ...lists.others].some((m) => m.id === next.id) ? next : null;
+  const anyFar = rows.some((m) => !withinLimit(m, prefs));
   const seats = useMemo(() => seatsNear(cities, prefs), [cities, prefs]);
   const homeCity = prefs.homeCityId ? cityById(prefs.homeCityId) : null;
   const posts = useSeedPosts(lang);
@@ -200,6 +271,18 @@ export default function HomeReturning({ focusHeading = false, onOpenMeeting }) {
   useEffect(() => {
     if (focusHeading && headingRef.current) headingRef.current.focus({ preventScroll: false });
   }, [focusHeading]);
+
+  // Clear the spoken confirmation of a new pick, so the same words are announced next time.
+  useEffect(() => {
+    if (!picked) return undefined;
+    const timer = setTimeout(() => setPicked(''), 4000);
+    return () => clearTimeout(timer);
+  }, [picked]);
+
+  const choose = (id) => {
+    setPrepMeeting(id);
+    setPicked(id ? t('home.pick.chosen') : t('home.pick.chosenAuto'));
+  };
 
   const setupLink = (
     <Link className="btn btn--secondary" to="/?setup=1" state={SETUP_STATE}>
@@ -214,7 +297,10 @@ export default function HomeReturning({ focusHeading = false, onOpenMeeting }) {
           {headline(next, today, profile.name)}
         </h1>
         <p className="greet__date">{todayLine(today)}</p>
+        <PlaceSwitch />
       </div>
+
+      {confirm && <Confirmation confirm={confirm} onUndo={onUndo} onDismiss={onDismissConfirm} setupLink={setupTo(location)} />}
 
       <div className="home-top">
         <NextMeetingCard
@@ -225,6 +311,9 @@ export default function HomeReturning({ focusHeading = false, onOpenMeeting }) {
           prep={next ? prepFor(next.id) : null}
           onContinue={() => next && setPrepMeeting(next.id)}
           setupLink={setupLink}
+          where={whereLine(next, prefs, cityById)}
+          onDetails={onOpenMeeting}
+          onPick={() => setPicking(true)}
         />
         <Section title={t('home.comingUp')} see={{ to: '/meetings' }}>
           {rows.length ? (
@@ -241,6 +330,14 @@ export default function HomeReturning({ focusHeading = false, onOpenMeeting }) {
               <p>{t('home.comingUpNone', { n: HOME_DAYS })}</p>
             </div>
           )}
+          {anyFar && (
+            <p className="home-note">
+              {t('home.far', { max: t('ui.milesShort', { n: prefs.maxMiles }) })}{' '}
+              <Link className="link" to={setupTo(location)} state={SETUP_STATE}>
+                {t('home.farChange')}
+              </Link>
+            </p>
+          )}
         </Section>
       </div>
 
@@ -255,6 +352,24 @@ export default function HomeReturning({ focusHeading = false, onOpenMeeting }) {
           {posts ? <CommunityPost post={post} cityName={postCity ? postCity.name : ''} /> : <div className="post home-post skel--post" aria-hidden="true" />}
         </Section>
       </div>
+
+      <NextPicker
+        open={picking}
+        onClose={() => setPicking(false)}
+        lists={lists}
+        current={chosenElsewhere}
+        maxMiles={prefs.location ? normalizePrefs(prefs).maxMiles : null}
+        hasPlace={Boolean(prefs.location)}
+        chosenId={ui.prepMeeting && ui.prepMeeting !== 'practice' ? ui.prepMeeting : null}
+        onChoose={choose}
+        today={today}
+        deadlineOf={deadlineOf}
+        cityById={cityById}
+        homeCityId={prefs.homeCityId}
+      />
+      <p className="vh" role="status" aria-live="polite">
+        {picked}
+      </p>
     </div>
   );
 }

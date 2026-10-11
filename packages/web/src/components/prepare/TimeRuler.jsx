@@ -9,6 +9,13 @@ export function mmss(seconds) {
 /** Seconds before the limit when the light turns amber. */
 const AMBER_SECONDS = 30;
 
+/** The podium light for a draft: 'go' with room to spare, 'amber' in the last 30 seconds, 'stop' past the limit. */
+export function rulerTone(seconds, limitSeconds = 180) {
+  const used = Math.max(0, Math.round(seconds || 0));
+  const limit = Math.max(60, Math.round(limitSeconds || 180));
+  return used > limit ? 'stop' : used > Math.max(0, limit - AMBER_SECONDS) ? 'amber' : 'go';
+}
+
 /**
  * The speaking-time ruler: the podium timer for a draft (podium mock "Your draft").
  * Green until the last 30 seconds, amber up to the limit, red past it. The track grows
@@ -25,7 +32,7 @@ export default function TimeRuler({ seconds, limitSeconds = 180, note, className
   const at = (v) => (Math.min(v, scale) / scale) * 100;
   const pct = (v) => `${at(v).toFixed(2)}%`;
 
-  const tone = used > limit ? 'stop' : used > amberAt ? 'amber' : 'go';
+  const tone = rulerTone(used, limit);
   const read =
     used > limit
       ? t('prepare.ruler.ofOver', { limit: mmss(limit), over: mmss(used - limit) })
@@ -76,7 +83,7 @@ export default function TimeRuler({ seconds, limitSeconds = 180, note, className
       </div>
       <div className="ruler__ticks num" aria-hidden="true">
         {ticks.map((v) => (
-          <span key={v} style={{ left: pct(v) }}>
+          <span key={v} style={{ left: pct(v) }} className={v === amberAt && v !== limit ? 'is-warn' : undefined}>
             {mmss(v)}
           </span>
         ))}

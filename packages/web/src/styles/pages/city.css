@@ -14,8 +14,9 @@
   .city-main, .city-side { gap: var(--s8); }
 }
 
-/* Anchors (#speak, #schedule, #agenda) land below the sticky header, not under it. */
-.city-sec, .city #agenda { scroll-margin-top: calc(var(--header-h) + var(--s4)); }
+/* Anchors (#speak, #schedule, #agenda) land a little below the sticky header (the page's
+   scroll-padding already clears the header itself). */
+.city-sec, .city #agenda { scroll-margin-top: var(--s4); }
 
 /* City data carries long URLs and emails: let them wrap instead of widening the page. */
 .city .howto, .city .disc__body, .city .youth, .city .lrow, .city .meetcard__also { overflow-wrap: anywhere; }
@@ -81,3 +82,5 @@
 .skel--line { display: block; height: 56px; border-radius: 0; background: var(--card); position: relative; }
 .skel--line::after { content: ""; position: absolute; left: var(--s4); right: 30%; top: 18px; height: 12px; border-radius: var(--r-pill); background: var(--well); box-shadow: 0 16px 0 -2px var(--well); animation: pulse 1.6s var(--ease) infinite; }
 .city__missing { margin-top: var(--s5); max-width: 560px; }
+/* A city checked long ago says so in amber, not with the "verified" shield. */
+.city__verified--stale .icon { color: var(--amber-ink); }

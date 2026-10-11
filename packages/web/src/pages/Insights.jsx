@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { computeStats, formatTime, getTopic, hourOf, joinList, t, tList, tn, upcomingMeetings } from '@agora/core';
-import { SCHEDULES_VERIFIED_ON, nowIso, today as todayFn } from '../lib/data.js';
+import { SCHEDULES_VERIFIED_ON } from '../lib/data.js';
+import useClock from '../components/home/useClock.js';
 import { useCities } from '../lib/DataProvider.jsx';
 import { useStore } from '../lib/store.jsx';
 import { BarList, ChartTable, Figure, Heatmap, StatTile } from '../components/charts.jsx';
@@ -28,8 +29,8 @@ function monthDayYear(dateStr) {
 export default function Insights() {
   const { prefs, lang } = useStore();
   const { cities, cityById } = useCities();
-  const today = todayFn();
-  const [now] = useState(nowIso);
+  // "The next 30 days" moves with the clock, also in a tab left open.
+  const { today, now } = useClock();
   const homeCity = prefs.homeCityId ? cityById(prefs.homeCityId) : null;
   const interests = prefs.interests || [];
   const time = (h, m = 0) => formatTime(`${h}:${String(m).padStart(2, '0')}`, lang, { compact: true });

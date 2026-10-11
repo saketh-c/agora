@@ -80,6 +80,7 @@
       "ages": "Jurors: ages 14 to 18 and attending high school; defendants: ages 13 to 17 (some 18-year-olds may be eligible)",
       "description": "A municipal court program in which teen volunteers serve as jurors for Class C misdemeanor cases involving juvenile defendants. All sessions are Wednesday nights at 6 p.m. at the Municipal Court, 2000 N. Highway 78; jurors arrive by 5:45 p.m. Posted dates run from Aug 12, 2026 through May 5, 2027 (roughly the first Wednesday of each month). Jurors must keep a C average in all classes, have parent consent and stay drug and alcohol free.",
       "applyWindow": "Ongoing; contact the Juvenile Case Manager (Melissa Davis, 972-429-8085, melissa.davis@wylietexas.gov)",
+      "applyStatus": "rolling",
       "source": "https://www.wylietexas.gov/departments/municipal_court/teen_court.php"
     },
     {
@@ -88,10 +89,12 @@
       "ages": "Wylie ISD students entering 8th or 9th grade (just finished 7th or 8th)",
       "description": "A Wylie Police Department program run by the school resource officers for students who are interested in law enforcement or just curious about the profession.",
       "applyWindow": "Application dates and session dates are not posted on the program page; contact the Wylie Police Department School Resource Officers Division at 972-442-8171",
+      "applyStatus": "unknown",
       "source": "https://www.wylietexas.gov/community2/youth_programs/index.php"
     },
     {
       "name": "P.O.L.I.C.E. Club (Practice of Leadership, Integrity and Character Education)",
+      "applyStatus": "unknown",
       "url": "https://www.wylietexas.gov/community2/youth_programs/index.php",
       "ages": "Wylie ISD students in grades 9 to 12",
       "description": "A high-school-level leadership and character club sponsored by the Wylie Police Department's school resource officers.",
@@ -99,6 +102,7 @@
     },
     {
       "name": "Wylie Youth Enrichment Program",
+      "applyStatus": "unknown",
       "url": "https://www.wylietexas.gov/community2/youth_programs/index.php",
       "ages": "Adolescents; no grade range is posted",
       "description": "A Wylie Police Department program for adolescents who are at risk or heading down a troubled path. It promotes respect for self and others, tobacco, drug and alcohol awareness, teen pregnancy education and community volunteerism.",

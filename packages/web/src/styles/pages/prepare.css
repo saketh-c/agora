@@ -13,24 +13,31 @@
 .forline__t span { display: block; font-size: 14px; line-height: 20px; color: var(--slate); }
 .forline__t strong { display: block; font-weight: 700; overflow-wrap: anywhere; }
 .forline .btn--quiet { margin-right: calc(-1 * var(--s1)); }
+.forline__t .forline__finding { display: flex; align-items: center; gap: var(--s2); color: var(--slate); }
+.forline__finding .spinner { width: 16px; height: 16px; border-width: 2px; flex: none; color: var(--slate); vertical-align: 0; }
+.prep-loading { padding-top: var(--s5); }
 .prep-notice { margin-top: var(--s3); }
+.prep-notice .act > .btn--quiet:first-child { margin-left: calc(-1 * var(--s3)); }
+.prep-notice .act .btn { text-align: left; justify-content: flex-start; height: auto; padding-block: var(--s2); }
 
 /* Progress */
 .prep-prog { margin: var(--s5) 0 var(--s3); }
 .prep-prog__h { font-weight: 700; max-width: none; }
 
-/* Step cards (base styles in components.css) */
+/* Step cards (base styles in components.css: the open ring, hover band and focus ring) */
 .step__h { min-width: 0; }
 .step__txt { min-width: 0; }
-.step__head:focus-visible { outline-offset: -2px; }
 .step__s > span { min-width: 0; }
+/* The Sign up subtitle repeats the deadline the open card spells out below it. */
+.step.is-open .step__s--dup { display: none; }
 /* "Not started" is the default state; where it would squeeze the title (small phones, and the
-   longer Spanish and Vietnamese labels) it is hidden visually and kept for screen readers. */
-@media (max-width: 359px) {
+   longer labels outside English) it is hidden visually and kept for screen readers. */
+.steps { container: steps / inline-size; }
+@container steps (max-width: 330px) {
   .step__statetxt--quiet { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
 }
-@media (max-width: 429px) {
-  :lang(es) .step__statetxt--quiet, :lang(vi) .step__statetxt--quiet { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+@container steps (max-width: 400px) {
+  .step:not(:lang(en)) .step__statetxt--quiet { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
 }
 .step__clamp { display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .step__lead { color: var(--slate); }
@@ -70,17 +77,54 @@
 .draft { background: var(--floor); border-radius: var(--r-group); padding: var(--s4); min-width: 0; }
 .draft__head { margin: 0; align-items: baseline; }
 .draft__head .t-small { flex: none; }
-.draft .ruler { background: transparent; margin-top: var(--s3); }
+.draft .ruler { background: transparent; margin-top: var(--s3); container-type: inline-size; }
+/* A narrow ruler drops the amber tick so the last minute marks never touch. */
+@container (max-width: 340px) { .draft .ruler__ticks .is-warn { display: none; } }
 .draft__ai { margin-top: var(--s4); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s2); }
 .draft__ai .btn--quiet { margin-right: calc(-1 * var(--s3)); }
-.draft__text { margin-top: var(--s4); background: var(--card); border-radius: var(--r-tile); padding: var(--s4); font-size: 16px; line-height: 26px; overflow-wrap: anywhere; }
+.draft__card { margin-top: var(--s4); background: var(--card); border-radius: var(--r-tile); padding: var(--s4) var(--s4) var(--s2); }
+.draft__text { font-size: 16px; line-height: 26px; overflow-wrap: anywhere; }
 .draft__text p { max-width: none; }
 .draft__text p + p { margin-top: var(--s3); }
-:lang(vi) .draft__text { line-height: 28px; }
+:lang(vi) .draft__text, :lang(vi) .draft__edit { line-height: 28px; }
+.draft__editbtn { margin: var(--s2) 0 0 calc(-1 * var(--s3)); }
+/* Edited by hand: the same card, now a field that grows with the text. */
+.draft__edit { display: block; width: 100%; margin-top: var(--s4); padding: var(--s4); min-height: 160px; font-size: 16px; line-height: 26px; resize: none; overflow: hidden; overflow-wrap: anywhere; background: var(--card); }
+.draft__mode { margin-top: var(--s3); }
 .draft .btn-row { margin-top: var(--s4); }
 .draft .btn--primary { flex: 1 1 auto; }
 .draft__note { margin-top: var(--s2); font-size: 14px; line-height: 20px; color: var(--slate); }
+/* Can't be there? The city's own way to send it in writing. */
+.draft__alt { display: flex; align-items: flex-start; gap: var(--s2); margin-top: var(--s4); padding-top: var(--s3); border-top: 1px solid var(--hairline); font-size: 14px; line-height: 20px; color: var(--slate); max-width: none; }
+.draft__alt .icon { flex: none; color: var(--slate); }
+.draft__alt .link { display: inline-flex; align-items: center; min-height: 24px; overflow-wrap: anywhere; }
+.draft__altnote { display: block; margin-top: var(--s1); }
 .draft__status > .notice { margin-top: var(--s3); }
+
+/* Phones: a compact timer that follows the form until the draft is on screen. It is anchored
+   at the end of the form with no height of its own, so it never adds space to the page. */
+.draft-bar-anchor { position: sticky; bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + var(--s3)); height: 0; z-index: 4; }
+.draft-bar {
+  position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: var(--s3);
+  min-height: 48px; padding: 0 var(--s2) 0 var(--s4); border: 0; border-radius: var(--r-pill);
+  background: var(--ink); color: var(--card); box-shadow: var(--lift); font: 600 14px/20px var(--font-text); text-align: left;
+  transition: opacity var(--d2) var(--ease), transform var(--d2) var(--ease), visibility 0s;
+}
+.draft-bar.is-away { opacity: 0; transform: translateY(8px); visibility: hidden; pointer-events: none; transition: opacity var(--d2) var(--ease), transform var(--d2) var(--ease), visibility 0s var(--d2); }
+.draft-bar:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.draft-bar__dot { width: 14px; height: 14px; flex: none; border-radius: 50%; background: var(--go); box-shadow: 0 0 0 3px rgb(255 255 255 / .16); }
+.draft-bar__dot--amber { background: var(--amber); }
+.draft-bar__dot--stop { background: var(--stop); }
+.draft-bar__t { flex: 1 1 auto; min-width: 0; font-size: 16px; line-height: 24px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.draft-bar__go { display: inline-flex; align-items: center; gap: 2px; flex: none; padding: 0 var(--s2) 0 var(--s3); min-height: 36px; border-radius: var(--r-pill); background: rgb(255 255 255 / .12); }
+/* No room for "See draft" beside the time: the pill keeps only its arrow (the words stay for screen readers). */
+.draft-bar.is-compact .draft-bar__go { justify-content: center; min-width: 36px; padding: 0 var(--s2); }
+/* A focused field never hides under the bar: focus scrolls stop above it (and above the tab bar). */
+@media (max-width: 1023.98px) {
+  html:has(.draft-bar:not(.is-away)) { scroll-padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + var(--s3) + 48px + var(--s3)); }
+}
+@media (hover: hover) { .draft-bar:hover .draft-bar__go { background: rgb(255 255 255 / .2); } }
+@media (min-width: 1024px) { .draft-bar-anchor { display: none; } }
 
 .prep-write { margin-top: var(--s5); }
 
@@ -91,7 +135,11 @@
 }
 
 /* Meeting picker (sheet) */
+.prep-pick__search { margin-bottom: var(--s2); }
+.prep-pick-sheet .day-head:first-of-type { padding-top: var(--s3); }
 .prep-pick + .prep-pick { margin-top: var(--s3); }
+.prep-pick__more-btn { margin-top: var(--s2); margin-left: calc(-1 * var(--s3)); }
+.prep-pick-sheet .empty { margin-top: var(--s3); }
 .prep-pick__row { align-items: center; }
 .prep-pick__row .row__main { padding-top: 0; }
 .prep-pick__check { width: 24px; height: 24px; color: var(--ink); }
@@ -111,5 +159,6 @@
 .prep-gloss dd { margin: 2px 0 0; color: var(--slate); }
 
 @media (forced-colors: active) {
-  .forline, .bsum, .draft, .draft__text { border: 1px solid CanvasText; }
+  .forline, .bsum, .draft, .draft__card, .draft-bar { border: 1px solid CanvasText; }
+  .draft-bar__dot { forced-color-adjust: none; }
 }

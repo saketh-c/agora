@@ -105,7 +105,7 @@
     "timeLimitMinutes": 3,
     "virtualAllowed": false,
     "writtenCommentMethod": "No written-comment form is listed on the agenda; email the Mayor at Mayor@farmersbranchtx.gov or your district council member (District1@ through District5@farmersbranchtx.gov, listed on the Mayor & City Council page).",
-    "notes": "The printed agenda still says the online form is at https://www.farmersbranchtx.gov/101/City-Council, but that address now returns Page Not Found; the working form is linked from the Mayor & City Council page under 'Sign Up to Speak at a City Council Meeting'. Speakers must follow the city's Rules of Decorum and Conduct for Public Hearings and Citizen Comments (the agenda links them from the Mayor & City Council page) and direct comments to the council, not the audience. The agenda states the city will not tolerate unruly behavior, intimidation or remarks not relevant to policy issues within the city's authority. No remote or virtual speaking option is described. Accessibility requests go to the City Secretary at (972) 919-2520 at least 72 hours before the meeting.",
+    "notes": "The printed agenda still points to an old City Council page for the online form, but that page has been taken down; the working form is linked from the Mayor & City Council page under 'Sign Up to Speak at a City Council Meeting'. Speakers must follow the city's Rules of Decorum and Conduct for Public Hearings and Citizen Comments (the agenda links them from the Mayor & City Council page) and direct comments to the council, not the audience. The agenda states the city will not tolerate unruly behavior, intimidation or remarks not relevant to policy issues within the city's authority. No remote or virtual speaking option is described. Accessibility requests go to the City Secretary at (972) 919-2520 at least 72 hours before the meeting.",
     "source": "https://legistar.granicus.com/FarmersBranch/meetings/2026/9/2724_A_City_Council_26-09-15_Meeting_Agenda.pdf"
   },
   "youthPrograms": [
@@ -115,6 +115,7 @@
       "ages": "13 to 15",
       "description": "Summer weekday day camp (7:30 a.m. to 6 p.m.) at the Farmers Branch Community Recreation Center, 14050 Heartside Place, combining recreation with community service and projects with the Animal Adoption Center, Historical Park and Parks; $15 per week for residents, $40 for non-residents. Teens completing about 80 service hours earn a free end-of-summer lock-in.",
       "applyWindow": "The 2026 session ran May 26 to Aug. 10 with resident registration from March 1 and non-resident registration from May 15; the city says 2027 details will be posted in January 2027",
+      "applyStatus": "closed",
       "source": "https://content.civicplus.com/api/assets/tx-farmersbranch/b6b87ed3-622e-406f-bb01-c18e59b21e26"
     },
     {
@@ -123,6 +124,8 @@
       "ages": "13 to 18 (residents and non-residents)",
       "description": "One-week summer academy run by Farmers Branch Fire and Parks and Recreation where teens learn firefighting equipment, basic emergency response, search-and-rescue skills and fitness challenges alongside city firefighters; the 2026 academy has ended and a 2027 session is planned.",
       "applyWindow": "Summer 2027; resident registration opens May 3, 2027 and non-resident registration May 17, 2027, with full details posted in spring 2027",
+      "applyStatus": "closed",
+      "applyOpens": "2027-05-03",
       "source": "https://www.farmersbranchtx.gov/teen-fire-rescue-academy"
     }
   ],

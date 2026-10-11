@@ -68,10 +68,12 @@
       "source": "https://public.destinyhosted.com/agenda_publish.cfm?id=33768&mt=ALL&get_month=9&get_year=2026&dsp=ag&seq=3939"
     },
     {
-      "date": "2026-09-21",
+      "date": "2026-09-25",
       "status": "special",
-      "note": "Listed on the city calendar as 'City Council Special Meeting' (all-day placeholder in the third-Monday work session slot). No agenda was posted as of Sept 10; confirm the time on the agenda portal.",
-      "source": "https://www.desototexas.gov/Calendar.aspx?EID=1437&month=9&year=2026&day=10&calType=0"
+      "time": "17:00",
+      "label": "City Council Special Called Meeting",
+      "note": "Listed on the city calendar as 'City Council Special Called Meeting' at 5 p.m. in the Council Chambers.",
+      "source": "https://www.desototexas.gov/calendar.aspx?view=list&year=2026&month=9&CID=0"
     },
     {
       "date": "2026-10-06",
@@ -119,6 +121,7 @@
       "ages": "Teens who are DeSoto residents (specific age range not stated on the page)",
       "description": "Parks and Recreation program that gives teens a formal look at municipal operations plus education, wellness, life-skills and career-readiness experiences. General board members attend monthly meetings and help plan youth programs; executive board members hold officer positions and represent the council at city events. Benefits include community service hours (subject to school approval), business etiquette training, internship and employment opportunities, and a letter of recommendation from City Administration.",
       "applyWindow": "Rolling; apply through the online application linked from the page (no deadline is stated). Contact Sydney Elliott, Administrative Superintendent, 972-230-9651, selliott@desototexas.gov.",
+      "applyStatus": "rolling",
       "source": "https://www.desototexas.gov/652/Teen-Council"
     },
     {
@@ -127,6 +130,7 @@
       "ages": "At least 13 years old or entering grades 8 to 12",
       "description": "Library volunteer program giving teens confidence-building volunteer experience, practical job skills, and customer and public service experience during the school year. Volunteers are expected to be dependable, flexible and self-disciplined. The page still describes the September 2025 to May 2026 program year, so ask the library about the current year.",
       "applyWindow": "Not stated on the page; contact the DeSoto Public Library, 211 E. Pleasant Run Road, 972-274-2489, actioncenter@desototexas.gov.",
+      "applyStatus": "unknown",
       "source": "https://www.desototexas.gov/608/Teen-School-Year-Volunteer-Program"
     }
   ],
@@ -271,7 +275,6 @@
     "https://www.desototexas.gov/calendar.aspx?view=list&year=2026&month=9&CID=0",
     "https://www.desototexas.gov/calendar.aspx?view=list&year=2026&month=10&CID=0",
     "https://www.desototexas.gov/calendar.aspx?view=list&year=2026&month=11&CID=0",
-    "https://www.desototexas.gov/Calendar.aspx?EID=1437&month=9&year=2026&day=10&calType=0",
     "https://www.desototexas.gov/Calendar.aspx?EID=914&month=10&year=2026&day=10&calType=0",
     "https://www.desototexas.gov/Calendar.aspx?EID=1438&month=10&year=2026&day=10&calType=0",
     "https://www.desototexas.gov/176/DeSoto-TX-TV",

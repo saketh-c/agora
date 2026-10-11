@@ -8,7 +8,8 @@ import AppHeader from './components/shell/AppHeader.jsx';
 import TabBar from './components/shell/TabBar.jsx';
 import AppFooter from './components/shell/AppFooter.jsx';
 import SetupHost from './components/shell/SetupHost.jsx';
-import { PageMetaProvider, RouteEffects, useShellChrome } from './components/shell/PageMeta.jsx';
+import { PageMetaProvider, RouteEffects, SkipLinks, useShellChrome } from './components/shell/PageMeta.jsx';
+import UpdatePrompt from './components/shell/UpdatePrompt.jsx';
 import EmptyState from './components/ui/EmptyState.jsx';
 import Home from './pages/Home.jsx';
 
@@ -142,14 +143,6 @@ function NotFound() {
   );
 }
 
-function skipToMain(e) {
-  const main = document.getElementById('main');
-  if (!main) return;
-  e.preventDefault();
-  main.focus({ preventScroll: true });
-  main.scrollIntoView({ block: 'start' });
-}
-
 function Shell() {
   const { lang } = useStore();
   const location = useLocation();
@@ -157,9 +150,7 @@ function Shell() {
 
   return (
     <>
-      <a className="skip" href="#main" onClick={skipToMain}>
-        {t('nav.skip')}
-      </a>
+      <SkipLinks />
       <AppHeader />
       <main id="main" tabIndex={-1}>
         <ErrorBoundary resetKey={location.key}>
@@ -193,6 +184,7 @@ function Shell() {
       {!footerHidden && <AppFooter />}
       <TabBar />
       <SetupHost />
+      <UpdatePrompt />
       <RouteEffects languageKey={lang} />
     </>
   );

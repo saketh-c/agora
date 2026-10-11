@@ -95,6 +95,8 @@
       "ages": "Rising 9th to 12th graders (public, private or homeschool) living inside Mesquite city limits",
       "description": "A city-run council of high school students that promotes youth resources, builds leadership skills, learns how city government works and addresses challenges facing their peers. General body meetings are August through May on the second Monday of each month from 6 to 8 p.m., with team-building sessions in June and July. Run by the Community Services Department, 1616 N. Galloway Ave., 972-216-6424.",
       "applyWindow": "Applications for 2027-28 open in March 2027, with the application and selection timeline posted in January 2027. The usual cycle is: applications open and close in March, interviews and decisions in April, waivers due in May, first meeting in June. Applications for Summer 2026 are closed.",
+      "applyStatus": "closed",
+      "applyOpens": "2027-03",
       "source": "https://www.cityofmesquite.com/4082/Youth-Council-Application"
     },
     {
@@ -103,6 +105,7 @@
       "ages": "Adult board (school district staff, business community and residents); positions 6 to 11 require Mesquite residency",
       "description": "An 11-member board created by the City Council to advise on Mesquite Youth Council initiatives and other youth programming: three MISD seats, two business-community seats and six resident seats. Meets at 5:30 p.m. on the second Tuesday every other month starting in January at the Community Services Building, 1616 N. Galloway Ave. Position 5 (business community) is currently vacant. Staff contact: Anthony Cao, Director of Housing and Community Services, 972-216-6427.",
       "applyWindow": "Apply now through the city's online boards application or the City Secretary's Office, 972-216-6244",
+      "applyStatus": "open",
       "source": "https://www.cityofmesquite.com/4083/Youth-Advisory-Board"
     },
     {
@@ -111,6 +114,8 @@
       "ages": "Teens ages 16 to 18",
       "description": "Places Mesquite teens in paid summer internships ($13 per hour) to build college and career skills; finishers get a letter of recommendation, a certificate of completion and a City of Mesquite leadership recognition. Run by Youth Services (Sheridan Hodges, youthservices@cityofmesquite.com, 972-329-8738).",
       "applyWindow": "Applications are closed for the 2026-27 school year; the 2026 cycle took applications March 1 to 31, so watch the Youth Services page for the next window",
+      "applyStatus": "closed",
+      "applyBy": "2026-03-31",
       "source": "https://www.cityofmesquite.com/m/newsflash/home/detail/2516"
     }
   ],

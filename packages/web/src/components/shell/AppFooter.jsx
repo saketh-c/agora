@@ -16,13 +16,15 @@ const LINKS = [
 
 export default function AppFooter({ inline = false }) {
   const { pathname } = useLocation();
+  // Routes ignore case and a trailing slash ("/News/" is the News page).
+  const here = pathname.toLowerCase().replace(/\/+$/, '') || '/';
   const verified = SCHEDULES_VERIFIED_ON ? monthDay(SCHEDULES_VERIFIED_ON, { withYear: true }) : '';
   const inner = (
     <>
       {/* These pages have no tab, so the footer is the nav that says where you are. */}
       <nav className="footer__links" aria-label={t('shell.footer.label')}>
         {LINKS.map((l) => (
-          <Link key={l.to} to={l.to} aria-current={pathname === l.to ? 'page' : undefined}>
+          <Link key={l.to} to={l.to} aria-current={here === l.to ? 'page' : undefined}>
             {t(l.key)}
           </Link>
         ))}

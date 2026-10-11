@@ -118,6 +118,7 @@
       "ages": "14 to 18",
       "description": "Library-based teen group where members share ideas, plan events for teens and earn volunteer hours. Sessions have run on Wednesdays from 5 to 6 p.m. at the Duncanville Public Library, 201 James Collins Blvd (for example June 10 and 24, 2026); the library does not keep a permanent web page for the group, so check the city's weekly updates or call for the next dates.",
       "applyWindow": "Ongoing; contact the library at 972-780-5050",
+      "applyStatus": "rolling",
       "source": "https://www.duncanvilletx.gov/CivicAlerts.aspx?AID=21"
     },
     {
@@ -126,6 +127,7 @@
       "ages": "Teens (details not yet published)",
       "description": "A resolution establishing a Duncanville Teen Council is item 7.M on the Sept 15, 2026 City Council consent agenda; membership details and applications should follow if it is adopted.",
       "applyWindow": "Not yet announced",
+      "applyStatus": "unknown",
       "source": "https://duncanvilletx.api.civicclerk.com/v1/Meetings/GetMeetingFileStream(fileId=7098,plainText=false)"
     }
   ],

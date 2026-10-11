@@ -49,6 +49,12 @@ function Highlight({ text, query }) {
   );
 }
 
+/** True when the typed text is exactly one of the cities (so there is nothing to look up). */
+function isExactCity(cities, text) {
+  const q = fold(text);
+  return Boolean(q) && cities.some((c) => fold(c.name) === q || c.cityId === q);
+}
+
 /**
  * A type-ahead city picker (ARIA APG combobox with a list popup).
  *
@@ -57,9 +63,32 @@ function Highlight({ text, query }) {
  *
  * Typing filters the 39 cities; ArrowDown/ArrowUp move, Enter picks, Escape closes (then
  * clears). ArrowDown in an empty box lists every city. `onQueryChange(text, matches)` lets
- * a parent react to free text (for example a ZIP code search when the API exists).
+ * a parent react to free text.
+ *
+ * `lookup` adds a last option that searches for whatever was typed (an address, ZIP code or
+ * school) when some cities match but none exactly: { label(text) => string, hint?: string,
+ * noMatch?: string (announced when no city matches), onLookup(text), minLength?: 3 }. It runs
+ * only when chosen (Enter or a click), never while typing. With no city match the list stays
+ * closed and Enter submits the form, which looks the text up. Enter with nothing highlighted
+ * closes the list, so the form's own button is never covered by a stale popup.
  */
-export default function CityPicker({ cities, value, onSelect, label, labelHidden = false, placeholder, id, describedBy, autoFocus = false, onQueryChange, className = '', inputRef: externalRef }) {
+export default function CityPicker({
+  cities,
+  value,
+  onSelect,
+  label,
+  labelHidden = false,
+  placeholder,
+  id,
+  describedBy,
+  autoFocus = false,
+  onQueryChange,
+  className = '',
+  inputRef: externalRef,
+  lookup,
+  icon = 'search',
+  invalid = false,
+}) {
   const auto = useId().replace(/[^a-zA-Z0-9_-]/g, '');
   const inputId = id || `city-${auto}`;
   const listId = `${inputId}-list`;
@@ -72,6 +101,7 @@ export default function CityPicker({ cities, value, onSelect, label, labelHidden
   const inputRef = externalRef || ownRef;
   const listRef = useRef(null);
   const wrapRef = useRef(null);
+  const minLookup = lookup ? lookup.minLength || 3 : Infinity;
 
   // Follow the selected city when it changes elsewhere (or the language changes its name).
   useEffect(() => {
@@ -83,7 +113,13 @@ export default function CityPicker({ cities, value, onSelect, label, labelHidden
     return matchCities(cities, query);
   }, [cities, query, showAll]);
 
-  const expanded = open && (options.length > 0 || Boolean(fold(query)));
+  // The "Look up ..." row, after the cities, when the text could also be an address, ZIP or
+  // school. With no city match there is no list at all: Enter (or the form's button) looks it
+  // up, and nothing covers that button.
+  const canLookup = Boolean(lookup) && options.length > 0 && fold(query).length >= minLookup && !isExactCity(cities, query);
+  const count = options.length + (canLookup ? 1 : 0);
+  const lookupIndex = canLookup ? options.length : -1;
+  const expanded = open && (count > 0 || (!lookup && Boolean(fold(query))));
 
   useEffect(() => {
     if (!expanded || active < 0 || !listRef.current) return;
@@ -101,12 +137,27 @@ export default function CityPicker({ cities, value, onSelect, label, labelHidden
     return () => document.removeEventListener('pointerdown', onDown);
   }, [open]);
 
-  const pick = (city) => {
-    setQuery(city.name);
+  const close = () => {
     setOpen(false);
     setShowAll(false);
     setActive(-1);
+  };
+
+  const pick = (city) => {
+    setQuery(city.name);
+    close();
     if (onSelect) onSelect(city);
+  };
+
+  const runLookup = () => {
+    const text = query.trim();
+    close();
+    if (lookup && lookup.onLookup) lookup.onLookup(text);
+  };
+
+  const choose = (i) => {
+    if (i === lookupIndex) runLookup();
+    else if (options[i]) pick(options[i]);
   };
 
   const onChange = (e) => {
@@ -115,31 +166,34 @@ export default function CityPicker({ cities, value, onSelect, label, labelHidden
     setShowAll(false);
     setOpen(true);
     const matches = matchCities(cities, text);
-    setActive(matches.length && fold(text) ? 0 : -1);
+    setActive(fold(text) && matches.length ? 0 : -1);
     if (onQueryChange) onQueryChange(text, matches);
   };
 
   const onKeyDown = (e) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      if (!open || !options.length) {
+      if (!open || !count) {
         setOpen(true);
         if (!fold(query)) setShowAll(true);
         setActive(0);
         return;
       }
-      setActive((i) => (i + 1) % options.length);
+      setActive((i) => (i + 1) % count);
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       if (!open) {
         setOpen(true);
         return;
       }
-      setActive((i) => (i <= 0 ? options.length - 1 : i - 1));
+      setActive((i) => (i <= 0 ? count - 1 : i - 1));
     } else if (e.key === 'Enter') {
-      if (expanded && active >= 0 && options[active]) {
+      if (expanded && active >= 0 && active < count) {
         e.preventDefault();
-        pick(options[active]);
+        choose(active);
+      } else {
+        // Nothing to pick: let the form submit, with the list out of the way.
+        close();
       }
     } else if (e.key === 'Escape') {
       if (expanded) {
@@ -147,7 +201,9 @@ export default function CityPicker({ cities, value, onSelect, label, labelHidden
         e.stopPropagation();
         setOpen(false);
       } else if (query) {
+        // Escape clears the text first; only a second one reaches the dialog around it.
         e.preventDefault();
+        e.stopPropagation();
         setQuery('');
         if (onQueryChange) onQueryChange('', []);
       }
@@ -155,6 +211,13 @@ export default function CityPicker({ cities, value, onSelect, label, labelHidden
       setOpen(false);
     }
   };
+
+  let status = '';
+  if (open && fold(query)) {
+    if (options.length) status = tn('ui.cityPicker.count', options.length);
+    else if (!lookup) status = t('ui.cityPicker.none', { n: cities.length });
+    else if (fold(query).length >= minLookup) status = lookup.noMatch || '';
+  }
 
   return (
     <div className={`cbx ${className}`.trim()} ref={wrapRef}>
@@ -164,7 +227,7 @@ export default function CityPicker({ cities, value, onSelect, label, labelHidden
         </label>
       )}
       <div className="search">
-        <Icon name="search" />
+        <Icon name={icon} />
         <input
           ref={inputRef}
           id={inputId}
@@ -173,12 +236,14 @@ export default function CityPicker({ cities, value, onSelect, label, labelHidden
           aria-autocomplete="list"
           aria-expanded={expanded}
           aria-controls={listId}
-          aria-activedescendant={expanded && active >= 0 ? `${listId}-${active}` : undefined}
+          aria-activedescendant={expanded && active >= 0 && active < count ? `${listId}-${active}` : undefined}
           aria-describedby={describedBy}
+          aria-invalid={invalid || undefined}
           autoComplete="off"
           autoCapitalize="words"
           spellCheck={false}
           enterKeyHint="go"
+          maxLength={lookup ? 120 : undefined}
           placeholder={placeholder}
           value={query}
           onChange={onChange}
@@ -206,10 +271,27 @@ export default function CityPicker({ cities, value, onSelect, label, labelHidden
             <span className="cbx__county">{t('ui.cityPicker.county', { county: city.county })}</span>
           </div>
         ))}
-        {expanded && !options.length && <div className="cbx__none">{t('ui.cityPicker.none', { n: cities.length })}</div>}
+        {canLookup && (
+          <div
+            id={`${listId}-${lookupIndex}`}
+            role="option"
+            aria-selected={active === lookupIndex}
+            className="cbx__opt cbx__opt--lookup"
+            onPointerDown={(e) => e.preventDefault()}
+            onClick={runLookup}
+            onMouseMove={() => active !== lookupIndex && setActive(lookupIndex)}
+          >
+            <Icon name="pin" />
+            <span className="cbx__lookup">
+              <span className="cbx__lookup-t">{lookup.label(query.trim())}</span>
+              {lookup.hint && <span className="cbx__lookup-s">{lookup.hint}</span>}
+            </span>
+          </div>
+        )}
+        {expanded && !count && <div className="cbx__none">{t('ui.cityPicker.none', { n: cities.length })}</div>}
       </div>
       <span className="vh" role="status" aria-live="polite">
-        {open && fold(query) ? (options.length ? tn('ui.cityPicker.count', options.length) : t('ui.cityPicker.none', { n: cities.length })) : ''}
+        {status}
       </span>
     </div>
   );

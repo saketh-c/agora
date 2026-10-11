@@ -41,6 +41,7 @@ export default {
     one: '{n} publicación sobre {city}',
     other: '{n} publicaciones sobre {city}',
   },
+  countFirst: '{count}, primero {city}',
   postsHeading: 'Publicaciones',
   emptyTitle: 'Todavía no hay nada aquí',
   emptyBody: 'Ninguna publicación coincide con estos filtros. Prueba con todas las ciudades u otro tipo.',

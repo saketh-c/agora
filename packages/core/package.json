@@ -5,7 +5,10 @@
   "type": "module",
   "main": "./src/index.js",
   "exports": {
-    ".": "./src/index.js",
+    ".": {
+      "browser": "./src/index.browser.js",
+      "default": "./src/index.js"
+    },
     "./node": "./src/load-node.js"
   },
   "files": ["src"],

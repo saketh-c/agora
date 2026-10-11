@@ -90,12 +90,16 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
+    // Kept on purpose: the first chunk carries the app, the city data and only the English
+    // dictionary. Every other language's dictionary is its own chunk (ui-<code>), loaded by
+    // core's loadLocale() when someone reads in it, so adding a language does not grow it.
     chunkSizeWarningLimit: 900,
     rollupOptions: {
       output: {
         manualChunks: {
           react: ['react', 'react-dom', 'react-dom/client', 'react-router-dom'],
           leaflet: ['leaflet', 'react-leaflet'],
+          ...Object.fromEntries(['es', 'vi'].map((code) => [`ui-${code}`, [path.join(repoRoot, 'packages', 'core', 'src', 'i18n', 'locales', code, 'index.js')]])),
         },
       },
     },

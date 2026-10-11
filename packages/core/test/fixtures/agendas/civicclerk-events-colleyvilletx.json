@@ -1,0 +1,84 @@
+{
+ "value": [
+  {
+   "id": 2236,
+   "eventName": "City Council Meeting - 2nd",
+   "startDateTime": "2026-10-20T17:30:00Z",
+   "agendaId": 2714,
+   "categoryName": "City Council",
+   "publishedFiles": []
+  },
+  {
+   "id": 2224,
+   "eventName": "City Council Meeting - 1st",
+   "startDateTime": "2026-11-04T17:30:00Z",
+   "agendaId": 2728,
+   "categoryName": "City Council",
+   "publishedFiles": []
+  },
+  {
+   "id": 2237,
+   "eventName": "City Council Meeting - 2nd",
+   "startDateTime": "2026-11-17T17:30:00Z",
+   "agendaId": 0,
+   "categoryName": "City Council",
+   "publishedFiles": []
+  },
+  {
+   "id": 2320,
+   "eventName": "City Council Meeting - 2nd",
+   "startDateTime": "2026-11-17T17:30:00Z",
+   "agendaId": 2729,
+   "categoryName": "City Council",
+   "publishedFiles": []
+  },
+  {
+   "id": 2225,
+   "eventName": "City Council Meeting - 1st",
+   "startDateTime": "2026-12-01T17:30:00Z",
+   "agendaId": 0,
+   "categoryName": "City Council",
+   "publishedFiles": []
+  },
+  {
+   "id": 2307,
+   "eventName": "City Council Meeting - 1st",
+   "startDateTime": "2026-12-01T17:30:00Z",
+   "agendaId": 2730,
+   "categoryName": "City Council",
+   "publishedFiles": []
+  },
+  {
+   "id": 2333,
+   "eventName": "City Council Meeting - 1st",
+   "startDateTime": "2026-12-01T17:30:00Z",
+   "agendaId": 0,
+   "categoryName": "City Council",
+   "publishedFiles": []
+  },
+  {
+   "id": 2286,
+   "eventName": "City Council Meeting - 2nd",
+   "startDateTime": "2026-12-15T17:30:00Z",
+   "agendaId": 0,
+   "categoryName": "City Council",
+   "publishedFiles": []
+  },
+  {
+   "id": 2321,
+   "eventName": "City Council Meeting - 2nd",
+   "startDateTime": "2026-12-15T17:30:00Z",
+   "agendaId": 2731,
+   "categoryName": "City Council",
+   "publishedFiles": []
+  },
+  {
+   "id": 2346,
+   "eventName": "City Council Meeting - 2nd",
+   "startDateTime": "2026-12-15T17:30:00Z",
+   "agendaId": 0,
+   "categoryName": "City Council",
+   "publishedFiles": []
+  }
+ ]
+}

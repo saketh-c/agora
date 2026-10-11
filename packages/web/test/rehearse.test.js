@@ -279,3 +279,60 @@ test('practice numbers and dates follow the app language and Central time', () =
   assert.equal(takeWhen('2026-10-11T01:30:00Z', 'en').time, '8:30 PM');
   assert.equal(secondsPhrase(75), '1:15');
 });
+
+// ---- Round 2: which runs count, and which script Practice starts with ----
+import { countsAsPractice } from '../src/lib/rehearse/coach.js';
+import { initialScript, isFromDraft, latestDraft, scriptParagraphs } from '../src/lib/rehearse/script.js';
+
+test('only a heard run long enough to coach counts as practice', () => {
+  assert.equal(countsAsPractice({ heard: false, findings: [{ id: 'not_heard' }] }), false);
+  assert.equal(countsAsPractice({ heard: true, findings: [{ id: 'too_short' }] }), false);
+  assert.equal(countsAsPractice({ heard: true, findings: [{ id: 'pace_fast' }] }), true);
+  assert.equal(countsAsPractice({ heard: true, findings: [] }), true);
+  assert.equal(countsAsPractice(null), false);
+  // Straight from the coach: a 9 second run does not count, a 40 second one does.
+  const env = (speakingSec) => ({ speakingSec, longPauses: 0, pauses: [], trailOff: false, loudnessCv: 0.3, firstSpeechSec: 0, lastSpeechSec: speakingSec });
+  const short = buildFindings({ speech: null, envelope: env(9), pitch: { varied: true }, body: null, seconds: 9, limitSec: 180, wpm: 140 });
+  assert.equal(countsAsPractice(short), false);
+  const full = buildFindings({ speech: null, envelope: env(40), pitch: { varied: true }, body: null, seconds: 40, limitSec: 180, wpm: 140 });
+  assert.equal(countsAsPractice(full), true);
+});
+
+test('Practice picks up the newest Write draft, but keeps a script the student typed or cleared', () => {
+  const cd = { name: 'Ana', school: 'Plano East', itemTitle: '', ask: 'Keep the bus', at: '2026-10-11T07:00:00.000Z' };
+  const write = 'Good evening. Keep the bus.';
+  let d = latestDraft({ commentDraft: cd, writeText: write });
+  assert.equal(d.text, write);
+  assert.equal(d.at, cd.at);
+  assert.equal(d.fields.ask, 'Keep the bus');
+  // a newer hand-over from the Practice button wins; an older one does not
+  d = latestDraft({ commentDraft: cd, writeText: write, lastDraft: { text: 'Polished text.', at: '2026-10-11T08:00:00.000Z', fields: { name: 'Ana' } } });
+  assert.equal(d.text, 'Polished text.');
+  d = latestDraft({ commentDraft: cd, writeText: write, lastDraft: { text: 'Old text.', at: '2026-10-10T08:00:00.000Z' } });
+  assert.equal(d.text, write);
+  assert.equal(latestDraft({}), null);
+  assert.equal(latestDraft({ lastDraft: { text: 'Only this.', at: 'x' } }).text, 'Only this.');
+
+  const draft = latestDraft({ commentDraft: cd, writeText: write });
+  // first visit: the draft
+  assert.deepEqual(initialScript({ saved: {}, draft }), { script: write, scriptFrom: 'draft', draftAt: cd.at });
+  // typed their own after seeing this draft: kept
+  assert.deepEqual(initialScript({ saved: { script: 'My own words.', draftAt: cd.at }, draft }), { script: 'My own words.', scriptFrom: 'own', draftAt: cd.at });
+  // cleared: stays cleared until Write changes
+  assert.equal(initialScript({ saved: { script: '', draftAt: cd.at }, draft }).script, '');
+  // Write changed since: the new draft replaces it
+  const newer = { ...draft, at: '2026-10-11T09:00:00.000Z', text: 'Good evening. Run the 7 PM bus.' };
+  assert.deepEqual(initialScript({ saved: { script: 'My own words.', draftAt: cd.at }, draft: newer }), { script: newer.text, scriptFrom: 'draft', draftAt: newer.at });
+  // no draft at all: whatever was saved
+  assert.equal(initialScript({ saved: { script: 'Pasted.' }, draft: null }).script, 'Pasted.');
+  // older saves without draftAt compare the text
+  assert.equal(initialScript({ saved: { script: 'Mine.', draftText: write }, draft }).script, 'Mine.');
+  assert.equal(isFromDraft(` ${write} `, draft), true);
+  assert.equal(isFromDraft('Something else', draft), false);
+});
+
+test('the on-screen script keeps paragraphs and line breaks', () => {
+  assert.deepEqual(scriptParagraphs('Good evening.\n\nI am Ana.\nI live here.\r\n\r\nThank you.'), ['Good evening.', 'I am Ana.\nI live here.', 'Thank you.']);
+  assert.deepEqual(scriptParagraphs('   '), []);
+  assert.deepEqual(scriptParagraphs(null), []);
+});

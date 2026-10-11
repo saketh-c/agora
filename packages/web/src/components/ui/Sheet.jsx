@@ -11,6 +11,9 @@ import Icon from './Icon.jsx';
  *     ...
  *   </Sheet>
  *
+ * `barStart` fills the bar's left side when there is no `title` (a badge); `barEnd` adds
+ * controls just before Close (MeetingShare).
+ *
  * Accessibility: role="dialog" + aria-modal, labelled by `title` (or by the element whose id
  * is `labelledBy`, for content that brings its own heading, like MeetingDetail). While open,
  * the rest of the app is `inert`, page scroll is locked, Tab cycles inside the dialog, Escape
@@ -54,7 +57,7 @@ function focusables(container) {
 
 const prefersReducedMotion = () => typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-export default function Sheet({ open, onClose, title, labelledBy, describedBy, barStart, children, footer, variant = 'center', wide = false, initialFocusRef, className = '', closeLabel }) {
+export default function Sheet({ open, onClose, title, labelledBy, describedBy, barStart, barEnd, children, footer, variant = 'center', wide = false, initialFocusRef, className = '', closeLabel }) {
   const [mounted, setMounted] = useState(open);
   const [shown, setShown] = useState(false);
   const layerRef = useRef(null);
@@ -87,7 +90,22 @@ export default function Sheet({ open, onClose, title, labelledBy, describedBy, b
     lockScroll();
     const target = (initialFocusRef && initialFocusRef.current) || dialogRef.current;
     if (target) target.focus({ preventScroll: true });
+    // Focus can fall out of the dialog onto <body> (the focused button was disabled or
+    // removed). Escape and Tab still belong to the top-most dialog then.
+    const onStrayKey = (e) => {
+      if (stack[stack.length - 1] !== layer || layer.contains(e.target)) return;
+      if (e.key === 'Escape' && !e.defaultPrevented) {
+        e.preventDefault();
+        if (onCloseRef.current) onCloseRef.current();
+      } else if (e.key === 'Tab' && dialogRef.current) {
+        e.preventDefault();
+        const items = focusables(dialogRef.current);
+        (items[e.shiftKey ? items.length - 1 : 0] || dialogRef.current).focus();
+      }
+    };
+    document.addEventListener('keydown', onStrayKey);
     return () => {
+      document.removeEventListener('keydown', onStrayKey);
       const i = stack.indexOf(layer);
       if (i >= 0) stack.splice(i, 1);
       syncInert();
@@ -154,9 +172,18 @@ export default function Sheet({ open, onClose, title, labelledBy, describedBy, b
           ) : (
             <span className="sheet__title">{barStart}</span>
           )}
-          <button type="button" className="iconbtn" onClick={() => onCloseRef.current && onCloseRef.current()} aria-label={closeLabel || t('common.close')}>
-            <Icon name="x" />
-          </button>
+          {barEnd ? (
+            <span className="sheet__tools">
+              {barEnd}
+              <button type="button" className="iconbtn" onClick={() => onCloseRef.current && onCloseRef.current()} aria-label={closeLabel || t('common.close')}>
+                <Icon name="x" />
+              </button>
+            </span>
+          ) : (
+            <button type="button" className="iconbtn" onClick={() => onCloseRef.current && onCloseRef.current()} aria-label={closeLabel || t('common.close')}>
+              <Icon name="x" />
+            </button>
+          )}
         </div>
         <div className="sheet__body">{children}</div>
         {footer && <div className="sheet__foot">{footer}</div>}

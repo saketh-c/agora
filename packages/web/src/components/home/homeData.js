@@ -4,7 +4,7 @@
  * preferences, `today` (a Central-time 'YYYY-MM-DD'), `now` (an ISO instant, so meetings that
  * already ended drop out) and `deadlineOf(meeting)` (the sign-up deadline, or null).
  */
-import { cityPoint, daysBetween, expandCityMeetings, hasEnded, haversineMiles, isDateStr, matchMeetings, matchYouthPrograms, normalizePrefs, upcomingMeetings } from '@agora/core';
+import { cityPoint, daysBetween, expandCityMeetings, hasEnded, haversineMiles, isDateStr, matchMeetings, matchYouthPrograms, normalizePrefs, todayStr, upcomingMeetings, youthApplyRank, youthApplyState } from '@agora/core';
 
 /** Home looks this many days ahead (the same window the old For you page used). */
 export const HOME_DAYS = 45;
@@ -27,11 +27,26 @@ export function isSpeakable(meeting, deadlineOf = noDeadline) {
  * (so a list is not one city's calendar). Ranking is core's matchMeetings: topics, times,
  * distance, home city, how soon.
  */
-export function rankedSpeakable(cities, prefs, { today, now, deadlineOf = noDeadline, perCity = 1, limit = 12, days = HOME_DAYS } = {}) {
+export function rankedSpeakable(cities, prefs, { today, now, deadlineOf = noDeadline, perCity = 1, limit = 12, days = HOME_DAYS, keepFar = false } = {}) {
   const p = { ...normalizePrefs(prefs), canSpeakOnly: true };
-  return matchMeetings(cities, p, { today, now, days, perCity, limit: limit + 8 })
+  return matchMeetings(cities, p, { today, now, days, perCity, limit: limit + 8, keepFar })
     .filter((m) => isSpeakable(m, deadlineOf))
     .slice(0, limit);
+}
+
+/** True when a meeting is within the student's distance limit (always, with no limit or no place). */
+export function withinLimit(meeting, prefs) {
+  const p = normalizePrefs(prefs);
+  return p.maxMiles == null || !p.location || meeting.distanceMiles == null || meeting.distanceMiles <= p.maxMiles;
+}
+
+/**
+ * Speakable meetings for the returning Home: those within the distance limit first, then (so
+ * Home is never quietly empty) the ones farther away, which the page labels as farther.
+ */
+function nearThenFar(cities, prefs, opts) {
+  const list = rankedSpeakable(cities, prefs, { ...opts, keepFar: true });
+  return [...list.filter((m) => withinLimit(m, prefs)), ...list.filter((m) => !withinLimit(m, prefs))];
 }
 
 /** True when a meeting falls in a time the student said works (weekday evenings, daytime, weekends). */
@@ -79,24 +94,43 @@ export function pickNextMeeting(cities, cityById, prefs, { today, now, prepMeeti
       return { ...chosen, distanceMiles };
     }
   }
-  return rankedSpeakable(cities, prefs, { today, now, deadlineOf, perCity: 1, limit: 1 })[0] || null;
+  return nearThenFar(cities, prefs, { today, now, deadlineOf, perCity: 1, limit: 12 })[0] || null;
 }
 
 /**
  * "Coming up for you": good matches at other councils than the featured meeting, one per
- * council, shown soonest first so the list reads as a calendar.
+ * council, shown soonest first so the list reads as a calendar. Meetings within the distance
+ * limit come first; farther ones only fill the list when there are too few near.
  */
 export function comingUp(cities, prefs, { today, now, exclude, deadlineOf = noDeadline, limit = HOME_ROWS } = {}) {
   const skipCity = exclude ? exclude.cityId : null;
-  return rankedSpeakable(cities, prefs, { today, now, deadlineOf, perCity: 1, limit: limit + 1 })
-    .filter((m) => m.cityId !== skipCity && (!exclude || m.id !== exclude.id))
-    .slice(0, limit)
-    .sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time) || a.cityName.localeCompare(b.cityName));
+  const bySoonest = (a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time) || a.cityName.localeCompare(b.cityName);
+  const list = nearThenFar(cities, prefs, { today, now, deadlineOf, perCity: 1, limit: limit + 30 }).filter((m) => m.cityId !== skipCity && (!exclude || m.id !== exclude.id));
+  const near = list.filter((m) => withinLimit(m, prefs)).slice(0, limit);
+  // Past the limit, the nearest councils fill in (not the best scored far away).
+  const far = list
+    .filter((m) => !withinLimit(m, prefs))
+    .sort((a, b) => a.distanceMiles - b.distanceMiles)
+    .slice(0, limit - near.length);
+  return [...near.sort(bySoonest), ...far.sort(bySoonest)];
 }
 
-/** Youth councils and programs, home city first, then nearest. */
-export function seatsNear(cities, prefs, limit = HOME_ROWS) {
-  return matchYouthPrograms(cities, prefs).slice(0, limit);
+/**
+ * "Seats you can apply for": youth councils and programs, each with `apply`, where its
+ * application stands (core/src/youth.js youthApplyState). A program whose window is closed is
+ * left out. Within the student's distance limit first; then the ones you can apply to now
+ * (closing soon, open, rolling) before those the city says nothing about; then home city
+ * first and nearest.
+ */
+export function seatsNear(cities, prefs, limit = HOME_ROWS, today = todayStr('America/Chicago')) {
+  const p = normalizePrefs(prefs);
+  const within = (s) => p.maxMiles == null || s.distanceMiles == null || s.distanceMiles <= p.maxMiles;
+  return matchYouthPrograms(cities, prefs)
+    .map((s, i) => ({ s: { ...s, apply: youthApplyState(s, today) }, i }))
+    .filter(({ s }) => s.apply.state !== 'closed')
+    .sort((a, b) => Number(within(b.s)) - Number(within(a.s)) || youthApplyRank(a.s.apply.state) - youthApplyRank(b.s.apply.state) || a.i - b.i)
+    .slice(0, limit)
+    .map(({ s }) => s);
 }
 
 /**

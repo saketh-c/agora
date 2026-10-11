@@ -1,0 +1,437 @@
+BEGIN:VCALENDAR
+PRODID:iCalendar-Ruby
+VERSION:2.0
+X-WR-TIMEZONE:America/Chicago
+BEGIN:VTIMEZONE
+TZID:America/Chicago
+X-LIC-LOCATION:America/Chicago
+BEGIN:STANDARD
+DTSTART:20241103T020000
+RRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11
+TZNAME:CST
+TZOFFSETFROM:-0500
+TZOFFSETTO:-0600
+END:STANDARD
+BEGIN:DAYLIGHT
+DTSTART:20250309T020000
+RRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3
+TZNAME:CDT
+TZOFFSETFROM:-0600
+TZOFFSETTO:-0500
+END:DAYLIGHT
+END:VTIMEZONE
+BEGIN:VEVENT
+DESCRIPTION:This meeting will take place in the Council Chambers. https://w
+ ww.desototexas.gov/calendar.aspx?EID=1240
+DTEND;TZID=America/Chicago:20261228T200000
+DTSTAMP;TZID=America/Chicago:20260507T123508
+DTSTART;TZID=America/Chicago:20261228T183000
+LAST-MODIFIED;TZID=America/Chicago:20260507T123508
+LOCATION:Town Center - 211 E. Pleasant Run Road  DeSoto TX 75115
+SEQUENCE:0
+SUMMARY:Citizens Police Advisory Committee
+UID:1240
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.desototexas.gov/calendar.aspx?EID=1440
+DTEND;VALUE=DATE:20261221
+DTSTAMP;TZID=America/Chicago:20260518T150743
+DTSTART;VALUE=DATE:20261221
+LAST-MODIFIED;TZID=America/Chicago:20260518T150743
+LOCATION:Town Center - 211 E. Pleasant Run Road  DeSoto TX 75115
+SEQUENCE:0
+SUMMARY:City Council Special Meeting
+UID:1440
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.desototexas.gov/calendar.aspx?EID=952
+DTEND;TZID=America/Chicago:20261215T210000
+DTSTAMP;TZID=America/Chicago:20260424T113924
+DTSTART;TZID=America/Chicago:20261215T180000
+LAST-MODIFIED;TZID=America/Chicago:20260424T113924
+LOCATION:Town Center - 211 E. Pleasant Run Road  DeSoto TX 75115
+SEQUENCE:0
+SUMMARY:City Council Meeting
+UID:952
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.desototexas.gov/calendar.aspx?EID=1168
+DTEND;TZID=America/Chicago:20261214T200000
+DTSTAMP;TZID=America/Chicago:20260424T115504
+DTSTART;TZID=America/Chicago:20261214T180000
+LAST-MODIFIED;TZID=America/Chicago:20260424T115504
+LOCATION:Town Center - 211 E. Pleasant Run Road  DeSoto TX 75115
+SEQUENCE:0
+SUMMARY:Veteran's Affairs Committee
+UID:1168
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:This meeting will take place in the Council Chambers. https://w
+ ww.desototexas.gov/calendar.aspx?EID=1132
+DTEND;TZID=America/Chicago:20261210T200000
+DTSTAMP;TZID=America/Chicago:20260507T123536
+DTSTART;TZID=America/Chicago:20261210T180000
+LAST-MODIFIED;TZID=America/Chicago:20260507T123536
+LOCATION:Town Center - 211 E. Pleasant Run Road  DeSoto TX 75115
+SEQUENCE:0
+SUMMARY:DeSoto Development Corporation
+UID:1132
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.desototexas.gov/calendar.aspx?EID=1204
+DTEND;TZID=America/Chicago:20261210T090000
+DTSTAMP;TZID=America/Chicago:20260424T120546
+DTSTART;TZID=America/Chicago:20261210T080000
+LAST-MODIFIED;TZID=America/Chicago:20260424T120546
+LOCATION:Police Department - 714 E. Beltline Road  DeSoto TX 75115
+SEQUENCE:0
+SUMMARY:Domestic Violence Advisory Commission
+UID:1204
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:This meeting will take place in the Council Chambers. https://w
+ ww.desototexas.gov/calendar.aspx?EID=1060
+DTEND;TZID=America/Chicago:20261203T200000
+DTSTAMP;TZID=America/Chicago:20260507T123841
+DTSTART;TZID=America/Chicago:20261203T190000
+LAST-MODIFIED;TZID=America/Chicago:20260507T123841
+LOCATION:<p>This meeting will take place in the Council Chambers in Town Ce
+ nter\, 211 E. Pleasant Run Road</p> - 211 E. Pleasant Run Road  DeSoto TX 
+ 75115
+SEQUENCE:0
+SUMMARY:Library Board
+UID:1060
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.desototexas.gov/calendar.aspx?EID=1276
+DTEND;TZID=America/Chicago:20261203T200000
+DTSTAMP;TZID=America/Chicago:20260424T125642
+DTSTART;TZID=America/Chicago:20261203T183000
+LAST-MODIFIED;TZID=America/Chicago:20260424T125642
+LOCATION:<p>211 E. Pleasant Run Road</p><p>DeSoto.\, TX 75115</p><p>Parks C
+ onference Room</p> -   DeSoto TX 75115
+SEQUENCE:0
+SUMMARY:Keep DeSoto Beautiful Corporation
+UID:1276
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:This meeting will take place in the Council Chambers. https://w
+ ww.desototexas.gov/calendar.aspx?EID=1750
+DTEND;TZID=America/Chicago:20261202T190000
+DTSTAMP;TZID=America/Chicago:20260804T083105
+DTSTART;TZID=America/Chicago:20261202T173000
+LAST-MODIFIED;TZID=America/Chicago:20260804T083105
+LOCATION:Town Center - 211 E. Pleasant Run Road  DeSoto TX 75115
+SEQUENCE:0
+SUMMARY:Park Board 
+UID:1750
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.desototexas.gov/calendar.aspx?EID=916
+DTEND;TZID=America/Chicago:20261201T210000
+DTSTAMP;TZID=America/Chicago:20260424T113854
+DTSTART;TZID=America/Chicago:20261201T180000
+LAST-MODIFIED;TZID=America/Chicago:20260424T113854
+LOCATION:Town Center - 211 E. Pleasant Run Road  DeSoto TX 75115
+SEQUENCE:0
+SUMMARY:City Council Meeting
+UID:916
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:This meeting will take place in the Council Chambers. https://w
+ ww.desototexas.gov/calendar.aspx?EID=1239
+DTEND;TZID=America/Chicago:20261123T200000
+DTSTAMP;TZID=America/Chicago:20260507T123508
+DTSTART;TZID=America/Chicago:20261123T183000
+LAST-MODIFIED;TZID=America/Chicago:20260507T123508
+LOCATION:Town Center - 211 E. Pleasant Run Road  DeSoto TX 75115
+SEQUENCE:0
+SUMMARY:Citizens Police Advisory Committee
+UID:1239
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.desototexas.gov/calendar.aspx?EID=951
+DTEND;TZID=America/Chicago:20261117T210000
+DTSTAMP;TZID=America/Chicago:20260424T113924
+DTSTART;TZID=America/Chicago:20261117T180000
+LAST-MODIFIED;TZID=America/Chicago:20260424T113924
+LOCATION:Town Center - 211 E. Pleasant Run Road  DeSoto TX 75115
+SEQUENCE:0
+SUMMARY:City Council Meeting
+UID:951
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.desototexas.gov/calendar.aspx?EID=1439
+DTEND;VALUE=DATE:20261116
+DTSTAMP;TZID=America/Chicago:20260518T150743
+DTSTART;VALUE=DATE:20261116
+LAST-MODIFIED;TZID=America/Chicago:20260518T150743
+LOCATION:Town Center - 211 E. Pleasant Run Road  DeSoto TX 75115
+SEQUENCE:0
+SUMMARY:City Council Special Meeting
+UID:1439
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:This meeting will take place in the Council Chambers. https://w
+ ww.desototexas.gov/calendar.aspx?EID=1131
+DTEND;TZID=America/Chicago:20261112T200000
+DTSTAMP;TZID=America/Chicago:20260507T123536
+DTSTART;TZID=America/Chicago:20261112T180000
+LAST-MODIFIED;TZID=America/Chicago:20260507T123536
+LOCATION:Town Center - 211 E. Pleasant Run Road  DeSoto TX 75115
+SEQUENCE:0
+SUMMARY:DeSoto Development Corporation
+UID:1131
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.desototexas.gov/calendar.aspx?EID=1203
+DTEND;TZID=America/Chicago:20261112T090000
+DTSTAMP;TZID=America/Chicago:20260424T120546
+DTSTART;TZID=America/Chicago:20261112T080000
+LAST-MODIFIED;TZID=America/Chicago:20260424T120546
+LOCATION:Police Department - 714 E. Beltline Road  DeSoto TX 75115
+SEQUENCE:0
+SUMMARY:Domestic Violence Advisory Commission
+UID:1203
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.desototexas.gov/calendar.aspx?EID=1167
+DTEND;TZID=America/Chicago:20261109T200000
+DTSTAMP;TZID=America/Chicago:20260424T115504
+DTSTART;TZID=America/Chicago:20261109T180000
+LAST-MODIFIED;TZID=America/Chicago:20260424T115504
+LOCATION:Town Center - 211 E. Pleasant Run Road  DeSoto TX 75115
+SEQUENCE:0
+SUMMARY:Veteran's Affairs Committee
+UID:1167
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:This meeting will take place in the Council Chambers. https://w
+ ww.desototexas.gov/calendar.aspx?EID=1059
+DTEND;TZID=America/Chicago:20261105T200000
+DTSTAMP;TZID=America/Chicago:20260507T123841
+DTSTART;TZID=America/Chicago:20261105T190000
+LAST-MODIFIED;TZID=America/Chicago:20260507T123841
+LOCATION:<p>This meeting will take place in the Council Chambers in Town Ce
+ nter\, 211 E. Pleasant Run Road</p> - 211 E. Pleasant Run Road  DeSoto TX 
+ 75115
+SEQUENCE:0
+SUMMARY:Library Board
+UID:1059
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.desototexas.gov/calendar.aspx?EID=1275
+DTEND;TZID=America/Chicago:20261105T200000
+DTSTAMP;TZID=America/Chicago:20260424T125642
+DTSTART;TZID=America/Chicago:20261105T183000
+LAST-MODIFIED;TZID=America/Chicago:20260424T125642
+LOCATION:<p>211 E. Pleasant Run Road</p><p>DeSoto.\, TX 75115</p><p>Parks C
+ onference Room</p> -   DeSoto TX 75115
+SEQUENCE:0
+SUMMARY:Keep DeSoto Beautiful Corporation
+UID:1275
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:This meeting will take place in the Council Chambers. https://w
+ ww.desototexas.gov/calendar.aspx?EID=1749
+DTEND;TZID=America/Chicago:20261104T190000
+DTSTAMP;TZID=America/Chicago:20260804T083105
+DTSTART;TZID=America/Chicago:20261104T173000
+LAST-MODIFIED;TZID=America/Chicago:20260804T083105
+LOCATION:Town Center - 211 E. Pleasant Run Road  DeSoto TX 75115
+SEQUENCE:0
+SUMMARY:Park Board 
+UID:1749
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.desototexas.gov/calendar.aspx?EID=915
+DTEND;TZID=America/Chicago:20261103T210000
+DTSTAMP;TZID=America/Chicago:20260424T113854
+DTSTART;TZID=America/Chicago:20261103T180000
+LAST-MODIFIED;TZID=America/Chicago:20260424T113854
+LOCATION:Town Center - 211 E. Pleasant Run Road  DeSoto TX 75115
+SEQUENCE:0
+SUMMARY:City Council Meeting
+UID:915
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.desototexas.gov/calendar.aspx?EID=1658
+DTEND;TZID=America/Chicago:20261102T193000
+DTSTAMP;TZID=America/Chicago:20260624T095030
+DTSTART;TZID=America/Chicago:20261102T180000
+LAST-MODIFIED;TZID=America/Chicago:20260624T095030
+LOCATION:<p data-pasted="true"><span style="color: rgb(51\, 51\, 51)\; font
+ -family: Arial\; font-size: 15.2px\; font-style: normal\; font-variant-lig
+ atures: normal\; font-variant-caps: normal\; font-weight: 400\; letter-spa
+ cing: normal\; orphans: 2\; text-align: start\; text-indent: 0px\; text-tr
+ ansform: none\; widows: 2\; word-spacing: 0px\; -webkit-text-stroke-width:
+  0px\; white-space: normal\; background-color: rgb(255\, 255\, 255)\; text
+ -decoration-thickness: initial\; text-decoration-style: initial\; text-dec
+ oration-color: initial\; display: inline !important\; float: none\;" data-
+ pasted="true">Council Chambers&nbsp\;</span></p><p><span style="color: rgb
+ (51\, 51\, 51)\; font-family: Arial\; font-size: 15.2px\; font-style: norm
+ al\; font-variant-ligatures: normal\; font-variant-caps: normal\; font-wei
+ ght: 400\; letter-spacing: normal\; orphans: 2\; text-align: start\; text-
+ indent: 0px\; text-transform: none\; widows: 2\; word-spacing: 0px\; -webk
+ it-text-stroke-width: 0px\; white-space: normal\; background-color: rgb(25
+ 5\, 255\, 255)\; text-decoration-thickness: initial\; text-decoration-styl
+ e: initial\; text-decoration-color: initial\; display: inline !important\;
+  float: none\;">211 E. Pleasant Run Road&nbsp\;</span></p><p><span style="
+ color: rgb(51\, 51\, 51)\; font-family: Arial\; font-size: 15.2px\; font-s
+ tyle: normal\; font-variant-ligatures: normal\; font-variant-caps: normal\
+ ; font-weight: 400\; letter-spacing: normal\; orphans: 2\; text-align: sta
+ rt\; text-indent: 0px\; text-transform: none\; widows: 2\; word-spacing: 0
+ px\; -webkit-text-stroke-width: 0px\; white-space: normal\; background-col
+ or: rgb(255\, 255\, 255)\; text-decoration-thickness: initial\; text-decor
+ ation-style: initial\; text-decoration-color: initial\; display: inline !i
+ mportant\; float: none\;">DeSoto\, Texas 75115</span></p> - 211 E. Pleasan
+ t Run Road  DeSoto TX 75115
+SEQUENCE:0
+SUMMARY:Cultural Arts Foundation Board Meeting
+UID:1658
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION:This meeting will take place in the Council Chambers. https://w
+ ww.desototexas.gov/calendar.aspx?EID=1238
+DTEND;TZID=America/Chicago:20261026T200000
+DTSTAMP;TZID=America/Chicago:20260507T123508
+DTSTART;TZID=America/Chicago:20261026T183000
+LAST-MODIFIED;TZID=America/Chicago:20260507T123508
+LOCATION:Town Center - 211 E. Pleasant Run Road  DeSoto TX 75115
+SEQUENCE:0
+SUMMARY:Citizens Police Advisory Committee
+UID:1238
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.desototexas.gov/calendar.aspx?EID=950
+DTEND;TZID=America/Chicago:20261020T210000
+DTSTAMP;TZID=America/Chicago:20260424T113924
+DTSTART;TZID=America/Chicago:20261020T180000
+LAST-MODIFIED;TZID=America/Chicago:20260424T113924
+LOCATION:Town Center - 211 E. Pleasant Run Road  DeSoto TX 75115
+SEQUENCE:0
+SUMMARY:City Council Meeting
+UID:950
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.desototexas.gov/calendar.aspx?EID=1438
+DTEND;VALUE=DATE:20261019
+DTSTAMP;TZID=America/Chicago:20260518T150743
+DTSTART;VALUE=DATE:20261019
+LAST-MODIFIED;TZID=America/Chicago:20260518T150743
+LOCATION:Town Center - 211 E. Pleasant Run Road  DeSoto TX 75115
+SEQUENCE:0
+SUMMARY:City Council Special Meeting
+UID:1438
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.desototexas.gov/calendar.aspx?EID=1991
+DTEND;TZID=America/Chicago:20261013T200000
+DTSTAMP;TZID=America/Chicago:20261006T134854
+DTSTART;TZID=America/Chicago:20261013T180000
+LAST-MODIFIED;TZID=America/Chicago:20261006T134854
+LOCATION: - 211 E Pleasant Run Rd.  DeSoto TX 75115
+SEQUENCE:0
+SUMMARY:Planning & Zoning Commission Regular Meeting
+UID:1991
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.desototexas.gov/calendar.aspx?EID=1166
+DTEND;TZID=America/Chicago:20261012T200000
+DTSTAMP;TZID=America/Chicago:20260424T115504
+DTSTART;TZID=America/Chicago:20261012T180000
+LAST-MODIFIED;TZID=America/Chicago:20260424T115504
+LOCATION:Town Center - 211 E. Pleasant Run Road  DeSoto TX 75115
+SEQUENCE:0
+SUMMARY:Veteran's Affairs Committee
+UID:1166
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.desototexas.gov/calendar.aspx?EID=1202
+DTEND;TZID=America/Chicago:20261008T090000
+DTSTAMP;TZID=America/Chicago:20260424T120546
+DTSTART;TZID=America/Chicago:20261008T080000
+LAST-MODIFIED;TZID=America/Chicago:20260424T120546
+LOCATION:Police Department - 714 E. Beltline Road  DeSoto TX 75115
+SEQUENCE:0
+SUMMARY:Domestic Violence Advisory Commission
+UID:1202
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.desototexas.gov/calendar.aspx?EID=1274
+DTEND;TZID=America/Chicago:20261001T200000
+DTSTAMP;TZID=America/Chicago:20260424T125642
+DTSTART;TZID=America/Chicago:20261001T183000
+LAST-MODIFIED;TZID=America/Chicago:20260424T125642
+LOCATION:<p>211 E. Pleasant Run Road</p><p>DeSoto.\, TX 75115</p><p>Parks C
+ onference Room</p> -   DeSoto TX 75115
+SEQUENCE:0
+SUMMARY:Keep DeSoto Beautiful Corporation
+UID:1274
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.desototexas.gov/calendar.aspx?EID=1201
+DTEND;TZID=America/Chicago:20260910T090000
+DTSTAMP;TZID=America/Chicago:20260424T120546
+DTSTART;TZID=America/Chicago:20260910T080000
+LAST-MODIFIED;TZID=America/Chicago:20260424T120546
+LOCATION:Police Department - 714 E. Beltline Road  DeSoto TX 75115
+SEQUENCE:0
+SUMMARY:Domestic Violence Advisory Commission
+UID:1201
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.desototexas.gov/calendar.aspx?EID=1273
+DTEND;TZID=America/Chicago:20260903T200000
+DTSTAMP;TZID=America/Chicago:20260424T125642
+DTSTART;TZID=America/Chicago:20260903T183000
+LAST-MODIFIED;TZID=America/Chicago:20260424T125642
+LOCATION:<p>211 E. Pleasant Run Road</p><p>DeSoto.\, TX 75115</p><p>Parks C
+ onference Room</p> -   DeSoto TX 75115
+SEQUENCE:0
+SUMMARY:Keep DeSoto Beautiful Corporation
+UID:1273
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.desototexas.gov/calendar.aspx?EID=913
+DTEND;TZID=America/Chicago:20260901T210000
+DTSTAMP;TZID=America/Chicago:20260424T113854
+DTSTART;TZID=America/Chicago:20260901T180000
+LAST-MODIFIED;TZID=America/Chicago:20260424T113854
+LOCATION:Town Center - 211 E. Pleasant Run Road  DeSoto TX 75115
+SEQUENCE:0
+SUMMARY:City Council Meeting
+UID:913
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=24
+END:VEVENT
+END:VCALENDAR

@@ -30,4 +30,14 @@ export default {
     components: 'Components',
     notFound: 'Page not found',
   },
+  skip: {
+    results: 'Skip to results',
+    posts: 'Skip to posts',
+    headlines: 'Skip to headlines',
+  },
+  update: {
+    ready: 'New meeting info is ready.',
+    refresh: 'Refresh',
+    later: 'Not now',
+  },
 };

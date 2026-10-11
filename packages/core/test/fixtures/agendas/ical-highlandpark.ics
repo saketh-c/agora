@@ -1,0 +1,86 @@
+BEGIN:VCALENDAR
+PRODID:iCalendar-Ruby
+VERSION:2.0
+X-WR-TIMEZONE:America/Chicago
+BEGIN:VTIMEZONE
+TZID:America/Chicago
+X-LIC-LOCATION:America/Chicago
+BEGIN:STANDARD
+DTSTART:20241103T020000
+RRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11
+TZNAME:CST
+TZOFFSETFROM:-0500
+TZOFFSETTO:-0600
+END:STANDARD
+BEGIN:DAYLIGHT
+DTSTART:20250309T020000
+RRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3
+TZNAME:CDT
+TZOFFSETFROM:-0600
+TZOFFSETTO:-0500
+END:DAYLIGHT
+END:VTIMEZONE
+BEGIN:VEVENT
+DESCRIPTION: https://www.hptx.org/calendar.aspx?EID=4810
+DTEND;TZID=America/Chicago:20261201T235900
+DTSTAMP;TZID=America/Chicago:20260210T100334
+DTSTART;TZID=America/Chicago:20261201T080000
+LAST-MODIFIED;TZID=America/Chicago:20260210T100334
+LOCATION:<p>2nd Floor\, Town Hall</p> - 4700 Drexel Dr  Highland Park TX 75
+ 205
+SEQUENCE:0
+SUMMARY:Town Council Meeting and Study Session
+UID:4810
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=14
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.hptx.org/calendar.aspx?EID=4809
+DTEND;TZID=America/Chicago:20261103T235900
+DTSTAMP;TZID=America/Chicago:20260210T100334
+DTSTART;TZID=America/Chicago:20261103T080000
+LAST-MODIFIED;TZID=America/Chicago:20260210T100334
+LOCATION:<p>2nd Floor\, Town Hall</p> - 4700 Drexel Dr  Highland Park TX 75
+ 205
+SEQUENCE:0
+SUMMARY:Town Council Meeting and Study Session
+UID:4809
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=14
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.hptx.org/calendar.aspx?EID=4797
+DTEND;TZID=America/Chicago:20261020T235900
+DTSTAMP;TZID=America/Chicago:20260210T100350
+DTSTART;TZID=America/Chicago:20261020T080000
+LAST-MODIFIED;TZID=America/Chicago:20260210T100350
+LOCATION:<p>2nd Floor\, Town Hall</p> - 4700 Drexel Dr  Highland Park TX 75
+ 205
+SEQUENCE:0
+SUMMARY:Town Council Meeting and Study Session
+UID:4797
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=14
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.hptx.org/calendar.aspx?EID=5397
+DTEND;TZID=America/Chicago:20261014T235900
+DTSTAMP;TZID=America/Chicago:20261009T093106
+DTSTART;TZID=America/Chicago:20261014T083000
+LAST-MODIFIED;TZID=America/Chicago:20261009T093106
+LOCATION: -   Highland Park TX 75205
+SEQUENCE:0
+SUMMARY:Board of Adjustment Meeting
+UID:5397
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=14
+END:VEVENT
+BEGIN:VEVENT
+DESCRIPTION: https://www.hptx.org/calendar.aspx?EID=5396
+DTEND;VALUE=DATE:20261012
+DTSTAMP;TZID=America/Chicago:20261009T092834
+DTSTART;VALUE=DATE:20261012
+LAST-MODIFIED;TZID=America/Chicago:20261009T092834
+LOCATION:<p>Town Hall</p> - 4700 Drexel Dr  Highland Park TX 75205
+SEQUENCE:0
+SUMMARY:Town Hall Offices\, Library\, and Municipal Court Closed
+UID:5396
+URL:/common/modules/iCalendar/iCalendar.aspx?feed=calendar&catID=14
+END:VEVENT
+END:VCALENDAR

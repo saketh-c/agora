@@ -1,0 +1,92 @@
+{
+ "value": [
+  {
+   "id": 1406,
+   "eventName": "City Council Work Session",
+   "startDateTime": "2026-10-19T18:00:00Z",
+   "agendaId": 1071,
+   "categoryName": "City Council",
+   "publishedFiles": []
+  },
+  {
+   "id": 1564,
+   "eventName": "City Council Regular Meeting",
+   "startDateTime": "2026-10-20T19:00:00Z",
+   "agendaId": 0,
+   "categoryName": "City Council",
+   "publishedFiles": []
+  },
+  {
+   "id": 1585,
+   "eventName": "City Council Regular Meeting",
+   "startDateTime": "2026-10-20T19:00:00Z",
+   "agendaId": 1072,
+   "categoryName": "City Council",
+   "publishedFiles": []
+  },
+  {
+   "id": 1527,
+   "eventName": "City Council Work Session",
+   "startDateTime": "2026-11-02T18:00:00Z",
+   "agendaId": 1073,
+   "categoryName": "City Council",
+   "publishedFiles": []
+  },
+  {
+   "id": 1442,
+   "eventName": "City Council Regular Meeting",
+   "startDateTime": "2026-11-02T19:00:00Z",
+   "agendaId": 1074,
+   "categoryName": "City Council",
+   "publishedFiles": []
+  },
+  {
+   "id": 1552,
+   "eventName": "Special City Council Meeting",
+   "startDateTime": "2026-11-10T18:00:00Z",
+   "agendaId": 1075,
+   "categoryName": "City Council",
+   "publishedFiles": []
+  },
+  {
+   "id": 1540,
+   "eventName": "City Council Work Session",
+   "startDateTime": "2026-11-16T18:00:00Z",
+   "agendaId": 1076,
+   "categoryName": "City Council",
+   "publishedFiles": []
+  },
+  {
+   "id": 1574,
+   "eventName": "City Council Regular Meeting",
+   "startDateTime": "2026-11-17T19:00:00Z",
+   "agendaId": 1077,
+   "categoryName": "City Council",
+   "publishedFiles": []
+  },
+  {
+   "id": 1516,
+   "eventName": "City Council Regular Meeting",
+   "startDateTime": "2026-12-01T19:00:00Z",
+   "agendaId": 1079,
+   "categoryName": "City Council",
+   "publishedFiles": []
+  },
+  {
+   "id": 1587,
+   "eventName": "City Council Work Session",
+   "startDateTime": "2026-12-14T18:00:00Z",
+   "agendaId": 1080,
+   "categoryName": "City Council",
+   "publishedFiles": []
+  },
+  {
+   "id": 1566,
+   "eventName": "City Council Regular Meeting",
+   "startDateTime": "2026-12-15T19:00:00Z",
+   "agendaId": 1081,
+   "categoryName": "City Council",
+   "publishedFiles": []
+  }
+ ]
+}

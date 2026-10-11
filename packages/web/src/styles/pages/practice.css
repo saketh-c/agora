@@ -9,6 +9,9 @@
 /* Phase headings take focus so screen readers hear where they are; a ring there is noise. */
 .pr h2[tabindex="-1"]:focus { outline: none; }
 
+.pr .page-head__extra { margin-top: var(--s4); }
+.pr .prep-notice { margin-top: var(--s3); }
+
 /* ---------- Setup ---------- */
 .pr-setup { margin-top: var(--s5); display: grid; gap: var(--s5); align-items: start; }
 .pr-form { display: flex; flex-direction: column; gap: var(--s5); }
@@ -61,6 +64,16 @@
 .pr-bullets { display: grid; gap: var(--s2); font-size: 14px; line-height: 20px; color: var(--slate); }
 .pr-bullets li { position: relative; padding-left: var(--s4); }
 .pr-bullets li::before { content: ""; position: absolute; left: 2px; top: 8px; width: 5px; height: 5px; border-radius: 50%; background: var(--edge); }
+
+/* "Using your draft from Write" sits where the help line would be. */
+.pr-from { margin-top: var(--s1); padding-block: var(--s1); grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; }
+.pr-from > .icon { color: var(--go-ink); }
+.pr-from .act { grid-column: auto; margin: 0 calc(-1 * var(--s3)) 0 0; gap: 0; flex-wrap: nowrap; }
+@media (max-width: 479px) {
+  .pr-from { grid-template-columns: auto minmax(0, 1fr); align-items: start; padding-block: var(--s3) var(--s1); }
+  .pr-from .act { grid-column: 2; margin: 0 0 0 calc(-1 * var(--s3)); }
+}
+.pr-script__help button.link { text-align: left; }
 
 .pr-go { align-self: stretch; }
 @media (min-width: 600px) { .pr-go { align-self: flex-start; } }
@@ -183,6 +196,42 @@
 
 .pr-wait { display: flex; align-items: center; gap: var(--s3); }
 
+/* Keyboard shortcut: shown only where there is a keyboard. */
+.pr-keys { display: none; align-items: center; gap: var(--s2); font-size: 14px; line-height: 20px; color: var(--slate); max-width: none; }
+@media (hover: hover) and (pointer: fine) { .pr-keys { display: flex; } }
+.pr-keys kbd {
+  display: inline-flex; align-items: center; min-height: 24px; padding: 0 var(--s2); border-radius: 6px;
+  background: var(--card); border: 1px solid var(--edge); box-shadow: inset 0 -2px 0 var(--well);
+  font: 600 12px/16px var(--font-text); color: var(--ink);
+}
+.pr-check .pr-keys { margin-top: calc(-1 * var(--s2)); }
+.pr-panel > .pr-keys { justify-content: center; }
+
+/* The script while recording: big, calm and scrollable, like a teleprompter card. */
+.pr-prompt { display: grid; gap: var(--s2); padding: var(--s3) var(--s4) var(--s4); }
+.pr-prompt.is-hidden { padding-bottom: var(--s3); }
+.pr-prompt__head { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); }
+.pr-prompt__t { font: 700 14px/20px var(--font-text); color: var(--slate); }
+.pr-prompt__head .btn--quiet { margin-right: calc(-1 * var(--s3)); }
+.pr-prompt__text {
+  max-height: 40vh; overflow-y: auto; overscroll-behavior: contain; scroll-padding-block: var(--s4);
+  font-size: 20px; line-height: 30px; font-weight: 500; white-space: pre-line; overflow-wrap: anywhere;
+  border-radius: var(--r-tile); margin: 0 calc(-1 * var(--s2)); padding: 0 var(--s2);
+}
+.pr-prompt__text p { max-width: none; }
+.pr-prompt__text p + p { margin-top: var(--s4); }
+.pr-prompt__text:focus-visible { outline-offset: 0; }
+:lang(vi) .pr-prompt__text { line-height: 34px; }
+/* Phones with the script on: a compact timer, so the timer, Stop and the script share the screen. */
+.pr-timer { scroll-margin-top: calc(var(--header-h) + var(--s3)); }
+@media (max-width: 899.98px) {
+  .pr-stage.has-script .pr-timer { padding: var(--s3) var(--s4); }
+  .pr-stage.has-script .pr-timer__n { font-size: 48px; line-height: 52px; }
+  .pr-stage.has-script .pr-timer__clock { margin-top: 0; }
+  .pr-stage.has-script .pr-timer__track { margin-top: var(--s3); }
+  .pr-stage.has-script .pr-prompt__text { max-height: calc(100vh - var(--header-h) - var(--tabbar-h) - 300px); min-height: 160px; }
+}
+
 /* ---------- Report ---------- */
 .pr-report { margin-top: var(--s4); }
 .pr-report__grid { display: grid; gap: var(--s5); align-items: start; }
@@ -195,6 +244,12 @@
 .pr-result .ruler { background: transparent; }
 .pr-result__miss { font: 700 18px/26px var(--font-text); }
 .pr-result__plain { color: var(--slate); margin-top: var(--s1); }
+/* Whether the run was saved, and what it counted for. */
+.pr-result__saved { display: flex; align-items: flex-start; gap: var(--s2); margin-top: var(--s4); padding-top: var(--s3); border-top: 1px solid var(--hairline); font-size: 14px; line-height: 20px; color: var(--slate); max-width: none; }
+.pr-result__saved .icon { flex: none; color: var(--go-ink); }
+.pr-result__saved.is-not .icon { color: var(--slate); }
+.pr-stats + .pr-result__saved { border-top: 0; padding-top: 0; }
+.pr-back { display: inline-flex; align-items: center; min-height: 44px; }
 .pr-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: var(--s4); margin-top: var(--s4); padding-top: var(--s4); border-top: 1px solid var(--hairline); }
 .pr-stat { display: flex; flex-direction: column-reverse; justify-content: flex-end; min-width: 0; }
 .pr-stat dd { font-family: var(--font-display); font-stretch: 125%; font-weight: 800; font-size: 28px; line-height: 32px; letter-spacing: -0.02em; }

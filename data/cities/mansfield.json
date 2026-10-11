@@ -105,6 +105,7 @@
       "ages": "Mansfield residents in grades 9 to 12 with at least a 2.0 GPA",
       "description": "Group of about 11 to 15 high school students who advise city leaders on youth issues, represent their peers, and plan service projects. Terms run Aug. 1 to July 31; members meet during the first week of each month of the school year at a time set at the August orientation. Applicants complete an application, interview and orientation.",
       "applyWindow": "Main recruitment each spring for the coming school year; 2026-27 applications are closed, but applications are accepted year-round for future openings",
+      "applyStatus": "rolling",
       "source": "https://www.mansfieldtexas.gov/1976/Mansfield-Youth-Council-MYC"
     },
     {
@@ -113,6 +114,7 @@
       "ages": "Students entering grades 9 to 12 who live in Mansfield or attend Mansfield ISD schools",
       "description": "Three-day summer teen civic academy (2026 session: July 7 to 9, 8:30 a.m. to 1:30 p.m.) with tours of city facilities such as a fire station and the water treatment plant, plus interactive sessions with city staff on economic development and parks; a feeder for the Mansfield Youth Council.",
       "applyWindow": "Summer 2026 applications closed; check the program page or call 817-276-4200 for the 2027 window",
+      "applyStatus": "closed",
       "source": "https://www.mansfieldtexas.gov/2098/My-Mansfield-Mini-Versity"
     }
   ],

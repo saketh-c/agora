@@ -1,5 +1,5 @@
 import { parseDate, weekdayOf, daysBetween, addDays } from './schedule.js';
-import { t, tn, tList, joinList, getLocale, isLocale } from './i18n/index.js';
+import { t, tn, tList, joinList, getLocale, isLocale } from './i18n/runtime.js';
 
 /** English names, kept for callers that need a stable reference. Prefer weekdayNames() for display. */
 export const WEEKDAY_NAMES = Object.freeze(['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']);
