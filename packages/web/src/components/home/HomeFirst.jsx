@@ -119,7 +119,6 @@ export default function HomeFirst({ onDone, onOpenMeeting, focusPlace = false })
             <h1 className="t-hero" id="hero-h">
               {t('home.hero')}
             </h1>
-            <p className="hero__lead">{t('home.heroLead')}</p>
           </div>
           <PlaceField variant="ask" cities={cities} onPlace={choosePlace} autoFocus={focusPlace} />
           <Entry />

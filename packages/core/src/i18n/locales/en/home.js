@@ -4,7 +4,6 @@
  */
 export default {
   hero: 'Your turn to speak at city hall.',
-  heroLead: 'Find a council meeting near you and learn exactly how to speak at it.',
   // The dictionary entry on the stage, under the headline: the word, how to say it, where it
   // comes from, and its two senses. {greek} is ἀγορά, which the page sets in its own element.
   entry: {

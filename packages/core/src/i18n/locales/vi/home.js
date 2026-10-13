@@ -1,6 +1,5 @@
 export default {
   hero: 'Đến lượt bạn phát biểu ở tòa thị chính.',
-  heroLead: 'Tìm một cuộc họp hội đồng thành phố gần bạn và biết chính xác cách phát biểu ở đó.',
   entry: {
     word: 'agora',
     pos: 'danh từ',

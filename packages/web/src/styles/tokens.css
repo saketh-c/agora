@@ -34,13 +34,10 @@
   --row-press: #F0F1F5;
   --chip-hover: #F4F5F8;
 
-  /* the landing stage (Home before setup): the Go light deepened until ivory serif type reads
-     on it (7.5:1), ivory for the text and the speaker. Nowhere else: the stage is the one brand
-     moment, and every other green stays a fill with Ink on it. */
-  --stage: #0A5A3B;
-  --stage-ink: #F7F3EA;
-  --stage-soft: rgb(247 243 234 / .8);
-  --stage-line: rgb(247 243 234 / .24);
+  /* on the Go light (the landing stage, Home before setup): secondary text and rules, as Ink
+     let through, so they stay green-tinted rather than gray */
+  --go-soft: rgb(21 24 43 / .76);
+  --go-line: rgb(21 24 43 / .18);
 
   /* state layers */
   --hover: rgb(21 24 43 / .06);
@@ -62,7 +59,7 @@
   --font-display: 'Mona Sans Variable', 'Mona Sans', 'Public Sans Variable', var(--font-scripts), system-ui, sans-serif;
   --font-text: 'Public Sans Variable', 'Public Sans', var(--font-scripts), system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   /* Fraunces, with its optical size axis, for the landing stage only (Home before setup): the
-     headline, the lead and the dictionary entry. Its Vietnamese subset is self-hosted with it;
+     headline and the dictionary entry. Its Vietnamese subset is self-hosted with it;
      other scripts fall through to the script fonts, as above. */
   --font-serif: 'Fraunces Variable', 'Fraunces', var(--font-scripts), Georgia, 'Times New Roman', serif;
 

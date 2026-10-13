@@ -1,6 +1,5 @@
 export default {
   hero: 'Tu turno de hablar en el ayuntamiento.',
-  heroLead: 'Encuentra una reunión del concejo cerca de ti y aprende exactamente cómo hablar en ella.',
   entry: {
     word: 'ágora',
     pos: 'sustantivo femenino',

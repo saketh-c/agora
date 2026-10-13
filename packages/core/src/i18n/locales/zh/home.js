@@ -4,7 +4,6 @@
  */
 export default {
   hero: '轮到你在市政厅发言了。',
-  heroLead: '找到你附近的市议会会议，准确了解如何在会上发言。',
   entry: {
     word: 'agora',
     pos: '名词',
