@@ -34,6 +34,14 @@
   --row-press: #F0F1F5;
   --chip-hover: #F4F5F8;
 
+  /* the landing stage (Home before setup): the Go light deepened until ivory serif type reads
+     on it (7.5:1), ivory for the text and the speaker. Nowhere else: the stage is the one brand
+     moment, and every other green stays a fill with Ink on it. */
+  --stage: #0A5A3B;
+  --stage-ink: #F7F3EA;
+  --stage-soft: rgb(247 243 234 / .8);
+  --stage-line: rgb(247 243 234 / .24);
+
   /* state layers */
   --hover: rgb(21 24 43 / .06);
   --press: rgb(21 24 43 / .10);
@@ -42,7 +50,8 @@
   /* elevation */
   --lift: 0 1px 2px rgb(21 24 43 / .08), 0 12px 32px -4px rgb(21 24 43 / .18);
 
-  /* type: Mona Sans (wide, 800) for display, Public Sans for text. Both self-hosted
+  /* type: Mona Sans (wide, 800) for display, Public Sans for text, and Fraunces, a serif, on
+     the landing stage alone (see --font-serif). All self-hosted
      through Fontsource; the variable Mona Sans file carries the wdth axis, so
      font-stretch: 125% is real, not synthesized.
      Other scripts follow the Latin fonts, so each is used only for its own characters and
@@ -52,6 +61,10 @@
   --font-scripts: 'Noto Sans Arabic Variable', 'Noto Sans Devanagari Variable', 'Noto Sans Telugu Variable', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Source Han Sans SC';
   --font-display: 'Mona Sans Variable', 'Mona Sans', 'Public Sans Variable', var(--font-scripts), system-ui, sans-serif;
   --font-text: 'Public Sans Variable', 'Public Sans', var(--font-scripts), system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  /* Fraunces, with its optical size axis, for the landing stage only (Home before setup): the
+     headline, the lead and the dictionary entry. Its Vietnamese subset is self-hosted with it;
+     other scripts fall through to the script fonts, as above. */
+  --font-serif: 'Fraunces Variable', 'Fraunces', var(--font-scripts), Georgia, 'Times New Roman', serif;
 
   /* space: 4 8 12 16 24 32 48 64 (+96 hero) */
   --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px; --s9: 96px;

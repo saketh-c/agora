@@ -3,17 +3,37 @@
    Round 1 fixes) and matched to the podium shots. Shared parts (.next, .prog, .post, .row,
    .group, .lrow, .chip, .sheet) live in components.css; rules here are scoped to Home. */
 
-/* ---------- First visit: the hero (the one brand moment) ---------- */
-.home-page .hero { background: var(--go); color: var(--ink); position: relative; overflow: hidden; }
-.home-page .hero__in { position: relative; z-index: 1; padding-top: var(--s5); padding-bottom: 112px; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s5); }
+/* ---------- First visit: the hero (the one brand moment) ----------
+   The stage: deep green, ivory serif type (Fraunces), the question card in white on it, the
+   dictionary entry under the headline, and the colonnade with the speaker along the bottom.
+   The colors are the --stage tokens; nothing else in the app uses them. */
+.home-page .hero { background: var(--stage); color: var(--stage-ink); position: relative; overflow: hidden; }
+.home-page .hero__in { position: relative; z-index: 1; padding-top: var(--s6); padding-bottom: 112px; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s5); }
 .home-page .hero h1:focus { outline: none; }
-.home-page .hero__lead { font-size: 18px; line-height: 28px; font-weight: 500; max-width: 34ch; margin-top: var(--s4); }
-.home-page .hero__art { position: absolute; inset-inline-start: 0; inset-inline-end: 0; bottom: 0; height: 96px; z-index: 0; color: var(--ink); pointer-events: none; }
+.home-page .hero .t-hero { font-family: var(--font-serif); font-stretch: normal; font-weight: 560; letter-spacing: -0.012em; word-spacing: normal; line-height: 1.06; }
+.home-page .hero__lead { font-family: var(--font-serif); font-size: 19px; line-height: 28px; font-weight: 400; color: var(--stage-soft); max-width: 34ch; margin-top: var(--s4); }
+.home-page .hero__art { position: absolute; inset-inline-start: 0; inset-inline-end: 0; bottom: 0; height: 96px; z-index: 0; color: var(--stage-ink); pointer-events: none; }
 .home-page .hero__art svg { display: block; width: 100%; height: 100%; }
-.home-page .hero__mic { fill: var(--go); }
+.home-page .hero__mic { fill: var(--stage); }
+.home-page .hero ::selection { background: var(--stage-ink); color: var(--stage); }
 
-/* the question card */
-.home-page .ask { background: var(--card); border-radius: var(--r-field); padding: var(--s4) var(--s4) var(--s3); box-shadow: 0 1px 0 rgb(21 24 43 / .06); min-width: 0; }
+/* the dictionary entry: the word, how to say it, where it comes from, and its two senses */
+.home-page .entry { font-family: var(--font-serif); max-width: 52ch; padding-top: var(--s5); border-top: 1px solid var(--stage-line); }
+.home-page .entry__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s1) var(--s3); max-width: none; }
+.home-page .entry__word { font-style: normal; font-weight: 600; font-size: 32px; line-height: 36px; letter-spacing: -0.01em; }
+.home-page .entry__pos { font-style: italic; font-size: 18px; line-height: 26px; color: var(--stage-soft); }
+.home-page .entry__say { font-size: 18px; line-height: 26px; color: var(--stage-soft); font-variant-numeric: normal; }
+.home-page .entry__origin { margin-top: var(--s1); font-style: italic; font-size: 17px; line-height: 26px; color: var(--stage-soft); max-width: none; }
+/* Polytonic Greek, which Fraunces lacks: a serif that has it, so the word is not a sans island. */
+.home-page .entry__greek { font-style: normal; font-family: 'Times New Roman', Georgia, 'Noto Serif', serif; }
+.home-page .entry__senses { margin-top: var(--s3); counter-reset: sense; display: grid; gap: var(--s2); }
+.home-page .entry__senses li { position: relative; padding-inline-start: 26px; font-size: 17px; line-height: 26px; counter-increment: sense; }
+.home-page .entry__senses li::before { content: counter(sense); position: absolute; inset-inline-start: 0; top: 0; font-weight: 600; color: var(--stage-soft); }
+/* Italic is a Latin device: the script fonts have none, and a slanted Arabic or Devanagari is a fake. */
+.home-page .entry :is(.entry__pos, .entry__origin):is(:lang(zh), :lang(hi), :lang(te), :lang(ar)) { font-style: normal; }
+
+/* the question card: Ink on white, lifted off the stage */
+.home-page .ask { background: var(--card); color: var(--ink); border-radius: var(--r-field); padding: var(--s4) var(--s4) var(--s3); box-shadow: var(--lift); min-width: 0; }
 /* On the narrowest phones the field keeps 8px more for its example. */
 @media (max-width: 359px) { .home-page .ask { padding-inline: var(--s3); } }
 .home-page .ask__q { display: block; margin-bottom: var(--s3); }
@@ -222,8 +242,12 @@
   .home-page .next__facts { margin-top: var(--s4); padding-bottom: 0; }
 }
 @media (min-width: 1024px) {
-  .home-page .hero__in { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--s7); align-items: start; padding-top: var(--s8); padding-bottom: 200px; }
-  .home-page .hero__lead { font-size: 20px; line-height: 30px; }
+  /* The headline and the lead, with the entry under them, beside the question card. */
+  .home-page .hero__in { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: "text ask" "entry ask"; gap: var(--s6) var(--s7); align-items: start; padding-top: var(--s8); padding-bottom: 200px; }
+  .home-page .hero__text { grid-area: text; }
+  .home-page .hero .ask { grid-area: ask; }
+  .home-page .entry { grid-area: entry; }
+  .home-page .hero__lead { font-size: 22px; line-height: 32px; }
   .home-page .hero__art { height: 168px; }
   .home-page .ask { margin-top: var(--s2); padding: var(--s5); }
   /* The headline may run a little into the column gap (never to the card), so the English

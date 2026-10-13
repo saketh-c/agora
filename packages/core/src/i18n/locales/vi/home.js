@@ -1,6 +1,16 @@
 export default {
   hero: 'Đến lượt bạn phát biểu ở tòa thị chính.',
   heroLead: 'Tìm một cuộc họp hội đồng thành phố gần bạn và biết chính xác cách phát biểu ở đó.',
+  entry: {
+    word: 'agora',
+    pos: 'danh từ',
+    say: 'a-gô-ra',
+    origin: 'Từ tiếng Hy Lạp {greek}, nghĩa là “nơi tụ họp”.',
+    senses: [
+      'Quảng trường mở ở trung tâm một thành phố Hy Lạp, nơi người dân tụ họp để trao đổi tin tức, tranh luận và cùng nhau quyết định. Không ai cần giấy mời mới được đứng ở đó.',
+      'Phòng họp hội đồng thành phố của bạn: nơi gần nhất với quảng trường ấy mà một thành phố ngày nay có.',
+    ],
+  },
   where: {
     question: 'Bạn sống hoặc đi học ở đâu?',
     placeholder: 'Thành phố, ZIP, địa chỉ hay trường',

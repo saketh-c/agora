@@ -5,6 +5,18 @@
 export default {
   hero: 'Your turn to speak at city hall.',
   heroLead: 'Find a council meeting near you and learn exactly how to speak at it.',
+  // The dictionary entry on the stage, under the headline: the word, how to say it, where it
+  // comes from, and its two senses. {greek} is ἀγορά, which the page sets in its own element.
+  entry: {
+    word: 'agora',
+    pos: 'noun',
+    say: '/ˈaɡərə/',
+    origin: 'From the Greek {greek}, “gathering place.”',
+    senses: [
+      'The open square at the center of a Greek city, where citizens gathered to trade news, argue, and decide things together. Nobody needed an invitation to stand in it.',
+      'Your city council chamber: the closest thing a city has to that square today.',
+    ],
+  },
   where: {
     question: 'Where do you live or go to school?',
     placeholder: 'City, ZIP, address or school',

@@ -202,7 +202,9 @@ you can speak**, amber means time is running out (sign-up deadlines), red means 
 green "Your next meeting" card on Home, the "Can I speak? Yes, for 3 minutes" answer on a
 meeting.
 
-Headings are set in Mona Sans at its widest, body text in Public Sans, both self-hosted.
+Headings are set in Mona Sans at its widest and body text in Public Sans. The landing
+stage, Home before setup, is the one place set in a serif: Fraunces, in ivory on deep green,
+with a dictionary entry for the word agora under the headline. All three fonts are self-hosted.
 Controls are pills; lists are white groups with hairline dividers; meeting rows lead with
 a date tile that is lit green when you can speak. Copy is sentence case and short, a page
 introduction is two lines at most, longer explanations sit behind a "How this works"

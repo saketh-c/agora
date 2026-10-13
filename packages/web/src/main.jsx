@@ -2,11 +2,14 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 // Fonts, self-hosted (no CDN at runtime). Mona Sans with the wdth axis, so the display type's
-// font-stretch: 125% is the real wide cut; Public Sans for text. Both carry Vietnamese.
+// font-stretch: 125% is the real wide cut; Public Sans for text; Fraunces, with its optical
+// size axis (upright and italic), for the landing stage's serif. All three carry Vietnamese.
 // fonts.css adds Noto Sans Arabic, Devanagari and Telugu, each downloaded only when its script
 // is on screen; Chinese uses the system's fonts.
 import '@fontsource-variable/mona-sans/wdth.css';
 import '@fontsource-variable/public-sans/wght.css';
+import '@fontsource-variable/fraunces/opsz.css';
+import '@fontsource-variable/fraunces/opsz-italic.css';
 import './styles/fonts.css';
 import './styles/index.css';
 import { loadLocale, setI18nWarnings } from '@agora/core';
