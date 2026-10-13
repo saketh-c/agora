@@ -1,6 +1,16 @@
 export default {
   hero: 'Tu turno de hablar en el ayuntamiento.',
   heroLead: 'Encuentra una reunión del concejo cerca de ti y aprende exactamente cómo hablar en ella.',
+  entry: {
+    word: 'ágora',
+    pos: 'sustantivo femenino',
+    say: '/ˈaɣoɾa/',
+    origin: 'Del griego {greek}, “lugar de reunión”.',
+    senses: [
+      'La plaza abierta en el centro de una ciudad griega, donde la gente se reunía para intercambiar noticias, discutir y decidir en común. Nadie necesitaba invitación para pararse ahí.',
+      'La sala del concejo de tu ciudad: lo más parecido que hoy tiene una ciudad a esa plaza.',
+    ],
+  },
   where: {
     question: '¿Dónde vives o vas a la escuela?',
     placeholder: 'Ciudad, ZIP, dirección o escuela',

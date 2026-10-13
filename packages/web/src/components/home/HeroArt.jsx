@@ -1,7 +1,8 @@
 /**
- * The first-visit hero's one illustration: a council chamber's colonnade in a faint tint of Ink,
- * and you, at the podium, in Ink. Decorative only. Drawn on a 1440x168 canvas that slices from
- * the bottom center, so the speaker stays centered at every width.
+ * The first-visit hero's one illustration: a council chamber's colonnade in a faint tint of the
+ * stage's ivory, and you, at the podium, in ivory (the colors come from home.css). Decorative
+ * only. Drawn on a 1440x168 canvas that slices from the bottom center, so the speaker stays
+ * centered at every width.
  */
 const COLUMN_XS = Array.from({ length: 16 }, (_, i) => -30 + i * 96);
 
@@ -9,7 +10,7 @@ export default function HeroArt() {
   return (
     <div className="hero__art" aria-hidden="true">
       <svg viewBox="0 0 1440 168" preserveAspectRatio="xMidYMax slice" focusable="false">
-        <g fill="currentColor" opacity=".1">
+        <g fill="currentColor" opacity=".14">
           <rect x="-40" y="14" width="1520" height="14" rx="7" />
           {COLUMN_XS.map((x) => (
             <g key={x}>

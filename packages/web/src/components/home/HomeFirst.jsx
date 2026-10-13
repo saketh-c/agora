@@ -1,6 +1,6 @@
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { formatTime, offeredLocales, sentenceGap, t } from '@agora/core';
+import { formatTime, offeredLocales, sentenceGap, t, tList } from '@agora/core';
 import { useCities } from '../../lib/DataProvider.jsx';
 import { useStore } from '../../lib/store.jsx';
 import { EmptyState, MeetingRow, Section, meetingDeadline } from '../ui/index.js';
@@ -38,9 +38,46 @@ function useFlip(ref, signature) {
   }, [ref, signature]);
 }
 
+/** The Greek word the entry's origin names. It is the same in every language, so it is not in the dictionaries. */
+const GREEK = 'ἀγορά';
+/** Stands in for {greek} in the translated origin line, so the Greek can be its own element. */
+const GREEK_MARK = '\u2063';
+
 /**
- * Home before setup: the pitch in one line, one question (where you live or go to school), three
- * real meetings a student can speak at, and optional topics that re-sort that list in place.
+ * The dictionary entry on the stage: the word, how to say it, where it comes from, and its two
+ * senses, the old square and the council chamber. The Greek is its own element so it can say
+ * what language it is (lang="grc") and use a serif that has polytonic Greek, which Fraunces
+ * does not.
+ */
+function Entry() {
+  const [before, after] = t('home.entry.origin', { greek: GREEK_MARK }).split(GREEK_MARK);
+  return (
+    <div className="entry">
+      <p className="entry__head">
+        <dfn className="entry__word">{t('home.entry.word')}</dfn>
+        <span className="entry__pos">{t('home.entry.pos')}</span>
+        <span className="entry__say">{t('home.entry.say')}</span>
+      </p>
+      <p className="entry__origin">
+        {before}
+        <span className="entry__greek" lang="grc">
+          {GREEK}
+        </span>
+        {after}
+      </p>
+      <ol className="entry__senses">
+        {tList('home.entry.senses').map((sense) => (
+          <li key={sense}>{sense}</li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+/**
+ * Home before setup: the pitch in one line, one question (where you live or go to school), the
+ * dictionary entry for the word (what an agora was, and what it is here), three real meetings a
+ * student can speak at, and optional topics that re-sort that list in place.
  * Answering the question completes setup; `onDone({ place, city, slot, before })` lets the page
  * confirm it (with Undo) and move focus to what replaces it. `focusPlace` puts the cursor in the
  * question's field (after an Undo).
@@ -85,6 +122,7 @@ export default function HomeFirst({ onDone, onOpenMeeting, focusPlace = false })
             <p className="hero__lead">{t('home.heroLead')}</p>
           </div>
           <PlaceField variant="ask" cities={cities} onPlace={choosePlace} autoFocus={focusPlace} />
+          <Entry />
         </div>
         <HeroArt />
       </section>
