@@ -10,7 +10,7 @@
 .home-page .hero { background: var(--go); color: var(--ink); position: relative; overflow: hidden; }
 .home-page .hero__in { position: relative; z-index: 1; padding-top: var(--s6); padding-bottom: 112px; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s5); }
 .home-page .hero h1:focus { outline: none; }
-.home-page .hero .t-hero { font-family: var(--font-serif); font-stretch: normal; font-weight: 560; letter-spacing: -0.012em; word-spacing: normal; line-height: 1.06; }
+.home-page .hero .t-hero { font-family: var(--font-serif); font-stretch: normal; font-weight: 780; letter-spacing: -0.012em; word-spacing: normal; line-height: 1.06; text-wrap: balance; }
 .home-page .hero__art { position: absolute; inset-inline-start: 0; inset-inline-end: 0; bottom: 0; height: 96px; z-index: 0; color: var(--ink); pointer-events: none; }
 .home-page .hero__art svg { display: block; width: 100%; height: 100%; }
 .home-page .hero__mic { fill: var(--go); }
